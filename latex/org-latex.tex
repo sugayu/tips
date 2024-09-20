@@ -1,0 +1,147 @@
+% Created 2024-09-20 金 15:05
+% Intended LaTeX compiler: pdflatex
+\documentclass[a4paper, 10pt, notitlepage, uplatex, dvipdfmx]{jsarticle}
+\usepackage{natbib}
+\usepackage[dvipdfmx,colorlinks=true,linkcolor=blue,filecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{pxjahyper}
+\renewcommand{\baselinestretch}{0.9}
+\setlength{\voffset}{-0.7in}
+\setlength{\topmargin}{-0.5cm}
+\setlength{\oddsidemargin}{0cm}
+\setlength{\textheight}{45\baselineskip}
+\addtolength{\textheight}{\topskip}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[dvipdfmx]{graphicx, color}
+\usepackage{ulem}
+\newcommand{\NaID}{\mbox{Na\,{\sc i}\,D}}
+\author{sugayu}
+\date{\today}
+\title{\textbf{orgから\LaTeX{}やHTMLへのエクスポート自分用メモ}}
+\begin{document}
+
+\maketitle
+\section{org-modeにおける\LaTeX{}文章の書き方}
+\label{sec:orgf2cabc3}
+org-exportを使うことでorg文章を\LaTeX{}文章へ変換することができる。
+パッケージ名は \texttt{ox-latex} 。
+
+Emacs上における\LaTeX{}クラスは \texttt{init.el} に自分で調整して指定済み。
+状況に応じて以下の\LaTeX{}クラスを使いわける。
+デフォルトのクラスは1段組みの \texttt{jsarticle} になっている。
+\begin{verbatim}
+#+LATEX_CLASS: jsarticle2  # 2段組み。長い文章のとき。
+#+LATEX_CLASS: jsarticle  # 短い文章や1行が長いとき。
+#+LATEX_CLASS: plain-article  # 英文1段組み
+\end{verbatim}
+クラスのオプションを指定したい場合は以下のようにしてオプションを変更できる。
+\begin{verbatim}
+#+LATEX_CLASS_OPTIONS: [oneside,twocolumn]
+\end{verbatim}
+デフォルトのコンパイラは \texttt{ptex2pdf -u -l} を使って \texttt{uplatex} を起動させている(はず)。
+英文のクラスにする際にはコンパイラを変更する。
+\begin{verbatim}
+#+LATEX_COMPILER: pdflatex
+\end{verbatim}
+ヘッダーキーワードは以下のように追加できる。
+ここでコマンドを定義すれば \texttt{\textbackslash{}NaID} のようにコマンドを打ったときに \NaID だと\LaTeX{}が認識できる。
+ただしHTMLは認識できないので別の方策を考える必要がある。
+\begin{verbatim}
+#+LATEX_HEADER: \input{template_sub}
+#+LATEX_HEADER: \subtitle{2024/09/02--2024/09/08}
+\end{verbatim}
+これらのヘッダー情報は、他の書類にも共通する内容であれば \texttt{init.el} に書きこんだり \texttt{\textbackslash{}input\{\}} で挿入したりして共通化するのが良い。
+目次(Table of Contents)を表示したくない場合には以下を打つ。
+\begin{verbatim}
+#+OPTIONS: toc:nil
+\end{verbatim}
+\section{要素の挿入}
+\label{sec:orge98ddde}
+\subsection{数式}
+\label{sec:org887cf9d}
+\texttt{org-mode} は\LaTeX{}の数式の仕様を導入してくれているので、そのまま使うことができる。
+文章中に数式を挿入すると \(\Sigma_{n = 0}^{\infty} (1/x)^n < 1\ (x = 2)\) のようになる。
+数式環境で挿入すると
+\begin{equation}
+\label{eq:1}
+F = \int_{-\infty}^{\infty} f_{\nu} d\nu
+\end{equation}
+のようになる。
+式番号も式\ref{eq:1}のように参照することができる。
+このとき \texttt{\#+NAME} を使ってラベルをつける必要があることに注意する。
+\subsection{表}
+\label{sec:org8506923}
+\texttt{org-table} が使える。
+
+\begin{center}
+\begin{tabular}{llll}
+\hline
+\hline
+Name & {[}OIII] & {[}NII] & {[}CII]\\
+\hline
+M82 & \(1\times10^{-22}\) & \(3\times10^{-23}\) & \(1\times10^{-23}\)\\
+M101 & \(1\times10^{-22}\) & \(4\times10^{-23}\) & \(1\times10^{-23}\)\\
+\hline
+\end{tabular}
+\end{center}
+\subsection{画像}
+\label{sec:orgd09cd2a}
+画像は \texttt{org-mode} と同じ要領で入れる。
+\texttt{\#+ATTR\_HTML: :width 30\%} を使えばHTML上で各画像のサイズを変更できる。
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{m83.jpg}
+\caption{\label{fig:m83}ここにキャプションが入る。M83は南の回転花火銀河とも呼ばれているらしい (Credit: CTIO/NOIRLab/DOE/NSF/AURA)。}
+\end{figure}
+
+ただし\LaTeX{}では挿入した位置にのまま画像が入るとは限らない。
+また、画像と本文の間に1行空けないと\LaTeX{}変換時に画像をうまく認識してくれないので、画像の次の行は別段落として扱われる。
+引用は「画像\ref{fig:m83}」のようにやる。
+\subsection{コード}
+\label{sec:org32843ee}
+\texttt{org-babel} を使ってPythonコードが挿入できる。
+デフォルトでは\LaTeX{}に出力したときソースコードは全て \texttt{verbatim} で囲まれている。
+そのためソースコードに装飾を施すためには工夫が必要になる。
+\begin{itemize}
+\item \href{https://orgmode.org/manual/Exporting-Code-Blocks.html}{Exporting Code Blocks (The Org Manual)}
+\item \href{https://orgmode.org/manual/Results-of-Evaluation.html}{Results of Evaluation (The Org Manual)}
+\end{itemize}
+
+コードを書いたときのアウトプットは \texttt{:exports} 設定に依る。
+デフォルトの \texttt{:exports} は \texttt{code} なので、Pythonコードは \texttt{python} 環境のときはコードがそのまま表示される。
+\begin{verbatim}
+import numpy as np
+a = np.arange(10)
+print(a)
+\end{verbatim}
+
+\texttt{ob-ipython} でも同様。
+\begin{verbatim}
+import numpy as np
+np.arange(10)
+\end{verbatim}
+
+このとき \texttt{ob-ipython} を使って計算結果を走らせていたとしても、 \texttt{:results} に \texttt{drawer} が入っていると表示されないので注意する。
+\begin{verbatim}
+import numpy as np
+np.arange(10)
+\end{verbatim}
+
+\begin{verbatim}
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+\end{verbatim}
+
+
+出力パラメータが \texttt{:exports results} の場合にはコードが走った結果のみが表示される。
+\texttt{:exports both} の場合にはコードと出力が表示される。
+\texttt{:results raw} で \texttt{org} 上で出力していると、出力先には2重で表示されるので注意する。
+また、あたりまえだが、\LaTeX{}やHTMLに出力するたびにコードが走るので動作が非常に遅くなって効率が悪い。
+度々走らせる必要があるコード以外は先に出力しておいてそれを表示するだけの方が良い。
+
+\begin{verbatim}
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+\end{verbatim}
+\end{document}

@@ -1,0 +1,125 @@
+#+title: *orgからLaTeXやHTMLへのエクスポート自分用メモ*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle
+#+LATEX_HEADER: \newcommand{\NaID}{\mbox{Na\,{\sc i}\,D}}
+#+OPTIONS: toc:nil
+# # 章番号を消す
+# #+OPTIONS: num:0
+
+* org-modeにおけるLaTeX文章の書き方
+org-exportを使うことでorg文章をLaTeX文章へ変換することができる。
+パッケージ名は ~ox-latex~ 。
+
+Emacs上におけるLaTeXクラスは ~init.el~ に自分で調整して指定済み。
+状況に応じて以下のLaTeXクラスを使いわける。
+デフォルトのクラスは1段組みの ~jsarticle~ になっている。
+#+begin_example
+  ,#+LATEX_CLASS: jsarticle2  # 2段組み。長い文章のとき。
+  ,#+LATEX_CLASS: jsarticle  # 短い文章や1行が長いとき。
+  ,#+LATEX_CLASS: plain-article  # 英文1段組み
+#+end_example
+クラスのオプションを指定したい場合は以下のようにしてオプションを変更できる。
+#+begin_example
+  ,#+LATEX_CLASS_OPTIONS: [oneside,twocolumn]
+#+end_example
+デフォルトのコンパイラは ~ptex2pdf -u -l~ を使って ~uplatex~ を起動させている(はず)。
+英文のクラスにする際にはコンパイラを変更する。
+#+begin_example
+  ,#+LATEX_COMPILER: pdflatex
+#+end_example
+ヘッダーキーワードは以下のように追加できる。
+ここでコマンドを定義すれば =\NaID= のようにコマンドを打ったときに \NaID だとLaTeXが認識できる。
+ただしHTMLは認識できないので別の方策を考える必要がある。
+#+begin_example
+  ,#+LATEX_HEADER: \input{template_sub}
+  ,#+LATEX_HEADER: \subtitle{2024/09/02--2024/09/08}
+#+end_example
+これらのヘッダー情報は、他の書類にも共通する内容であれば ~init.el~ に書きこんだり ~\input{}~ で挿入したりして共通化するのが良い。
+目次(Table of Contents)を表示したくない場合には以下を打つ。
+#+begin_example
+  ,#+OPTIONS: toc:nil
+#+end_example
+
+* 要素の挿入
+** 数式
+~org-mode~ はLaTeXの数式の仕様を導入してくれているので、そのまま使うことができる。
+文章中に数式を挿入すると \(\Sigma_{n = 0}^{\infty} (1/x)^n < 1\ (x = 2)\) のようになる。
+数式環境で挿入すると
+#+NAME: eq:1
+\begin{equation}
+F = \int_{-\infty}^{\infty} f_{\nu} d\nu
+\end{equation}
+のようになる。
+式番号も式[[eq:1]]のように参照することができる。
+このとき =#+NAME= を使ってラベルをつける必要があることに注意する。
+
+** 表
+~org-table~ が使える。
+
+|------+---------------------+---------------------+---------------------|
+|------+---------------------+---------------------+---------------------|
+| Name | [OIII]              | [NII]               | [CII]               |
+|------+---------------------+---------------------+---------------------|
+| M82  | \(1\times10^{-22}\) | \(3\times10^{-23}\) | \(1\times10^{-23}\) |
+| M101 | \(1\times10^{-22}\) | \(4\times10^{-23}\) | \(1\times10^{-23}\) |
+|------+---------------------+---------------------+---------------------|
+
+** 画像
+画像は ~org-mode~ と同じ要領で入れる。
+~#+ATTR_HTML: :width 30%~ を使えばHTML上で各画像のサイズを変更できる。
+
+#+CAPTION: ここにキャプションが入る。M83は南の回転花火銀河とも呼ばれているらしい (Credit: CTIO/NOIRLab/DOE/NSF/AURA)。
+#+NAME: fig:m83
+[[file:m83.jpg]]
+
+ただしLaTeXでは挿入した位置にのまま画像が入るとは限らない。
+また、画像と本文の間に1行空けないとLaTeX変換時に画像をうまく認識してくれないので、画像の次の行は別段落として扱われる。
+引用は「画像[[fig:m83]]」のようにやる。
+
+** コード
+~org-babel~ を使ってPythonコードが挿入できる。
+デフォルトではLaTeXに出力したときソースコードは全て ~verbatim~ で囲まれている。
+そのためソースコードに装飾を施すためには工夫が必要になる。
+- [[https://orgmode.org/manual/Exporting-Code-Blocks.html][Exporting Code Blocks (The Org Manual)]]
+- [[https://orgmode.org/manual/Results-of-Evaluation.html][Results of Evaluation (The Org Manual)]]
+
+コードを書いたときのアウトプットは ~:exports~ 設定に依る。
+デフォルトの ~:exports~ は ~code~ なので、Pythonコードは ~python~ 環境のときはコードがそのまま表示される。
+#+begin_src python
+  import numpy as np
+  a = np.arange(10)
+  print(a)
+#+end_src
+
+~ob-ipython~ でも同様。
+#+begin_src ipython :session :exports code :results raw drawer
+  import numpy as np
+  np.arange(10)
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[2]:
+: array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+:end:
+
+このとき ~ob-ipython~ を使って計算結果を走らせていたとしても、 ~:results~ に ~drawer~ が入っていると表示されないので注意する。
+#+begin_src ipython :session :exports code :results raw
+  import numpy as np
+  np.arange(10)
+#+end_src
+
+#+RESULTS:
+# Out[3]:
+: array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+出力パラメータが ~:exports results~ の場合にはコードが走った結果のみが表示される。
+~:exports both~ の場合にはコードと出力が表示される。
+~:results raw~ で ~org~ 上で出力していると、出力先には2重で表示されるので注意する。
+また、あたりまえだが、LaTeXやHTMLに出力するたびにコードが走るので動作が非常に遅くなって効率が悪い。
+度々走らせる必要があるコード以外は先に出力しておいてそれを表示するだけの方が良い。
+
+#+begin_src ipython :session :exports results :results raw
+  import numpy as np
+  np.arange(10)
+#+end_src
