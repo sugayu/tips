@@ -1,0 +1,61 @@
+#+title: *matplotlibで作成する図の調整方法*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle2
+
+* 基準の図
+#+begin_src ipython :ipyfile ./obipy-resources/fiducial.png :session :exports code :results raw :eval never-export
+  from numpy.random import default_rng
+  from sugayutils.figure import makefig
+
+  rng = default_rng(222)
+  data = rng.standard_normal(50).reshape(2, 25)
+
+
+  def plot_fiducial():
+      fig = makefig(figsize=['small', 1.0])
+      ax = fig.add_subplot(1, 1, 1)
+      ax.scatter(data[0], data[1], c='blue')
+      ax.set_xylabels('This is x label', 'This is y label')
+      return ax
+
+  _ = plot_fiducial()
+#+end_src
+
+#+RESULTS:
+# Out[1]:
+[[file:./obipy-resources/fiducial.png]]
+
+* 目盛り
+** 目盛りの数字
+目盛りの軸ラベルのサイズを変更し、縦軸の目盛りを指定する。
+#+begin_src ipython :ipyfile ./obipy-resources/params_ticks.png :session :exports code :results raw :eval never-export
+  ax = plot_fiducial()
+  ax.tick_params(labelsize='xx-small')    # both axes
+  ax.tick_params(axis='y', labelsize=20)
+  _ = ax.set_yticks([-0.5, 1.5, 2.0])
+#+end_src
+
+#+RESULTS:
+# Out[4]:
+[[file:./obipy-resources/params_ticks.png]]
+
+* 矢印
+** arrow
+データ座標を使って矢印を描く。
+#+begin_src ipython :ipyfile ./obipy-resources/params_arrow.png :session :exports code :results raw :eval never-export
+  ax = plot_fiducial()
+  _ = ax.arrow(
+      x=-1.0,
+      y=-0.5,
+      dx=1.0,
+      dy=1.4,
+      width=0.05,
+      head_length=0.3,
+      length_includes_head=True,
+      fc='red',
+  )
+#+end_src
+
+#+RESULTS:
+# Out[5]:
+[[file:./obipy-resources/params_arrow.png]]

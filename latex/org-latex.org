@@ -13,6 +13,7 @@ org-exportを使うことでorg文章をLaTeX文章へ変換することがで�
 Emacs上におけるLaTeXクラスは ~init.el~ に自分で調整して指定済み。
 状況に応じて以下のLaTeXクラスを使いわける。
 デフォルトのクラスは1段組みの ~jsarticle~ になっている。
+
 #+begin_example
   ,#+LATEX_CLASS: jsarticle2  # 2段組み。長い文章のとき。
   ,#+LATEX_CLASS: jsarticle  # 短い文章や1行が長いとき。
@@ -83,6 +84,15 @@ F = \int_{-\infty}^{\infty} f_{\nu} d\nu
 - [[https://orgmode.org/manual/Exporting-Code-Blocks.html][Exporting Code Blocks (The Org Manual)]]
 - [[https://orgmode.org/manual/Results-of-Evaluation.html][Results of Evaluation (The Org Manual)]]
 
+ソースコードをハイライトするパッケージとして ~minted~ が使える。
+以下のコマンドで ~minted~ を使うことができる。
+#+begin_src emacs-lisp
+  (setq org-latex-listings 'minted)
+#+end_src
+~org-latex-minted-options~ で ~minted~ 用の設定を記述することができる。
+また ~\usepackage{minted}~ を設定する必要がある。
+- [[https://qiita.com/clothoid/items/0a8f825ae19150fe5750][emacs の org-latex-export-to-pdf 設定手順 #Python - Qiita]]
+
 コードを書いたときのアウトプットは ~:exports~ 設定に依る。
 デフォルトの ~:exports~ は ~code~ なので、Pythonコードは ~python~ 環境のときはコードがそのまま表示される。
 #+begin_src python
@@ -91,7 +101,7 @@ F = \int_{-\infty}^{\infty} f_{\nu} d\nu
   print(a)
 #+end_src
 
-~ob-ipython~ でも同様。
+~ob-ipython~ でも同様で、結果を実行していたとしても ~:exports code~ の場合は実行されない。
 #+begin_src ipython :session :exports code :results raw drawer
   import numpy as np
   np.arange(10)
@@ -116,10 +126,12 @@ F = \int_{-\infty}^{\infty} f_{\nu} d\nu
 出力パラメータが ~:exports results~ の場合にはコードが走った結果のみが表示される。
 ~:exports both~ の場合にはコードと出力が表示される。
 ~:results raw~ で ~org~ 上で出力していると、出力先には2重で表示されるので注意する。
+
 また、あたりまえだが、LaTeXやHTMLに出力するたびにコードが走るので動作が非常に遅くなって効率が悪い。
 度々走らせる必要があるコード以外は先に出力しておいてそれを表示するだけの方が良い。
+~:eval never-export~ を設定するとエクスポート時に実行されなくなる。
 
-#+begin_src ipython :session :exports results :results raw
+#+begin_src ipython :session :exports results :results raw :eval never-export
   import numpy as np
   np.arange(10)
 #+end_src

@@ -1,0 +1,94 @@
+% Created 2024-10-29 火 19:44
+\documentclass[a4paper, 10pt, notitlepage, twocolumn, uplatex, oneside, dvipdfmx]{jsarticle}
+\usepackage{color}
+\definecolor{shadecolor}{gray}{0.92}
+\usepackage{natbib}
+\usepackage[dvipdfmx,colorlinks=true,linkcolor=blue,filecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{pxjahyper}
+\usepackage{minted}
+\usepackage{mdframed}
+\surroundwithmdframed[backgroundcolor=shadecolor,hidealllines=true]{verbatim}
+\renewcommand{\baselinestretch}{0.86}
+\setlength{\voffset}{-0.7in}
+\setlength{\hoffset}{-0.5in}
+\setlength{\headsep}{0cm}
+\setlength{\topmargin}{-0.5cm}
+\setlength{\oddsidemargin}{0cm}
+\setlength{\textwidth}{525pt}
+\setlength{\textheight}{46\baselineskip}
+\addtolength{\textheight}{\topskip}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage[dvipdfmx]{graphicx, color}
+\usepackage{ulem}
+\author{sugayu}
+\date{\today}
+\title{\textbf{matplotlibで作成する図の調整方法}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\section{基準の図}
+\label{sec:org94ed311}
+\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+from numpy.random import default_rng
+from sugayutils.figure import makefig
+
+rng = default_rng(222)
+data = rng.standard_normal(50).reshape(2, 25)
+
+
+def plot_fiducial():
+    fig = makefig(figsize=['small', 1.0])
+    ax = fig.add_subplot(1, 1, 1)
+    ax.scatter(data[0], data[1], c='blue')
+    ax.set_xylabels('This is x label', 'This is y label')
+    return ax
+
+_ = plot_fiducial()
+\end{minted}
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{./obipy-resources/fiducial.png}
+\end{center}
+\section{目盛り}
+\label{sec:org19561f2}
+\subsection{目盛りの数字}
+\label{sec:org6da1e1f}
+目盛りの軸ラベルのサイズを変更し、縦軸の目盛りを指定する。
+\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+ax = plot_fiducial()
+ax.tick_params(labelsize='xx-small')    # both axes
+ax.tick_params(axis='y', labelsize=20)
+_ = ax.set_yticks([-0.5, 1.5, 2.0])
+\end{minted}
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{./obipy-resources/params_ticks.png}
+\end{center}
+\section{矢印}
+\label{sec:org6e71d31}
+\subsection{arrow}
+\label{sec:org9630989}
+データ座標を使って矢印を描く。
+\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+ax = plot_fiducial()
+_ = ax.arrow(
+    x=-1.0,
+    y=-0.5,
+    dx=1.0,
+    dy=1.4,
+    width=0.05,
+    head_length=0.3,
+    length_includes_head=True,
+    fc='red',
+)
+\end{minted}
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{./obipy-resources/params_arrow.png}
+\end{center}
+\end{document}

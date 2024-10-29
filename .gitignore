@@ -1,2 +1,4 @@
 /latex/auto/
 *.synctex(busy)
+*.pygtex
+*.pygstyle
