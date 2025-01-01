@@ -12,9 +12,16 @@
 
   theta = np.pi / 2.0
   phi = np.linspace(0.0, 2.0 * np.pi, 91)
-  x = np.sin(theta) * np.cos(phi)
-  y = np.sin(theta) * np.sin(phi)
-  z = np.cos(theta) * np.ones_like(phi)
+
+
+  def xyz(theta, phi):
+      x = np.sin(theta) * np.cos(phi)
+      y = np.sin(theta) * np.sin(phi)
+      z = np.cos(theta) * np.ones_like(phi)
+      return x, y, z
+
+
+  x, y, z = xyz(theta, phi)
 
 
   def plot_fiducial(left=-0.1) -> Axes3D:
@@ -45,7 +52,7 @@
 
 #+RESULTS:
 :results:
-# Out[21]:
+# Out[1]:
 [[file:./obipy-resources/fiducial_3d.png]]
 :end:
 
@@ -53,7 +60,34 @@
   なお、おそらく ~Jupyter notebook~ の仕様で図の余白が自動的に調整されてしまうので、
   ここでは ~ob-ipython~ のファイル保存形式ではなく、保存方法と表示方法を指定している。
   ただし出力のたび、いちいち手作業が必要になる。
+  また、この場合の方がプロットがとても速い。
 #+end_example
+
+* 基本
+** 面をプロット
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  fig, ax = plot_fiducial()
+  theta = np.linspace(0.0, np.pi / 2.0, 9).reshape(-1, 1)
+  _xyz = xyz(theta, phi)
+  ax.plot_surface(
+      *_xyz,
+      color=colors.sky,
+      # facecolors=facecolor,
+      alpha=1.0,
+      # shade=True,
+      # lightsource=light,
+  )
+  savefig(fig, './obipy-resources/surface_3d.png')
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[6]:
+[[file:./obipy-resources/surface_3d.png]]
+:end:
+
+光が当たる角度は引数の ~lightsource~ に ~matplotlib.colors.LightSource~ を入れて指定できる。
+詳しくは
 
 * 軸の設定
 ** ズーム
@@ -76,7 +110,8 @@
 
 ** 視点の角度
 ~Axes3D.view_init()~ で変更する。
-パラメータの ~azim~ はx軸正の向き(~y = 0~ の方向)から時計まわりの方位角、
+パラメータの角度方向は直感の通りで、
+~azim~ はx軸正の向き(~y = 0~ の方向)から反時計まわりの方位角、
 ~elev~ は ~z = 0~ の方向からのz軸正の向きに上がる仰角。
 全ての角度は単位は度で入力する。
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
@@ -174,6 +209,7 @@
 :end:
 
 * プロットの工夫
+** 大量の線
 一斉に同じ種類の線をプロットするには ~art3d.Line3DCollection~ を使って、返り値を ~ax.add_collection()~ で加えると良い。
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
   from mpl_toolkits.mplot3d import art3d
@@ -200,3 +236,38 @@
 # Out[66]:
 [[file:./obipy-resources/lines_3d.png]]
 :end:
+
+** 光の角度
+光の角度は ~matplotlib.colors.LightSource~ で指定できる。
+パラメータの角度方向は直感に反していて、
+~azdeg~ はy軸負の向き(~x = 0~ の方向)から時計まわりの方位角、
+~altdeg~ は ~z = 0~ の方向からのz軸負の向きに下がる仰角。
+つまり上からの照明は ~altdeg = 90~ で指定する。
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from matplotlib.colors import LightSource
+
+  fig, ax = plot_fiducial()
+  light = LightSource(azdeg=0.0, altdeg=-20.0)
+  # light = LightSource(azdeg=270.0, altdeg=15.0)
+  theta = np.linspace(1e-5, np.pi / 2.0, 10).reshape(-1, 1)
+  _xyz = xyz(theta, phi)
+
+  ax.plot_surface(
+      ,*_xyz,
+      color=colors.sky,
+      # facecolors=facecolor,
+      alpha=1.0,
+      shade=True,
+      lightsource=light,
+  )
+  savefig(fig, './obipy-resources/light_3d.png')
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[40]:
+[[file:./obipy-resources/light_3d.png]]
+:end:
+
+~LightSource~ は他に照明を当てた際の色の変化も指定できるが、
+~Axes3D.plot_surface()~ が作る配色と異なるので注意する。
