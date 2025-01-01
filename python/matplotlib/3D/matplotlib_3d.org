@@ -108,6 +108,8 @@
 [[file:./obipy-resources/zoom_3d.png]]
 :end:
 
+参照：[[[https://stackoverflow.com/questions/25575729/how-to-zoom-with-axes3d-in-matplotlib][python - How to Zoom with Axes3D in Matplotlib - Stack Overflow]]
+
 ** 視点の角度
 ~Axes3D.view_init()~ で変更する。
 パラメータの角度方向は直感の通りで、
@@ -194,6 +196,8 @@
 # Out[60]:
 [[file:./obipy-resources/axis_3d.png]]
 :end:
+
+参照: [[https://stackoverflow.com/questions/59857203/remove-border-from-matplotlib-3d-pane][python - Remove border from matplotlib 3D pane - Stack Overflow]]
 
 ** 軸を完全に消す
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export

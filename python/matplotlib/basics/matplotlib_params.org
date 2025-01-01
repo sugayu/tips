@@ -113,3 +113,5 @@
 #+RESULTS:
 # Out[47]:
 [[file:./obipy-resources/params_grids.png]]
+
+参照: [[https://stackoverflow.com/questions/10388462/matplotlib-different-size-subplots][python - Matplotlib different size subplots - Stack Overflow]]
