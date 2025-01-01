@@ -1,0 +1,12 @@
+#+title: *ImageMagickのコマンド*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle2
+
+#+begin_src bash
+  magick -dispose 2 -loop 0 -delay 5 clip_*.jpg movie.gif
+#+end_src
+- -loop 0 :: ずっとループを繰り返す
+- -dispose 2 :: 後ろの画像を残さない (jpegだとたいして意味はなさそう)
+- -delay 5 :: 次の画像を表示するまでのミリ秒単位の時間
+
+png から gif へ変換すると色指定がおかしくなることが多い。
