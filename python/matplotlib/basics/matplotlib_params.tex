@@ -1,4 +1,4 @@
-% Created 2025-01-01 水 21:47
+% Created 2025-01-01 水 23:19
 \documentclass[a4paper, 10pt, notitlepage, twocolumn, uplatex, oneside, dvipdfmx]{jsarticle}
 \usepackage[dvipdfmx]{graphicx, color}
 \usepackage{ulem}
@@ -30,7 +30,7 @@
 \tableofcontents
 
 \section{基準の図}
-\label{sec:orgb804484}
+\label{sec:orgdf1d5a3}
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
 from numpy.random import default_rng
 from sugayutils.figure import makefig
@@ -53,9 +53,9 @@ _ = plot_fiducial()
 \includegraphics[width=1.0\linewidth]{./obipy-resources/fiducial.png}
 \end{center}
 \section{目盛り}
-\label{sec:org2344501}
+\label{sec:org69eaf0a}
 \subsection{目盛りの数字}
-\label{sec:orgfb6ce28}
+\label{sec:org18299a8}
 目盛りの軸ラベルのサイズを変更し、縦軸の目盛りを指定する。
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
 ax = plot_fiducial()
@@ -68,9 +68,9 @@ _ = ax.set_yticks([-0.5, 1.5, 2.0])
 \includegraphics[width=1.0\linewidth]{./obipy-resources/params_ticks.png}
 \end{center}
 \section{矢印}
-\label{sec:org6b68ac0}
+\label{sec:orga616d91}
 \subsection{arrow}
-\label{sec:org1009cfc}
+\label{sec:org9bcdd3f}
 データ座標を使って矢印を描く。
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
 ax = plot_fiducial()
@@ -90,7 +90,7 @@ _ = ax.arrow(
 \includegraphics[width=1.0\linewidth]{./obipy-resources/params_arrow.png}
 \end{center}
 \section{大量の線}
-\label{sec:org4dddadb}
+\label{sec:org9855d63}
 一斉に同じ種類の線をプロットするには \texttt{mcoll.LineCollection} を使って、返り値を \texttt{ax.add\_collection()} で加えると良い。
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
 import matplotlib.collections as mcoll
@@ -111,5 +111,26 @@ _ = ax.add_collection(linecollection)
 
 \begin{center}
 \includegraphics[width=1.0\linewidth]{./obipy-resources/params_lines.png}
+\end{center}
+\section{グリッド分け}
+\label{sec:org5e1b2b1}
+\texttt{fig.subplots()} と \texttt{fig.subplots\_adjust()} の組み合わせでもグリッドを切れるが、
+\texttt{matplotlib.gridspec.GridSpec} を使うと引数 \texttt{width\_ratios} などを使ってより柔軟なグリッドを作ることができる。
+\texttt{GridSpec} は \texttt{fig.subplots()} に引数として与えることもできるが、
+\texttt{fig.add\_subplot()} で個別にパネルを作ることで \texttt{projection} などを柔軟に対応させられる。
+\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+from matplotlib.gridspec import GridSpec
+gs = GridSpec(1, 2, width_ratios=(1.5, 1))
+fig = plt.figure(figsize=[7.2, 3.5])
+ax0 = fig.add_subplot(gs[0])
+ax1 = fig.add_subplot(gs[1], projection='3d')
+ax0.scatter(data[0], data[1], c='blue')
+ax0.set_xlabel('This is x label')
+ax0.set_ylabel('This is y label')
+_ = ax1.plot(np.arange(0., 10.0), np.arange(0., 10.0), np.arange(0., 10.0))
+\end{minted}
+
+\begin{center}
+\includegraphics[width=1.0\linewidth]{./obipy-resources/params_grids.png}
 \end{center}
 \end{document}

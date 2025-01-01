@@ -81,3 +81,24 @@
 #+RESULTS:
 # Out[5]:
 [[file:./obipy-resources/params_lines.png]]
+
+* グリッド分け
+~fig.subplots()~ と ~fig.subplots_adjust()~ の組み合わせでもグリッドを切れるが、
+~matplotlib.gridspec.GridSpec~ を使うと引数 ~width_ratios~ などを使ってより柔軟なグリッドを作ることができる。
+~GridSpec~ は ~fig.subplots()~ に引数として与えることもできるが、
+~fig.add_subplot()~ で個別にパネルを作ることで ~projection~ などを柔軟に対応させられる。
+#+begin_src ipython :ipyfile ./obipy-resources/params_grids.png :session :exports code :results raw :eval never-export
+  from matplotlib.gridspec import GridSpec
+  gs = GridSpec(1, 2, width_ratios=(1.5, 1))
+  fig = plt.figure(figsize=[7.2, 3.5])
+  ax0 = fig.add_subplot(gs[0])
+  ax1 = fig.add_subplot(gs[1], projection='3d')
+  ax0.scatter(data[0], data[1], c='blue')
+  ax0.set_xlabel('This is x label')
+  ax0.set_ylabel('This is y label')
+  _ = ax1.plot(np.arange(0., 10.0), np.arange(0., 10.0), np.arange(0., 10.0))
+#+end_src
+
+#+RESULTS:
+# Out[47]:
+[[file:./obipy-resources/params_grids.png]]
