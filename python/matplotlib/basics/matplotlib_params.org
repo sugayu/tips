@@ -39,6 +39,17 @@
 # Out[4]:
 [[file:./obipy-resources/params_ticks.png]]
 
+** 目盛り反転
+#+begin_src ipython :ipyfile ./obipy-resources/params_tick_inverse.png :session :exports code :results raw :eval never-export
+  ax = plot_fiducial()
+  _ = ax.invert_xaxis()
+#+end_src
+
+#+RESULTS:
+# Out[49]:
+[[file:./obipy-resources/params_tick_inverse.png]]
+
+
 * 矢印
 ** arrow
 データ座標を使って矢印を描く。
