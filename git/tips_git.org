@@ -1,0 +1,11 @@
+#+title: Gitの細かいところ
+
+* Git commands
+** git force pull
+~pull~ したあとにリモートに変更を加えちゃって、無理やりもう一度 ~pull~ したいとき。(つまり緊急回避用。)
+#+begin_src bash
+  git fetch
+  git reset --hard origin/branch_name
+#+end_src
+
+- [[https://qiita.com/Yinaura/items/30992f25b87f76af3ba2][Git で force pull する方法 ( $ git reset --hard origin/branch_name ) #Git - Qiita]]
