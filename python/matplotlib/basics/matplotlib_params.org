@@ -74,11 +74,10 @@
       ((-1.0, 2.0), (1.0, 2.0)),
       ((0.0, -1.0), (0.0, 1.0)),
   )
-  linecollection = mcoll.LineCollection(segments, colors=colors.black, lw=0.5, ls='--')
-  ax.add_collection(linecollection)
+  linecollection = mcoll.LineCollection(segments, colors=colors.green, lw=0.5, ls='--')
+  _ = ax.add_collection(linecollection)
 #+end_src
 
 #+RESULTS:
-# Out[4]:
-: <matplotlib.collections.LineCollection at 0x12856ccb0>
+# Out[5]:
 [[file:./obipy-resources/params_lines.png]]
