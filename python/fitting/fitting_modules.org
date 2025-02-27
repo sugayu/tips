@@ -1,0 +1,72 @@
+#+title: *Fittingに使われるPythonモジュールの比較*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle2
+#+OPTIONS: toc:nil
+
+* 導入
+データのフィッティングに使用可能なPythonモジュールは数多くある。
+これらを比較することで、
+(1) 使用感の違いを見る、
+(2) 使い方をメモする、
+(3) 最尤値や誤差が正しく求まるか調べる
+ことを目的とする。
+
+* 比較対象のPythonモジュール
+** NumPy
+~NumPy~ は ~polynomial~ という多項式を扱うモジュールを提供している。
+この中で ~fit()~ というメソッドが提供されており、これを使ってモデルの最適化が可能である。
+名前のついた多くの多項式を扱えるが、ガウス関数などは無いので輝線のフィッティングには使えない(と思う)。
+- [[https://numpy.org/doc/stable/reference/routines.polynomials-package.html#module-numpy.polynomial][numpy.polynomial — NumPy v2.2 Manual]]
+
+** Scipy
+~SciPy~ は ~optimize~ という最適化のためのモジュールを提供している。
+この中で ~curve_fit()~ という関数は非線形最小二乗法によりモデルの最適化を行う。
+- [[https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html][curve_fit — SciPy v1.15.2 Manual]]
+2変数の間の線形回帰は ~linregress()~ という関数でも与えられており、こちらを使えば関数を指定してやる必要がない。
+- [[https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html#scipy.stats.linregress][linregress — SciPy v1.15.2 Manual]]
+
+** Astropy
+天文解析パッケージ ~Astropy~ は ~modeling~ というモジュールを提供している。
+天文関係で使うと思われるモデルやフィッティングの関数が網羅されているので、
+使いたいモデルが実装されていないか確認する価値がある。
+- [[https://docs.astropy.org/en/stable/modeling/][Models and Fitting (astropy.modeling) — Astropy v7.0.1]]
+~modeling.models~ モジュールが提供するクラスを使って統計モデルを構築し、
+~modeling.fitting~ モジュールが提供するクラスを使ってモデルをデータに当て嵌める。
+- [[https://docs.astropy.org/en/stable/modeling/models.html][Models — Astropy v7.0.1]]
+- [[https://docs.astropy.org/en/stable/modeling/fitting.html][Fitting Models to Data — Astropy v7.0.1]]
+
+** specutils
+天体スペクトルを扱うパッケージ ~specutils~ は輝線フィッティングを含めたスペクトル解析のためのモジュールを提供する。
+フィッティングの際には内部で ~Astropy.modeling~ モジュールが呼ばれている。
+ユーザーの輝線フィッティングを助けるパッケージとも言える。
+- [[https://specutils.readthedocs.io/en/stable/fitting.html][Line/Spectrum Fitting — specutils v1.19.1.dev0+g746a5d4.d20241105]]
+
+** MPFIT
+~MPFIT~ は古くから天文学で使われているフィッティングパッケージ。
+元々はFortranで書かれた ~MINPACK-1~ というパッケージの中のフィッティングコードを
+Craig MarkwardtさんがIDLで書き直した。
+それをMark RiversさんがPythonで書き直し、Sergey Koposovさんが ~numpy~ で実装し直した後にPython3で動くようにした。
+Levenberg-Marquardt法を使っているので効率良く最小二乗問題を解けるのが売りだった。
+- [[https://eispac.readthedocs.io/en/stable/guide/07-mpfit_docs.html][MPFIT Documentation — eispac 0.1.dev108+gdfa97b1 documentation]]
+- [[https://github.com/segasai/astrolibpy/blob/master/mpfit/mpfit.py][astrolibpy/mpfit/mpfit.py at master · segasai/astrolibpy · GitHub]]
+
+** LMFIT
+~LMFIT~ は非線形最小二乗法を解くためのパッケージ。
+~scipy.optimize~ モジュールから着想を得て、フィッティングのための便利な機能を多数導入している。
+- [[https://lmfit.github.io/lmfit-py/index.html][Non-Linear Least-Squares Minimization and Curve-Fitting for Python — Non-Linear Least-Squares Minimization and Curve-Fitting for Python]]
+
+* 理想的な線形データのフィッティング結果
+** 解析解
+** Numpy
+** Scipy
+** Astropy
+** MPFIT
+** LMFIT
+
+* 理想的な輝線データのフィッティング結果
+** Numpy
+** Scipy
+** Astropy
+** specutils
+** MPFIT
+** LMFIT
