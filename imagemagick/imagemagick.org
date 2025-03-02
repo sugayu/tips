@@ -10,3 +10,7 @@
 - -delay 5 :: 次の画像を表示するまでのミリ秒単位の時間
 
 png から gif へ変換すると色指定がおかしくなることが多い。
+
+#+begin_src bash
+  magick pic.jpg -strip -resize 518x518 -crop 512x512+3+3 pic.png
+#+end_src
