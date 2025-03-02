@@ -15,8 +15,10 @@
 ** NumPy
 ~NumPy~ は ~polynomial~ という多項式を扱うモジュールを提供している。
 この中で ~fit()~ というメソッドが提供されており、これを使ってモデルの最適化が可能である。
-名前のついた多くの多項式を扱えるが、ガウス関数などは無いので輝線のフィッティングには使えない(と思う)。
+内部で ~numpy.linalg.lstsq~ という最適化関数を使っている。
+物理学でよく使われる名前のついた多くの多項式を扱えるが、ガウス関数などは無いので輝線のフィッティングには使えない(と思う)。
 - [[https://numpy.org/doc/stable/reference/routines.polynomials-package.html#module-numpy.polynomial][numpy.polynomial — NumPy v2.2 Manual]]
+- [[https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html#numpy.linalg.lstsq][numpy.linalg.lstsq — NumPy v2.2 Manual]]
 
 ** Scipy
 ~SciPy~ は ~optimize~ という最適化のためのモジュールを提供している。
@@ -56,17 +58,121 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 - [[https://lmfit.github.io/lmfit-py/index.html][Non-Linear Least-Squares Minimization and Curve-Fitting for Python — Non-Linear Least-Squares Minimization and Curve-Fitting for Python]]
 
 * 理想的な線形データのフィッティング結果
+** データ作成
+- 平均: 100.0
+- 標準偏差: 10.0
+- 標本の大きさ: 30
+- 直線: \(y = 2.0 (x - 100.0) + 220.0\)
+#+begin_src ipython :session :ipyfile ./obipy-resources/data.png :exports both :async t :results raw drawer :eval never-export
+  import numpy as np
+  from numpy.random import default_rng
+  from sugayutils.figure import makefig
+
+  rng = default_rng(222)
+
+  size = 30
+  sigma0 = 10.0
+  sigma = rng.standard_normal(size) * sigma0
+  x0 = 100.0
+  x = rng.normal(x0, 10, size=size)
+
+  a, b = 2.0, 220.0
+  y0 = a * (x - x0) + b
+  y = y0 + sigma
+
+  fig = makefig(figsize=['small', 1.0])
+  ax = fig.add_subplot(1, 1, 1)
+  _ = ax.scatter(x, y)
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[3]:
+[[file:./obipy-resources/data.png]]
+:end:
+
 ** 解析解
+一次方程式の場合は解析解が得られている。
+係数の最尤推定値は
+\begin{align}
+\label{eq:1}
+  a &= \frac{N\sum x_i y_i - \sum x_i \sum y_i}{N\sum x_i^2 - (\sum x_i)^2} \\
+  b &= \frac{\sum x_i^2 \sum y_i - \sum x_i \sum x_i y_i}{N\sum x_i^2 - (\sum x_i)^2}
+\end{align}
+であり、その誤差は
+\begin{align}
+\label{eq:2}
+  \sigma_\text{a} & = \sigma \sqrt{\frac{N}{N\sum x_i^2 - (\sum x_i)^2}} \\
+  \sigma_\text{b} & = \sigma \sqrt{\frac{\sum x_i^2}{N\sum x_i^2 - (\sum x_i)^2}} \\
+\end{align}
+と表せる。
+- [[http://www.cc.u-ryukyu.ac.jp/~fukami/p0.pdf][物理実験III データ処理 (琉球大学深水研究室)]]
+
+以上より最尤推定値を求める。
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  _x = x - x0
+  denom = (size * np.sum(_x**2) - np.sum(_x) ** 2)
+  sol_analytic = {
+      'a': (size * np.sum(_x * y) - np.sum(_x) * np.sum(y)) / denom,
+      'b': (np.sum(_x**2) * np.sum(y) - np.sum(_x) * np.sum(_x * y)) / denom,
+      's_a': sigma0 * np.sqrt(size / denom),
+      's_b': sigma0 * np.sqrt(np.sum(_x ** 2) / denom)
+  }
+  sol_analytic
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[4]:
+#+BEGIN_EXAMPLE
+  {'a': 1.8419873744634017,
+  'b': 221.09327400439,
+  's_a': 0.18305375486749972,
+  's_b': 1.8375169284378194}
+#+END_EXAMPLE
+:end:
+
+1sigma誤差の範囲に真値が収まっている。
+
 ** Numpy
+~Polynomial.fit()~ を使ったフィッティング手法を示す。
+デフォルトの返り値は ~Polynomial~ インスタンスである。
+~full=True~ のキーワード引数を与えるとタプルを出力し、2番目の要素にフィッティングの情報が含まれる。
+- [[https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.Polynomial.fit.html#numpy.polynomial.polynomial.Polynomial.fit][numpy.polynomial.polynomial.Polynomial.fit — NumPy v2.2 Manual]]
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from numpy.polynomial import Polynomial
+
+  _x = x - x0
+  p, status = Polynomial.fit(_x, y, 1, w=1 / sigma, full=True)
+  p = p.convert()
+
+  sol_numpy_poly = {'a': p.coef[1], 'b': p.coef[0], 's_a': 0, 's_b': 0}
+  sol_numpy_poly
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[6]:
+: {'a': 2.0169555112890785, 'b': 219.8701393926761, 's_a': 0, 's_b': 0}
+:end:
+
+なぜか解析解よりも真値に近い値を出しているが、誤差を出力してくれないようである。
+なお、 ~Polynomial.fit()~ は ~Polynomial~ クラスのクラスメソッドである。
+
 ** Scipy
+
+
 ** Astropy
 ** MPFIT
 ** LMFIT
+** まとめ
 
 * 理想的な輝線データのフィッティング結果
+** データ作成
 ** Numpy
 ** Scipy
 ** Astropy
 ** specutils
 ** MPFIT
 ** LMFIT
+** まとめ
