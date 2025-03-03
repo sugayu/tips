@@ -4,37 +4,60 @@
 #+OPTIONS: toc:nil
 
 * 導入
-データのフィッティングに使用可能なPythonモジュールは数多くある。
+最尤法(Maximum Likelihood Methods)を提供するデータのフィッティングに使用可能なPythonモジュールは数多くある。
 これらを比較することで、
 (1) 使用感の違いを見る、
 (2) 使い方をメモする、
 (3) 最尤値や誤差が正しく求まるか調べる
 ことを目的とする。
+ベイズ統計やMCMCのパッケージの比較は目的としていない。
 
 * 比較対象のPythonモジュール
 ** NumPy
 ~NumPy~ は ~polynomial~ という多項式を扱うモジュールを提供している。
 この中で ~fit()~ というメソッドが提供されており、これを使ってモデルの最適化が可能である。
-内部で ~numpy.linalg.lstsq~ という最適化関数を使っている。
+内部で ~numpy.linalg.lstsq()~ という最適化関数を使っており、\( |y - Ax | \) を最小化するという説明があるものの最適化手法は不明。
 物理学でよく使われる名前のついた多くの多項式を扱えるが、ガウス関数などは無いので輝線のフィッティングには使えない(と思う)。
+~numpy.linalg.lstsq()~ 自体を使えばガウス関数フィッティングもできないこともなさそうではあるが...
 - [[https://numpy.org/doc/stable/reference/routines.polynomials-package.html#module-numpy.polynomial][numpy.polynomial — NumPy v2.2 Manual]]
 - [[https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html#numpy.linalg.lstsq][numpy.linalg.lstsq — NumPy v2.2 Manual]]
 
 ** Scipy
 ~SciPy~ は ~optimize~ という最適化のためのモジュールを提供している。
 この中で ~curve_fit()~ という関数は非線形最小二乗法によりモデルの最適化を行う。
+~method~ 引数により最適化手法をLevenberg-Marquardt法、Trust Region Reflective法、dogleg法の中から選べる。
+デフォルトではパラメータ範囲に制限が無ければLM法、あればTRR法が使われる。
+LM法の場合は最尤推定にFortranで実装されたMINPACKというプログラムを呼び出す ~scipy.optimize.leastsq()~ を使用しており、
+他の手法の場合は最尤推定に ~scipy.optimize.least_square()~ という新しい関数を使用している。
+データの誤差 ~sigma~ の中に誤差の相関(共分散)を入れることもできる。
 - [[https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html][curve_fit — SciPy v1.15.2 Manual]]
+
 2変数の間の線形回帰は ~linregress()~ という関数でも与えられており、こちらを使えば関数を指定してやる必要がない。
+ただしデータ点に誤差を与えることができない。
+内部では ~np.cov()~ を使って共分散を計算し、解析解を導いているようである。
+(なお ~linregress~ はlinear regressionの略だと思われる。)
 - [[https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html#scipy.stats.linregress][linregress — SciPy v1.15.2 Manual]]
 
 ** Astropy
 天文解析パッケージ ~Astropy~ は ~modeling~ というモジュールを提供している。
-天文関係で使うと思われるモデルやフィッティングの関数が網羅されているので、
+天文関係で使うと思われるモデルやフィッティングの関数、単位付き変数のフィッティングが整備されているので、
 使いたいモデルが実装されていないか確認する価値がある。
 - [[https://docs.astropy.org/en/stable/modeling/][Models and Fitting (astropy.modeling) — Astropy v7.0.1]]
+- [[https://docs.astropy.org/en/stable/modeling/models.html][Models — Astropy v7.0.1]]
+
 ~modeling.models~ モジュールが提供するクラスを使って統計モデルを構築し、
 ~modeling.fitting~ モジュールが提供するクラスを使ってモデルをデータに当て嵌める。
-- [[https://docs.astropy.org/en/stable/modeling/models.html][Models — Astropy v7.0.1]]
+しかし、結局中身は ~scipy.optimize.least_squares()~ を使っている。
+User Interfaceが関数ではなくクラス中心で複雑なので、それに応じた複雑なフィッティングをするのに適していると考えられる。
+内部で変数変換したり ~scipy.optimize~ のフィッティング関数のアウトプットを変換したりしているので、
+コードを見るとフィッティング結果をどう扱うかの勉強になるかも？
+
+用意されているおすすめの最適化手法は、単純な線形の場合は ~LinearLSQFitter~、
+非線形の場合は ~TRFLSQFitter~, ~DogBoxLSQFitter~, ~LMLSQFitter~ の3種類である。
+これらの最適化手法は内部で ~scipy.optimize~ を使っているが、~LinearLSQFitter~ だけは例外的に ~numpy.linalg.lstsq()~ を使っている。
+パラメータ範囲が指定されていない小さな最適化であれば ~LMLSQFitter~,
+範囲が指定されているなら ~TRFLSQFitter~, ~DogBoxLSQFitter~ が良いとのこと。
+アルゴリズムが不安定なので、 ~LMLSQFitter~ を使う場合はパラメータ範囲を指定できない。
 - [[https://docs.astropy.org/en/stable/modeling/fitting.html][Fitting Models to Data — Astropy v7.0.1]]
 
 ** specutils
@@ -87,7 +110,7 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 
 #+RESULTS:
 :results:
-# Out[3]:
+# Out[2]:
 [[file:./obipy-resources/data.png]]
 :end:
 
@@ -146,8 +169,8 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
   p, status = Polynomial.fit(_x, y, 1, w=1 / sigma, full=True)
   p = p.convert()
 
-  sol_numpy_poly = {'a': p.coef[1], 'b': p.coef[0], 's_a': 0, 's_b': 0}
-  sol_numpy_poly
+  sol_numpy = {'a': p.coef[1], 'b': p.coef[0], 's_a': 0.0, 's_b': 0.0}
+  sol_numpy
 #+end_src
 
 #+RESULTS:
@@ -160,9 +183,141 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 なお、 ~Polynomial.fit()~ は ~Polynomial~ クラスのクラスメソッドである。
 
 ** Scipy
+*** curve_fit
+引数 ~absolute_sigma=True~ にすると誤差 ~sigma~ を絶対値で設定することになる。
+デフォルトは ~absolute_sigma=False~ なので相対値で指定、返り値の共分散 ~pcov~ も相対値になるので注意する。
+~pcov~ の絶対値と相対値の関係は ~pcov(absolute_sigma=False) = pcov(absolute_sigma=True) * chisq(popt)/(M-N)~ 。
+引数 ~full_output=True~ でフィッティングに関する細かい出力が得られる。
+他にも ~bounds~ や ~loss~ など多くの引数を持つ。
 
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from scipy.optimize import curve_fit
+
+
+  def func(x, a, b):
+      return a * x + b
+
+
+  _x = x - x0
+  popt, pcov, infodict, mesg, ier = curve_fit(
+      func, _x, y, sigma=sigma, absolute_sigma=True, full_output=True
+  )
+  perr = np.sqrt(np.diag(pcov))
+
+  sol_scipy_curvefit = {'a': popt[0], 'b': popt[1], 's_a': perr[0], 's_b': perr[1]}
+  sol_scipy_curvefit
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[11]:
+#+BEGIN_EXAMPLE
+  {'a': 2.0169555146937843,
+  'b': 219.87013941608788,
+  's_a': 0.07746656331133386,
+  's_b': 0.6067190416454986}
+#+END_EXAMPLE
+:end:
+
+~numpy.Polynomial.fit~ と同じ結果を示した。
+結果には示していないが、pcovの値を見ると共分散項はおよそ0.04であり、
+最適化されたパラメータ間の相関(共分散)がほとんどゼロであることが分かる。
+
+*** linregress
+引数 ~alternative~ を加えることで検定も可能らしい。
+誤差 ~sigma~ を与えることはできない。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from scipy.stats import linregress
+
+  _x = x - x0
+  res = linregress(_x, y)
+  sol_scipy_linregress = {'a': res.slope, 'b': res.intercept, 's_a': res.stderr, 's_b': res.intercept_stderr}
+  sol_scipy_linregress
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[5]:
+#+BEGIN_EXAMPLE
+  {'a': 1.8419873744634003,
+  'b': 221.09327400439,
+  's_a': 0.22700227671955325,
+  's_b': 2.2786777936788623}
+#+END_EXAMPLE
+:end:
+
+解析解と同じ結果が得られた。
+なぜか誤差は解析解で得られたものよりも少し大きい(与えた解析解が自由度の計算間違っている？)。
 
 ** Astropy
+*** LinearLSQFitter
+LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っているので誤差の出力は無し。
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from astropy.modeling import models, fitting
+
+  _x = x - x0
+  fit = fitting.LinearLSQFitter()
+  line_init = models.Linear1D()   # initial values <Linear1D(slope=1., intercept=0.)>
+  fitted_line = fit(line_init, _x, y, weights=1 / sigma)
+  sol_astropy_linear = {'a': fitted_line.slope.value, 'b': fitted_line.intercept.value, 's_a': 0.0, 's_b': 0.0}
+  sol_astropy_linear
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[8]:
+: {'a': 2.016955511289068, 'b': 219.87013939267607, 's_a': 0.0, 's_b': 0.0}
+:end:
+
+内部の実装どおり ~numpy.Polynomial.fit()~ と同じ結果が得られた。
+
+*** LMLSQFitter
+~LMLSQFitter~ は内部で ~scipy.optimize.least_squares()~ を使っている。
+引数 ~calc_uncertainties=True~ を与えるとパラメータ誤差を計算して ~fitted_line.cov_matrix~ と ~fitted_line.stds~ に値が入力される。
+この引数を与えなくても、 ~fit['fit_info']~ にフィッティングの結果は残されている。
+ちなみに、 ~scipy.optimize.curve_fit()~ のデフォルトの振舞いを修正して、与えた誤差は絶対値 (~absolute_sigma=True~) として内部で補正されている。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from astropy.modeling import models, fitting
+
+  _x = x - x0
+  fit = fitting.LMLSQFitter(calc_uncertainties=True)
+  line_init = models.Linear1D()  # initial values <Linear1D(slope=1., intercept=0.)>
+  fitted_line = fit(line_init, _x, y, weights=1 / sigma)
+  sol_astropy_LM = {
+      'a': fitted_line.slope.value,
+      'b': fitted_line.intercept.value,
+      's_a': fitted_line.stds['slope'],
+      's_b': fitted_line.stds['intercept'],
+  }
+  sol_astropy_LM
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[9]:
+#+BEGIN_EXAMPLE
+  {'a': 2.0169555112890816,
+  'b': 219.87013939267604,
+  's_a': 0.07746656519872085,
+  's_b': 0.606719014577763}
+#+END_EXAMPLE
+:end:
+
+なぜか ~scipy.optimize.curve_fit()~ よりも ~LinearSQFitter~ に近い結果が得られた。
+~curve_fit()~ は内部で ~scipy.optimize.leastsq()~ を使用しており、 ~LMLSQFitter~ は ~scipy.optimize.least_square()~ を使用しているので、
+内部のわずかな実装の違いが表れたのかもしれない。
+もちろん、誤差の範囲ではこれらは一致している。
+得られた誤差も ~scipy.optimize.curve_fit()~ に近い値が得られた。
+
+なお、これを実行すると
+#+begin_example
+  WARNING: Model is linear in parameters; consider using linear fitting methods. [astropy.modeling.fitting]
+#+end_example
+という警告が出る。
+線形フィッティングは ~LinearLSQFitter~ がお薦めのようである。
+
 ** MPFIT
 ** LMFIT
 ** まとめ
