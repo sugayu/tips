@@ -1,4 +1,4 @@
-% Created 2025-01-01 水 22:54
+% Created 2025-01-01 水 23:33
 \documentclass[a4paper, 10pt, notitlepage, twocolumn, uplatex, oneside, dvipdfmx]{jsarticle}
 \usepackage[dvipdfmx]{graphicx, color}
 \usepackage{ulem}
@@ -30,7 +30,7 @@
 \tableofcontents
 
 \section{基準の図}
-\label{sec:orgfa59f90}
+\label{sec:orgef722fa}
 \texttt{fig.add\_subplot()} に \texttt{projection='3d'} を渡して3次元図を作成する。
 このとき返ってくるのは3次元専用の軸オブジェクト \texttt{Axes3D} である。
 
@@ -91,9 +91,9 @@ savefig(fig, './obipy-resources/fiducial_3d.png')
 また、この場合の方がプロットがとても速い。
 \end{verbatim}
 \section{基本}
-\label{sec:org1ceb77d}
+\label{sec:org65f27ac}
 \subsection{面をプロット}
-\label{sec:org3dfa4fd}
+\label{sec:org7fd12ea}
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
 fig, ax = plot_fiducial()
 theta = np.linspace(0.0, np.pi / 2.0, 9).reshape(-1, 1)
@@ -118,9 +118,9 @@ savefig(fig, './obipy-resources/surface_3d.png')
 光が当たる角度は引数の \texttt{lightsource} に \texttt{matplotlib.colors.LightSource} を入れて指定できる。
 詳しくは
 \section{軸の設定}
-\label{sec:org64c14f3}
+\label{sec:org39e21c7}
 \subsection{ズーム}
-\label{sec:org99ba930}
+\label{sec:orgac10a95}
 ズームをする関数は用意されていない。
 軸の表示範囲を調整して似た機能を実現する。
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
@@ -137,8 +137,10 @@ savefig(fig, './obipy-resources/zoom_3d.png')
 \begin{center}
 \includegraphics[width=1.0\linewidth]{./obipy-resources/zoom_3d.png}
 \end{center}
+
+参照：[\href{https://stackoverflow.com/questions/25575729/how-to-zoom-with-axes3d-in-matplotlib}{python - How to Zoom with Axes3D in Matplotlib - Stack Overflow}
 \subsection{視点の角度}
-\label{sec:org866ae54}
+\label{sec:org4bffba3}
 \texttt{Axes3D.view\_init()} で変更する。
 パラメータの角度方向は直感の通りで、
 \texttt{azim} はx軸正の向き(\texttt{y = 0} の方向)から反時計まわりの方位角、
@@ -195,7 +197,7 @@ savefig(fig, './obipy-resources/view_3d.png')
 \includegraphics[width=1.0\linewidth]{./obipy-resources/view_3d.png}
 \end{center}
 \subsection{軸を消す}
-\label{sec:orgf355797}
+\label{sec:orgf6c95f9}
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
 fig, ax = plot_fiducial()
 ax.grid(False)  # gridを消す
@@ -224,8 +226,10 @@ savefig(fig, './obipy-resources/axis_3d.png')
 \begin{center}
 \includegraphics[width=1.0\linewidth]{./obipy-resources/axis_3d.png}
 \end{center}
+
+参照: \href{https://stackoverflow.com/questions/59857203/remove-border-from-matplotlib-3d-pane}{python - Remove border from matplotlib 3D pane - Stack Overflow}
 \subsection{軸を完全に消す}
-\label{sec:org01e8338}
+\label{sec:org29a5541}
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
 fig, ax = plot_fiducial()
 ax.axis('off')
@@ -238,9 +242,9 @@ savefig(fig, './obipy-resources/noaxis_3d.png')
 \includegraphics[width=1.0\linewidth]{./obipy-resources/noaxis_3d.png}
 \end{center}
 \section{プロットの工夫}
-\label{sec:org00a224b}
+\label{sec:org20c7485}
 \subsection{大量の線}
-\label{sec:org400d12b}
+\label{sec:orga1d43cb}
 一斉に同じ種類の線をプロットするには \texttt{art3d.Line3DCollection} を使って、返り値を \texttt{ax.add\_collection()} で加えると良い。
 \begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
 from mpl_toolkits.mplot3d import art3d
@@ -268,7 +272,7 @@ savefig(fig, './obipy-resources/lines_3d.png')
 \includegraphics[width=1.0\linewidth]{./obipy-resources/lines_3d.png}
 \end{center}
 \subsection{光の角度}
-\label{sec:org146ab7a}
+\label{sec:org1d155c3}
 光の角度は \texttt{matplotlib.colors.LightSource} で指定できる。
 パラメータの角度方向は直感に反していて、
 \texttt{azdeg} はy軸負の向き(\texttt{x = 0} の方向)から時計まわりの方位角、

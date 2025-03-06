@@ -87,7 +87,7 @@
 :end:
 
 光が当たる角度は引数の ~lightsource~ に ~matplotlib.colors.LightSource~ を入れて指定できる。
-詳しくは
+詳しくは[[*光の角度][光の角度]]を参照。
 
 * 軸の設定
 ** ズーム
