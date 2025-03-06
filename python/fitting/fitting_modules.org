@@ -68,17 +68,38 @@ User Interfaceが関数ではなくクラス中心で複雑なので、それに
 
 ** MPFIT
 ~MPFIT~ は古くから天文学で使われているフィッティングパッケージ。
-元々はFortranで書かれた ~MINPACK-1~ というパッケージの中のフィッティングコードを
-Craig MarkwardtさんがIDLで書き直した。
+元々はFortranで書かれた ~MINPACK-1~ というパッケージの中のフィッティングコードをCraig MarkwardtさんがIDLで書き直した。
 それをMark RiversさんがPythonで書き直し、Sergey Koposovさんが ~numpy~ で実装し直した後にPython3で動くようにした。
+IDLでフィッティングといえばこのコード。
 Levenberg-Marquardt法を使っているので効率良く最小二乗問題を解けるのが売りだった。
 - [[https://eispac.readthedocs.io/en/stable/guide/07-mpfit_docs.html][MPFIT Documentation — eispac 0.1.dev108+gdfa97b1 documentation]]
 - [[https://github.com/segasai/astrolibpy/blob/master/mpfit/mpfit.py][astrolibpy/mpfit/mpfit.py at master · segasai/astrolibpy · GitHub]]
 
+~pip~ でダウンロードできる形式では配布されていない。
+~astrolibpy~ をダウンロードしたあと、Pythonのパスが通っている場所に ~mpfit~ のディレクトリを置いたら良い。
+たぶんディレクトリ直下に mpfit/__init__.py ファイルを設置する必要がある (空ファイルで良い)。
+
 ** LMFIT
 ~LMFIT~ は非線形最小二乗法を解くためのパッケージ。
 ~scipy.optimize~ モジュールから着想を得て、フィッティングのための便利な機能を多数導入している。
+多くのモデル、多様な最適化手法、パラメータ制御法、解の解析手法が提供されている。
 - [[https://lmfit.github.io/lmfit-py/index.html][Non-Linear Least-Squares Minimization and Curve-Fitting for Python — Non-Linear Least-Squares Minimization and Curve-Fitting for Python]]
+
+基本的に最適化には ~scipy.optimize~ が内部で使われており、 例えば ~method='leastsq'~ が指定されているときは ~scipy.optimize.leastsq()~ が使用されている。
+~Minimizer.minimize()~ の説明:
+#+begin_example
+  In most cases, these methods wrap and use the method with the same name from `scipy.optimize`, or use `scipy.optimize.minimize` with the same `method` argument.
+#+end_example
+
+[[https://lmfit.github.io/lmfit-py/intro.html][Getting started]]で述べられている ~scipy.optimize.leastsq()~ から改善したかった点は、
+1. パラメータを(本質的に意味のない)数値インデックスで指定する(~p[0]~)のではなく、名前で指定したい(~p['slope']~)。
+2. パラメータを固定したかったら作った関数を変更しなければならない。
+3. パラメータ範囲を指定する方法が頑強な方法が無いし、あったとしても全パラメータの範囲を順番に指定しなければならない。
+4. パラメータの振舞いを制限する方法がかなり複雑 (~p['b'] = 3*p['a']~ としたいときなど。)。
+
+また ~emcee~ を使って最尤推定値まわりの事後分布を得る関数も提供されている。
+これはパラメータの確率分布(誤差)を調べるためであって、パラメータ推定のために用意されているわけではないと何度も注意されている。
+- [[https://lmfit.github.io/lmfit-py/fitting.html#minimizer-emcee-calculating-the-posterior-probability-distribution-of-parameters][Performing Fits and Analyzing Outputs — Non-Linear Least-Squares Minimization and Curve-Fitting for Python]]
 
 * 理想的な線形データのフィッティング結果
 ** データ作成
@@ -94,14 +115,15 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
   rng = default_rng(222)
 
   size = 30
-  sigma0 = 10.0
-  sigma = rng.standard_normal(size) * sigma0
+  sigma = np.full(size, 10.0)
+  noise = rng.standard_normal(size) * sigma
   x0 = 100.0
   x = rng.normal(x0, 10, size=size)
+  xn = x - x0
 
   a, b = 2.0, 220.0
   y0 = a * (x - x0) + b
-  y = y0 + sigma
+  y = y0 + noise
 
   fig = makefig(figsize=['small', 1.0])
   ax = fig.add_subplot(1, 1, 1)
@@ -133,20 +155,19 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 
 以上より最尤推定値を求める。
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
-  _x = x - x0
-  denom = (size * np.sum(_x**2) - np.sum(_x) ** 2)
+  denom = size * np.sum(xn**2) - np.sum(xn) ** 2
   sol_analytic = {
-      'a': (size * np.sum(_x * y) - np.sum(_x) * np.sum(y)) / denom,
-      'b': (np.sum(_x**2) * np.sum(y) - np.sum(_x) * np.sum(_x * y)) / denom,
-      's_a': sigma0 * np.sqrt(size / denom),
-      's_b': sigma0 * np.sqrt(np.sum(_x ** 2) / denom)
+      'a': (size * np.sum(xn * y) - np.sum(xn) * np.sum(y)) / denom,
+      'b': (np.sum(xn**2) * np.sum(y) - np.sum(xn) * np.sum(xn * y)) / denom,
+      's_a': sigma[0] * np.sqrt(size / denom),
+      's_b': sigma[0] * np.sqrt(np.sum(xn**2) / denom),
   }
   sol_analytic
 #+end_src
 
 #+RESULTS:
 :results:
-# Out[4]:
+# Out[3]:
 #+BEGIN_EXAMPLE
   {'a': 1.8419873744634017,
   'b': 221.09327400439,
@@ -165,8 +186,7 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
   from numpy.polynomial import Polynomial
 
-  _x = x - x0
-  p, status = Polynomial.fit(_x, y, 1, w=1 / sigma, full=True)
+  p, status = Polynomial.fit(xn, y, 1, w=1 / sigma, full=True)
   p = p.convert()
 
   sol_numpy = {'a': p.coef[1], 'b': p.coef[0], 's_a': 0.0, 's_b': 0.0}
@@ -175,11 +195,11 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 
 #+RESULTS:
 :results:
-# Out[6]:
-: {'a': 2.0169555112890785, 'b': 219.8701393926761, 's_a': 0, 's_b': 0}
+# Out[4]:
+: {'a': 1.8419873744634028, 'b': 221.09327400438997, 's_a': 0.0, 's_b': 0.0}
 :end:
 
-なぜか解析解よりも真値に近い値を出しているが、誤差を出力してくれないようである。
+最尤推定値は解析解とほとんど正確に一致したが、誤差を出力してくれないようである。
 なお、 ~Polynomial.fit()~ は ~Polynomial~ クラスのクラスメソッドである。
 
 ** Scipy
@@ -198,9 +218,8 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
       return a * x + b
 
 
-  _x = x - x0
   popt, pcov, infodict, mesg, ier = curve_fit(
-      func, _x, y, sigma=sigma, absolute_sigma=True, full_output=True
+      func, xn, y, sigma=sigma, absolute_sigma=True, full_output=True
   )
   perr = np.sqrt(np.diag(pcov))
 
@@ -210,17 +229,17 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 
 #+RESULTS:
 :results:
-# Out[11]:
+# Out[5]:
 #+BEGIN_EXAMPLE
-  {'a': 2.0169555146937843,
-  'b': 219.87013941608788,
-  's_a': 0.07746656331133386,
-  's_b': 0.6067190416454986}
+  {'a': 1.84198738877173,
+  'b': 221.09327399514368,
+  's_a': 0.18305375794763726,
+  's_b': 1.8375169220175631}
 #+END_EXAMPLE
 :end:
 
-~numpy.Polynomial.fit~ と同じ結果を示した。
-結果には示していないが、pcovの値を見ると共分散項はおよそ0.04であり、
+~numpy.Polynomial.fit~ と同じ結果を示したが、解析解からの数値誤差が若干ある(実用的に何の問題もないし気にするべきではない)。
+結果には示していないが、pcovの値を見ると共分散項はおよそ-0.04であり、
 最適化されたパラメータ間の相関(共分散)がほとんどゼロであることが分かる。
 
 *** linregress
@@ -228,17 +247,21 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 誤差 ~sigma~ を与えることはできない。
 
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
-  from scipy.stats import linregress
+  from scipy import stats
 
-  _x = x - x0
-  res = linregress(_x, y)
-  sol_scipy_linregress = {'a': res.slope, 'b': res.intercept, 's_a': res.stderr, 's_b': res.intercept_stderr}
+  res = stats.linregress(xn, y)
+  sol_scipy_linregress = {
+      'a': res.slope,
+      'b': res.intercept,
+      's_a': res.stderr,
+      's_b': res.intercept_stderr,
+  }
   sol_scipy_linregress
 #+end_src
 
 #+RESULTS:
 :results:
-# Out[5]:
+# Out[7]:
 #+BEGIN_EXAMPLE
   {'a': 1.8419873744634003,
   'b': 221.09327400439,
@@ -247,8 +270,9 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 #+END_EXAMPLE
 :end:
 
-解析解と同じ結果が得られた。
-なぜか誤差は解析解で得られたものよりも少し大きい(与えた解析解が自由度の計算間違っている？)。
+最尤推定値は解析解と一致した。
+誤差が解析解より少し大きいのは、おそらく内部でデータの誤差を相関係数やデータの標準偏差(標本標準偏差)から評価しているから。
+実際、 ~np.std(noise)~ の値は12であり、最尤推定値の誤差も同じくらいの倍率で大きくなっている(完全に一致はしない)。
 
 ** Astropy
 *** LinearLSQFitter
@@ -256,10 +280,9 @@ LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っている�
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
   from astropy.modeling import models, fitting
 
-  _x = x - x0
   fit = fitting.LinearLSQFitter()
   line_init = models.Linear1D()   # initial values <Linear1D(slope=1., intercept=0.)>
-  fitted_line = fit(line_init, _x, y, weights=1 / sigma)
+  fitted_line = fit(line_init, xn, y, weights=1 / sigma)
   sol_astropy_linear = {'a': fitted_line.slope.value, 'b': fitted_line.intercept.value, 's_a': 0.0, 's_b': 0.0}
   sol_astropy_linear
 #+end_src
@@ -267,24 +290,23 @@ LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っている�
 #+RESULTS:
 :results:
 # Out[8]:
-: {'a': 2.016955511289068, 'b': 219.87013939267607, 's_a': 0.0, 's_b': 0.0}
+: {'a': 1.8419873744634014, 'b': 221.09327400439003, 's_a': 0.0, 's_b': 0.0}
 :end:
 
-内部の実装どおり ~numpy.Polynomial.fit()~ と同じ結果が得られた。
+内部の実装どおり ~numpy.Polynomial.fit()~ と同じ結果が得られ、解析解と一致した。
 
 *** LMLSQFitter
 ~LMLSQFitter~ は内部で ~scipy.optimize.least_squares()~ を使っている。
 引数 ~calc_uncertainties=True~ を与えるとパラメータ誤差を計算して ~fitted_line.cov_matrix~ と ~fitted_line.stds~ に値が入力される。
 この引数を与えなくても、 ~fit['fit_info']~ にフィッティングの結果は残されている。
-ちなみに、 ~scipy.optimize.curve_fit()~ のデフォルトの振舞いを修正して、与えた誤差は絶対値 (~absolute_sigma=True~) として内部で補正されている。
+ちなみに、 ~scipy.optimize.curve_fit()~ のデフォルトの結果を修正して、与えた誤差は絶対値 (~absolute_sigma=True~) になるように内部で補正されている。
 
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
   from astropy.modeling import models, fitting
 
-  _x = x - x0
   fit = fitting.LMLSQFitter(calc_uncertainties=True)
   line_init = models.Linear1D()  # initial values <Linear1D(slope=1., intercept=0.)>
-  fitted_line = fit(line_init, _x, y, weights=1 / sigma)
+  fitted_line = fit(line_init, xn, y, weights=1 / sigma)
   sol_astropy_LM = {
       'a': fitted_line.slope.value,
       'b': fitted_line.intercept.value,
@@ -298,10 +320,10 @@ LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っている�
 :results:
 # Out[9]:
 #+BEGIN_EXAMPLE
-  {'a': 2.0169555112890816,
-  'b': 219.87013939267604,
-  's_a': 0.07746656519872085,
-  's_b': 0.606719014577763}
+  {'a': 1.8419873744634017,
+  'b': 221.09327400438997,
+  's_a': 0.1830537548674997,
+  's_b': 1.8375169284378194}
 #+END_EXAMPLE
 :end:
 
@@ -316,11 +338,210 @@ LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っている�
   WARNING: Model is linear in parameters; consider using linear fitting methods. [astropy.modeling.fitting]
 #+end_example
 という警告が出る。
-線形フィッティングは ~LinearLSQFitter~ がお薦めのようである。
+線形フィッティングは ~LinearLSQFitter~ がお薦めのようである (誤差を出力してくれないのに？)。
 
 ** MPFIT
+コードの表記がPythonを使ううえであまり直感的ではないので、使うならさらにwrapperを作ってしまうのが便利な気がする。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from mpfit.mpfit import mpfit
+  import numpy as np
+
+
+  def func(p, fjac=None, x=None, y=None, err=None):
+      y0 = p[0] * x + p[1]
+      status = 0
+      return [status, (y - y0) / err]
+
+
+  p0 = [1.0, 200.0]
+  functkw = {'x': xn, 'y': y, 'err': sigma}
+  m = mpfit(func, p0, functkw=functkw)
+
+  sol_mpfit = {
+      'a': m.params[0],
+      'b': m.params[1],
+      's_a': m.perror[0],
+      's_b': m.perror[1],
+  }
+  sol_mpfit
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[11]:
+#+BEGIN_EXAMPLE
+  {'a': 1.8419873769467103,
+  'b': 221.09327423192875,
+  's_a': 0.18305375489620923,
+  's_b': 1.8375169218509713}
+#+END_EXAMPLE
+:end:
+
+同じMINPACK由来のコードと言えど他の手法とは実装が異なるので、異なる数値誤差が出た。
+
+デフォルトではプリントメッセージが表示される。
+#+begin_example
+  Iter       1    CHI-SQUARE =  210.0576791  DOF =  28
+     P0 = 1  
+     P1 = 200  
+  Iter       2    CHI-SQUARE =  43.05872579  DOF =  28
+     P0 = 1.841987377  
+     P1 = 221.0932742  
+#+end_example
+まじか、Levenberg-Marquardt法ってIteration 1回で終わるのか... 信じられへんな...
+
 ** LMFIT
+*** 関数を使った書き方
+書き方は ~MPFIT~ と似ているところがある。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  import numpy as np
+  import lmfit
+
+
+  def func(p, x, data, uncertainty):
+      y0 = p['slope'] * x + p['intercept']
+      return (data - y0) / uncertainty
+
+
+  params = lmfit.create_params(slope=1.0, intercept=200.0)
+  out = lmfit.minimize(func, params, args=(xn, y, sigma))
+
+  sol_lmfit = {
+      'a': float(out.params['slope'].value),
+      'b': float(out.params['intercept'].value),
+      's_a': float(out.params['slope'].stderr),
+      's_b': float(out.params['intercept'].stderr),
+  }
+  sol_lmfit
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[15]:
+#+BEGIN_EXAMPLE
+  {'a': 1.8419873744056405,
+  'b': 221.09327400473325,
+  's_a': 0.22700227671667123,
+  's_b': 2.2786777936860263}
+#+END_EXAMPLE
+:end:
+
+~scipy.optimize.leastsq()~ を使っているが、 ~scipy.optimize.curve_fit()~ と数値誤差が完全に同じというわけではなさそう。
+誤差が大きくなって ~scipy.stats.linregress~ と同じになっているが、これは *内部で勝手にデータから誤差をスケールさせている* から。
+~scale_covar=False~ を指定すると他の手法と同じ結果が得られる。
+スケールすること自体は悪くなはないが、自分の使っている手法が中で何をやっているかはちゃんと理解しておく必要があるだろう。
+
+*** Modelクラスを使った書き方
+同じ ~lmfit~ でも ~Model~ クラスを使った書き方もある。
+既存のフィッティング関数を使ったり、それと自分のオリジナルの関数を組み合わせたりする場合はこちらが便利かもしれない。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  import numpy as np
+  from lmfit.models import LinearModel
+
+
+  model = LinearModel()
+  init = model.guess(y, x=xn)
+  out = model.fit(y, init, x=xn, weights=1 / sigma)
+
+  sol_lmfit2 = {
+      'a': float(out.params['slope'].value),
+      'b': float(out.params['intercept'].value),
+      's_a': float(out.params['slope'].stderr),
+      's_b': float(out.params['intercept'].stderr),
+  }
+  sol_lmfit2
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[17]:
+#+BEGIN_EXAMPLE
+  {'a': 1.84198737447337,
+  'b': 221.09327400437255,
+  's_a': 0.22700227671776427,
+  's_b': 2.278677793677153}
+#+END_EXAMPLE
+:end:
+
+数値誤差も含めると上の手法と完全に一致するわけではない。なぜ？
+こちらも ~Model.fit()~ に ~scale_covar~ という引数がある。
+
 ** まとめ
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  import pandas as pd
+
+  data = {
+      'Analytic': sol_analytic,
+      'Numpy': sol_numpy,
+      'Scipy curvefit': sol_scipy_curvefit,
+      'Scipy linregress': sol_scipy_linregress,
+      'Astropy Linear': sol_astropy_linear,
+      'Astropy LM': sol_astropy_LM,
+      'MPFIT': sol_mpfit,
+      'LMFIT minimize': sol_lmfit,
+      'LMFIT Model.fit': sol_lmfit2,
+  }
+  pd.DataFrame.from_dict(data, orient='index')
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[29]:
+#+BEGIN_EXAMPLE
+                           a           b       s_a       s_b
+  Analytic          1.841987  221.093274  0.183054  1.837517
+  Numpy             1.841987  221.093274  0.000000  0.000000
+  Scipy curvefit    1.841987  221.093274  0.183054  1.837517
+  Scipy linregress  1.841987  221.093274  0.227002  2.278678
+  Astropy Linear    1.841987  221.093274  0.000000  0.000000
+  Astropy LM        1.841987  221.093274  0.183054  1.837517
+  MPFIT             1.841987  221.093274  0.183054  1.837517
+  LMFIT minimize    1.841987  221.093274  0.227002  2.278678
+  LMFIT Model.fit   1.841987  221.093274  0.227002  2.278678
+#+END_EXAMPLE
+:end:
+
+(誤差のスケールを除いて) 全ての数値が一致した。
+
+** 図
+~LMFIT~ は手軽にベストフィット関数の誤差範囲を示すことができる。
+- [[https://lmfit.github.io/lmfit-py/examples/documentation/model_uncertainty_pred.html#sphx-glr-examples-documentation-model-uncertainty-pred-py][Model - uncertainty pred — Non-Linear Least-Squares Minimization and Curve-Fitting for Python]]
+計算は以下のサイトに基づいているよう。
+- [[https://www.astro.rug.nl/software/kapteyn/kmpfittutorial.html#confidence-and-prediction-intervals][Least squares fitting with kmpfit — Kapteyn Package (home)]]
+  (新しい ~kmpfit~ が登場したが、さすがにもうやってられない)
+
+~scale_covar=False~ を与えて ~lmfit~ で計算し直した。
+また、 ~xx - x0~ をどこで使うか少し考えないといけないことに注意。
+
+#+begin_src ipython :session :ipyfile ./obipy-resources/fit_linear.png :exports both :async t :results raw drawer :eval never-export
+  from sugayutils.core import colors as col
+  from sugayutils.figure import makefig
+
+  out = model.fit(y, init, x=xn, weights=1 / sigma, scale_covar=False)
+
+  xx = np.linspace(80, 130, 101)
+  yy = out.eval(x=xx - x0)
+  ye = out.eval_uncertainty(x=xx - x0, sigma=1)
+
+  fig = makefig(figsize=['small', 1.0])
+  ax = fig.add_subplot(1, 1, 1)
+  ax.scatter(x, y, c='blue', zorder=2)
+  ax.plot(xx, yy, c='red', zorder=1)
+  ax.plot(xx, a * (xx - x0) + b, c='blue', ls='--', zorder=1)
+  ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[44]:
+: <matplotlib.collections.FillBetweenPolyCollection at 0x7fc99e5dfd40>
+[[file:./obipy-resources/fit_linear.png]]
+:end:
+
+データを生成した新の直線を青破線、最尤推定した直線を赤実線、その誤差を淡い赤帯で示した。
 
 * 理想的な輝線データのフィッティング結果
 ** データ作成
