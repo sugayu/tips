@@ -107,6 +107,7 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 - 標準偏差: 10.0
 - 標本の大きさ: 30
 - 直線: \(y = 2.0 (x - 100.0) + 220.0\)
+=# ~makefig()~ は菅原が編集した ~matplotlib~ の関数=
 #+begin_src ipython :session :ipyfile ./obipy-resources/data.png :exports both :async t :results raw drawer :eval never-export
   import numpy as np
   from numpy.random import default_rng
@@ -409,10 +410,10 @@ LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っている�
   out = lmfit.minimize(func, params, args=(xn, y, sigma))
 
   sol_lmfit = {
-      'a': float(out.params['slope'].value),
-      'b': float(out.params['intercept'].value),
-      's_a': float(out.params['slope'].stderr),
-      's_b': float(out.params['intercept'].stderr),
+      'a': out.params['slope'].value,
+      'b': out.params['intercept'].value,
+      's_a': out.params['slope'].stderr,
+      's_b': out.params['intercept'].stderr,
   }
   sol_lmfit
 #+end_src
@@ -447,10 +448,10 @@ LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っている�
   out = model.fit(y, init, x=xn, weights=1 / sigma)
 
   sol_lmfit2 = {
-      'a': float(out.params['slope'].value),
-      'b': float(out.params['intercept'].value),
-      's_a': float(out.params['slope'].stderr),
-      's_b': float(out.params['intercept'].stderr),
+      'a': out.params['slope'].value,
+      'b': out.params['intercept'].value,
+      's_a': out.params['slope'].stderr,
+      's_b': out.params['intercept'].stderr,
   }
   sol_lmfit2
 #+end_src
@@ -528,9 +529,9 @@ LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っている�
 
   fig = makefig(figsize=['small', 1.0])
   ax = fig.add_subplot(1, 1, 1)
+  ax.plot(xx, a * (xx - x0) + b, c='blue', ls='--', zorder=2)
   ax.scatter(x, y, c='blue', zorder=2)
   ax.plot(xx, yy, c='red', zorder=1)
-  ax.plot(xx, a * (xx - x0) + b, c='blue', ls='--', zorder=1)
   ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
 #+end_src
 
@@ -545,10 +546,400 @@ LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っている�
 
 * 理想的な輝線データのフィッティング結果
 ** データ作成
-** Numpy
+ガウス関数に従う模擬輝線データを作成する。
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  import numpy as np
+  from numpy.random import default_rng
+
+  rng = default_rng(222)
+
+  size = 21
+  sigma = np.linspace(1.0, 3.0, size)[::-1]
+  noise = rng.standard_normal(size) * sigma
+  start = 90.0
+  x = np.arange(size) + start
+
+  x0 = 100.0
+  w = 2.0
+  flux = 40.0
+  y0 = 10.0
+  y_line = flux * np.exp(-0.5 * (x - x0) ** 2/ w ** 2) / np.sqrt(2 * np.pi) / w
+  y = y0 + y_line + noise
+
+  sol_answer = {
+      'x0': x0,
+      'e_x0': 0.0,
+      'w': w,
+      'e_w': 0.0,
+      'f': flux,
+      'e_f': 0.0,
+      'y0': y0,
+      'e_y0': 0.0,
+  }
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[2]:
+:end:
+
+ここで、厳密にはフラックスの保存を考えずにガウス関数を離散化してフィッティングしていることに注意する。
+線幅sigmaが2ピクセルあるのでほとんど問題ないはずだが、線幅が細すぎる場合にはこのガウス関数の離散化はフラックスを全く保存しない。
+
 ** Scipy
+初期値 ~p0~ を与えないと収束しないだろう。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from scipy.optimize import curve_fit
+
+
+  def gauss(x, x0, w, flux, y0):
+      y_line = flux * np.exp(-0.5 * (x - x0) ** 2 / w**2) / np.sqrt(2 * np.pi) / w
+      return y0 + y_line
+
+
+  p0_x0, p0_w, p0_f, p0_y0 = np.mean(y * x) / np.mean(y), 1.0, np.max(y) * 2.0, np.mean(y)
+  p0 = [p0_x0, p0_w, p0_f, p0_y0]
+  popt, pcov, infodict, mesg, ier = curve_fit(
+      gauss, x, y, p0=p0, sigma=sigma, absolute_sigma=True, full_output=True
+  )
+  perr = np.sqrt(np.diag(pcov))
+
+  sol_scipy = {
+      'x0': popt[0],
+      'e_x0': perr[0],
+      'w': popt[1],
+      'e_w': perr[1],
+      'f': popt[2],
+      'e_f': perr[2],
+      'y0': popt[3],
+      'e_y0': perr[3],
+  }
+  sol_scipy
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[3]:
+#+BEGIN_EXAMPLE
+  {'x0': 100.24469301948592,
+  'e_x0': 0.3519444307764577,
+  'w': 1.6269735406285912,
+  'e_w': 0.37345397962760474,
+  'f': 31.175842723920148,
+  'e_f': 7.0277508837556475,
+  'y0': 10.337014096545635,
+  'e_y0': 0.4525080145096782}
+#+END_EXAMPLE
+:end:
+
 ** Astropy
+- 面積を変数に持つガウス関数を使いたいので ~AreaGaussian1D~ を定義する必要がある: [[https://docs.astropy.org/en/latest/modeling/jointfitter.html#example-spectral-line][JointFitter — Astropy v7.1.dev604+g07b8873e0]]。
+- 輝線幅 ~stddev~ に定義域があるので ~fitter~ はLM法ではなく ~TRFLSQFitter~ を選んだ。
+- 連続光と輝線の和を足し算で定義すると、アウトプットの変数には番号 "_0" や "_1" がつく。
+モデルを組むのに考えないといけないことがちょっと多くて気が逸らされそうな印象。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from astropy.modeling import models, fitting, Fittable1DModel
+  from astropy.modeling.parameters import Parameter
+  from astropy.modeling.functional_models import FLOAT_EPSILON
+
+
+  class AreaGaussian1D(Fittable1DModel):
+      area = Parameter(default=1)
+      mean = Parameter(default=0)
+      stddev = Parameter(default=1, bounds=(FLOAT_EPSILON, None))
+
+      @staticmethod
+      def evaluate(x, area, mean, stddev):
+          return (area / (stddev * np.sqrt(2 * np.pi))) * np.exp(
+              -0.5 * (x - mean) ** 2 / stddev**2
+          )
+
+
+  line = AreaGaussian1D(area=p0_f, mean=p0_x0, stddev=p0_w)
+  const = models.Const1D(amplitude=p0_y0)
+  fit = fitting.TRFLSQFitter(calc_uncertainties=True)
+  sol = fit(line + const, x, y, weights=1 / sigma)
+
+  sol_astropy = {
+      'x0': sol.mean_0.value,
+      'e_x0': sol.stds['mean_0'],
+      'w': sol.stddev_0.value,
+      'e_w': sol.stds['stddev_0'],
+      'f': sol.area_0.value,
+      'e_f': sol.stds['area_0'],
+      'y0': sol.amplitude_1.value,
+      'e_y0': sol.stds['amplitude_1'],
+  }
+  sol_astropy
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[4]:
+#+BEGIN_EXAMPLE
+  {'x0': 100.24473610204825,
+  'e_x0': 0.35192975287232203,
+  'w': 1.627041764794084,
+  'e_w': 0.3736855128006802,
+  'f': 31.176803560406576,
+  'e_f': 7.027771300910829,
+  'y0': 10.336972337844252,
+  'e_y0': 0.4525082896217146}
+#+END_EXAMPLE
+:end:
+
+既存のモデルを使うとフィッティングをとても楽にしてくれるはずだが、
+逆に自分でモデルを組まないといけない場合はちょっとめんどくさい。
+(Pythonではこれくらいのユーザー定義関数を作るのはあたりまえという感覚を持っていた方がいいというのはある。)
+
 ** specutils
+はじめにスペクトルのオブジェクト ~specutils.Spectrum1D~ を定義する。
+入力する引数(~flux~, ~spectral_axis~)等は ~astropy.units.Quantity~ でないといけないので適当に定義する。
+~specutils.fitting.estimate_line_parameters()~ という関数はどうやらパラメータをざっくり推定するための関数。本来は初期値を与えるのに使えるのかもしれない。
+今回のモデルは連続光が含まれているので、 ~specutils.fitting.fit_lines()~ をはじめから使う。
+
+~Spectrum1D~ はデータに単位を含むので、当て嵌めるモデルも単位計算に対応させる必要がある。
+~AreaGaussian1D~ に ~_parameter_units_for_data_units()~ メソッドを追加して、
+各パラメータの単位を横軸の波長(インプット)と縦軸のエネルギー密度(アウトプット)の単位を使って構築してやる必要がある。
+- [[https://docs.astropy.org/en/stable/modeling/add-units.html][Adding support for units in a model (Advanced) — Astropy v7.0.1]]
+
+データの誤差は本来は ~Spectrum1D~ に格納しておくのが良いが、その場合は ~astropy.nddata.nduncertainty.StdDevUncertainty~ を使って誤差の性質を明示する必要がある。
+フィッティングのときにこの誤差を考慮するためには、 ~fit_lines()~ で ~weights='unc'~ と引数を渡す必要がある。
+~weights=1/sigma~ のように引数を渡せば ~StdDevUncertainty~ を使う必要がないが、この場合も ~weights~ に与えられる配列は単位を持つ必要がある。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  import astropy.units as u
+  from astropy.modeling import models, fitting, Fittable1DModel
+  from astropy.nddata.nduncertainty import StdDevUncertainty
+  from specutils import Spectrum1D
+  from specutils.fitting import fit_lines
+  from specutils.manipulation import extract_region
+
+
+  class AreaGaussian1D(Fittable1DModel):
+      area = Parameter(default=1)
+      mean = Parameter(default=0)
+      stddev = Parameter(default=1, bounds=(FLOAT_EPSILON, None))
+
+      @staticmethod
+      def evaluate(x, area, mean, stddev):
+          return (area / (stddev * np.sqrt(2 * np.pi))) * np.exp(
+              -0.5 * (x - mean) ** 2 / stddev**2
+          )
+
+      # Required
+      def _parameter_units_for_data_units(self, inputs_unit, outputs_unit):
+          return {
+              "area": outputs_unit[self.outputs[0]] * inputs_unit[self.inputs[0]],
+              "mean": inputs_unit[self.inputs[0]],
+              "stddev": inputs_unit[self.inputs[0]],
+          }
+
+
+  line = AreaGaussian1D(
+      area=p0_f * u.erg / u.s / u.cm**2, mean=p0_x0 * u.AA, stddev=p0_w * u.AA
+  )
+  const = models.Const1D(amplitude=p0_y0 * u.erg / u.s / u.cm**2 / u.AA)
+  spec = Spectrum1D(
+      flux=y * u.erg / u.s / u.cm**2 / u.AA,
+      spectral_axis=x * u.AA,
+      uncertainty=StdDevUncertainty(sigma * u.erg / u.s / u.cm**2 / u.AA),
+  )
+  sol = fit_lines(spec, line + const, weights='unc')
+
+  sol_specutils = {
+      'x0': sol.mean_0.value,
+      'e_x0': sol.stds['mean_0'],
+      'w': sol.stddev_0.value,
+      'e_w': sol.stds['stddev_0'],
+      'f': sol.area_0.value,
+      'e_f': sol.stds['area_0'],
+      'y0': sol.amplitude_1.value,
+      'e_y0': sol.stds['amplitude_1'],
+  }
+  sol_specutils
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[5]:
+#+BEGIN_EXAMPLE
+  {'x0': 100.24473610204825,
+  'e_x0': 0.35192975287232203,
+  'w': 1.627041764794084,
+  'e_w': 0.3736855128006802,
+  'f': 31.176803560406576,
+  'e_f': 7.027771300910829,
+  'y0': 10.336972337844252,
+  'e_y0': 0.4525082896217146}
+#+END_EXAMPLE
+:end:
+
+総じて、フィッティングするだけならかなり面倒くさい。
+~specutils~ を使っているなら便利だが(単位もその中で自然に使うと思うので)、フィッティングをするためだけに使うにはオーバースペック。
+
 ** MPFIT
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  from mpfit.mpfit import mpfit
+  import numpy as np
+
+
+  def gauss(x, x0, w, flux, y0):
+      y_line = flux * np.exp(-0.5 * (x - x0) ** 2 / w**2) / np.sqrt(2 * np.pi) / w
+      return y0 + y_line
+
+
+  def func(p, fjac=None, x=None, y=None, err=None):
+      model = gauss(x, p[0], p[1], p[2], p[3])
+      status = 0
+      return [status, (y - model) / err]
+
+
+  p0 = [p0_x0, p0_w, p0_f, p0_y0]
+  functkw = {'x': x, 'y': y, 'err': sigma}
+  m = mpfit(func, p0, functkw=functkw)
+
+  sol_mpfit = {
+      'x0': m.params[0],
+      'e_x0': m.perror[0],
+      'w': m.params[1],
+      'e_w': m.perror[1],
+      'f': m.params[2],
+      'e_f': m.perror[2],
+      'y0': m.params[3],
+      'e_y0': m.perror[3],
+  }
+  sol_mpfit
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[6]:
+#+BEGIN_EXAMPLE
+  {'x0': 100.24472021324937,
+  'e_x0': 0.3519250939614858,
+  'w': 1.627045790857027,
+  'e_w': 0.37343125462216553,
+  'f': 31.17668577297413,
+  'e_f': 7.0274247725102175,
+  'y0': 10.336978317619911,
+  'e_y0': 0.4524998123023251}
+#+END_EXAMPLE
+:end:
+
+~specutils~ のあとに実装するとめっちゃ楽に感じる...
+なお、フィッティングが収束するまでに30回iterationしている。
+
 ** LMFIT
+たまたま ~GaussianModel~ の引数 ~amplitude~ がフラックスに相当したので楽に実装できた。
+なお、内部でピーク値 ~height~ も自動的に計算されている。誤差伝播がどこまで正しいかは知らない。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  import numpy as np
+  from lmfit.models import ConstantModel, GaussianModel
+
+  const = ConstantModel()
+  gauss = GaussianModel()
+  model = const + gauss
+  init = const.guess(y, x=x)
+  init.update(gauss.guess(y, x=x))
+  out = model.fit(y, init, x=x, weights=1 / sigma, scale_covar=False)
+
+  sol_lmfit = {
+      'x0': out.params['center'].value,
+      'e_x0': out.params['center'].stderr,
+      'w': out.params['sigma'].value,
+      'e_w': out.params['sigma'].stderr,
+      'f': out.params['amplitude'].value,
+      'e_f': out.params['amplitude'].stderr,
+      'y0': out.params['c'].value,
+      'e_y0': out.params['c'].stderr,
+  }
+  sol_lmfit
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[9]:
+#+BEGIN_EXAMPLE
+  {'x0': 100.24474812193493,
+  'e_x0': 0.3519061226112018,
+  'w': 1.6271080677992757,
+  'e_w': 0.37343511682123093,
+  'f': 31.17740729614346,
+  'e_f': 7.027139625729403,
+  'y0': 10.336947140254642,
+  'e_y0': 0.4524926545009989}
+#+END_EXAMPLE
+:end:
+
 ** まとめ
+#+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
+  import pandas as pd
+
+  data = {
+      'True': sol_answer,
+      'Scipy': sol_scipy,
+      'Astropy': sol_astropy,
+      'specutils': sol_specutils,
+      'MPFIT': sol_mpfit,
+      'LMFIT': sol_lmfit,
+  }
+  pd.DataFrame.from_dict(data, orient='index')
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[30]:
+#+BEGIN_EXAMPLE
+                     x0      e_x0         w       e_w          f       e_f  \
+  True       100.000000  0.000000  2.000000  0.000000  40.000000  0.000000
+  Scipy      100.244693  0.351944  1.626974  0.373454  31.175843  7.027751
+  Astropy    100.244736  0.351930  1.627042  0.373686  31.176804  7.027771
+  specutils  100.244736  0.351930  1.627042  0.373686  31.176804  7.027771
+  MPFIT      100.244720  0.351925  1.627046  0.373431  31.176686  7.027425
+  LMFIT      100.244748  0.351906  1.627108  0.373435  31.177407  7.027140
+
+                    y0      e_y0
+  True       10.000000  0.000000
+  Scipy      10.337014  0.452508
+  Astropy    10.336972  0.452508
+  specutils  10.336972  0.452508
+  MPFIT      10.336978  0.452500
+  LMFIT      10.336947  0.452493
+#+END_EXAMPLE
+:end:
+
+線形フィッティングよりも数値誤差が大きいものの、結果は全て一致した。
+
+** 図
+#+begin_src ipython :session :ipyfile ./obipy-resources/gauss.png :exports both :async t :results raw drawer :eval never-export
+  from sugayutils.core import colors as col
+  from sugayutils.figure import makefig
+
+  xx = np.linspace(start, start + size, 101)
+  yy = out.eval(x=xx)
+  ye = out.eval_uncertainty(x=xx, sigma=1)
+
+  fig = makefig(figsize=['small', 0.7])
+  ax = fig.add_subplot(1, 1, 1)
+  ytrue = flux * np.exp(-0.5 * (xx - x0) ** 2/ w ** 2) / np.sqrt(2 * np.pi) / w + y0
+  ax.plot(xx, ytrue, c='black', ls='--', lw=1.0, zorder=2)
+  ax.step(x, y, c='black', lw=0.7, where='mid', zorder=1)
+  ax.errorbar(x, y, yerr=sigma, c='black', ls='None', zorder=2)
+  ax.plot(xx, yy, c='red', lw=1.5, zorder=3)
+  ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[29]:
+: <matplotlib.collections.FillBetweenPolyCollection at 0x7f5a17df07d0>
+[[file:./obipy-resources/gauss.png]]
+:end:
+
+なお、ガウス関数の面積と線幅の推定値には相関があるので、モデル関数の不定性を図示する際には
+この相関関係を無視すると不定性を過小評価してしまうので注意する。
+~lmfit~ は考慮しようとしている風だが、ちゃんとできているかどうかは知らない。
