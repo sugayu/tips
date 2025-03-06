@@ -1,0 +1,1396 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2025-03-06 木 17:56 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>*Fittingに使われるPythonモジュールの比較*</title>
+<meta name="author" content="sugayu" />
+<meta name="generator" content="Org Mode" />
+<style type="text/css">
+  #content { max-width: 60em; margin: auto; }
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    top: -8px;
+    right: 12px;
+    padding: 3px;
+    color: #555;
+    background-color: #f2f2f299;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { }
+</style>
+<script>
+  window.MathJax = {
+    tex: {
+      ams: {
+        multlineWidth: '85%'
+      },
+      tags: 'ams',
+      tagSide: 'right',
+      tagIndent: '.8em'
+    },
+    chtml: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    svg: {
+      scale: 1.0,
+      displayAlign: 'center',
+      displayIndent: '0em'
+    },
+    output: {
+      font: 'mathjax-modern',
+      displayOverflow: 'overflow'
+    }
+  };
+</script>
+
+<script
+  id="MathJax-script"
+  async
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+</script>
+</head>
+<body>
+<div id="content" class="content">
+<h1 class="title"><b>Fittingに使われるPythonモジュールの比較</b></h1>
+<div id="outline-container-org0cfb624" class="outline-2">
+<h2 id="org0cfb624"><span class="section-number-2">1.</span> 導入</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+最尤法(Maximum Likelihood Methods)を提供するデータのフィッティングに使用可能なPythonモジュールは数多くある。
+これらを比較することで、
+(1) 使用感の違いを見る、
+(2) 使い方をメモする、
+(3) 最尤値や誤差が正しく求まるか調べる
+ことを目的とする。
+ベイズ統計やMCMCのパッケージの比較は目的としていない。
+</p>
+</div>
+</div>
+<div id="outline-container-org0cade90" class="outline-2">
+<h2 id="org0cade90"><span class="section-number-2">2.</span> 比較対象のPythonモジュール</h2>
+<div class="outline-text-2" id="text-2">
+</div>
+<div id="outline-container-org2e32528" class="outline-3">
+<h3 id="org2e32528"><span class="section-number-3">2.1.</span> NumPy</h3>
+<div class="outline-text-3" id="text-2-1">
+<p>
+<code>NumPy</code> は <code>polynomial</code> という多項式を扱うモジュールを提供している。
+この中で <code>fit()</code> というメソッドが提供されており、これを使ってモデルの最適化が可能である。
+内部で <code>numpy.linalg.lstsq()</code> という最適化関数を使っており、\( |y - Ax | \) を最小化するという説明があるものの最適化手法は不明。
+物理学でよく使われる名前のついた多くの多項式を扱えるが、ガウス関数などは無いので輝線のフィッティングには使えない(と思う)。
+<code>numpy.linalg.lstsq()</code> 自体を使えばガウス関数フィッティングもできないこともなさそうではあるが&#x2026;
+</p>
+<ul class="org-ul">
+<li><a href="https://numpy.org/doc/stable/reference/routines.polynomials-package.html#module-numpy.polynomial">numpy.polynomial — NumPy v2.2 Manual</a></li>
+<li><a href="https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html#numpy.linalg.lstsq">numpy.linalg.lstsq — NumPy v2.2 Manual</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgf207478" class="outline-3">
+<h3 id="orgf207478"><span class="section-number-3">2.2.</span> Scipy</h3>
+<div class="outline-text-3" id="text-2-2">
+<p>
+<code>SciPy</code> は <code>optimize</code> という最適化のためのモジュールを提供している。
+この中で <code>curve_fit()</code> という関数は非線形最小二乗法によりモデルの最適化を行う。
+<code>method</code> 引数により最適化手法をLevenberg-Marquardt法、Trust Region Reflective法、dogleg法の中から選べる。
+デフォルトではパラメータ範囲に制限が無ければLM法、あればTRR法が使われる。
+LM法の場合は最尤推定にFortranで実装されたMINPACKというプログラムを呼び出す <code>scipy.optimize.leastsq()</code> を使用しており、
+他の手法の場合は最尤推定に <code>scipy.optimize.least_square()</code> という新しい関数を使用している。
+データの誤差 <code>sigma</code> の中に誤差の相関(共分散)を入れることもできる。
+</p>
+<ul class="org-ul">
+<li><a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html">curve<sub>fit</sub> — SciPy v1.15.2 Manual</a></li>
+</ul>
+
+<p>
+2変数の間の線形回帰は <code>linregress()</code> という関数でも与えられており、こちらを使えば関数を指定してやる必要がない。
+ただしデータ点に誤差を与えることができない。
+内部では <code>np.cov()</code> を使って共分散を計算し、解析解を導いているようである。
+(なお <code>linregress</code> はlinear regressionの略だと思われる。)
+</p>
+<ul class="org-ul">
+<li><a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html#scipy.stats.linregress">linregress — SciPy v1.15.2 Manual</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org9614b6c" class="outline-3">
+<h3 id="org9614b6c"><span class="section-number-3">2.3.</span> Astropy</h3>
+<div class="outline-text-3" id="text-2-3">
+<p>
+天文解析パッケージ <code>Astropy</code> は <code>modeling</code> というモジュールを提供している。
+天文関係で使うと思われるモデルやフィッティングの関数、単位付き変数のフィッティングが整備されているので、
+使いたいモデルが実装されていないか確認する価値がある。
+</p>
+<ul class="org-ul">
+<li><a href="https://docs.astropy.org/en/stable/modeling/">Models and Fitting (astropy.modeling) — Astropy v7.0.1</a></li>
+<li><a href="https://docs.astropy.org/en/stable/modeling/models.html">Models — Astropy v7.0.1</a></li>
+</ul>
+
+<p>
+<code>modeling.models</code> モジュールが提供するクラスを使って統計モデルを構築し、
+<code>modeling.fitting</code> モジュールが提供するクラスを使ってモデルをデータに当て嵌める。
+しかし、結局中身は <code>scipy.optimize.least_squares()</code> を使っている。
+User Interfaceが関数ではなくクラス中心で複雑なので、それに応じた複雑なフィッティングをするのに適していると考えられる。
+内部で変数変換したり <code>scipy.optimize</code> のフィッティング関数のアウトプットを変換したりしているので、
+コードを見るとフィッティング結果をどう扱うかの勉強になるかも？
+</p>
+
+<p>
+用意されているおすすめの最適化手法は、単純な線形の場合は <code>LinearLSQFitter</code> 、
+非線形の場合は <code>TRFLSQFitter</code>, <code>DogBoxLSQFitter</code>, <code>LMLSQFitter</code> の3種類である。
+これらの最適化手法は内部で <code>scipy.optimize</code> を使っているが、 <code>LinearLSQFitter</code> だけは例外的に <code>numpy.linalg.lstsq()</code> を使っている。
+パラメータ範囲が指定されていない小さな最適化であれば <code>LMLSQFitter</code>,
+範囲が指定されているなら <code>TRFLSQFitter</code>, <code>DogBoxLSQFitter</code> が良いとのこと。
+アルゴリズムが不安定なので、 <code>LMLSQFitter</code> を使う場合はパラメータ範囲を指定できない。
+</p>
+<ul class="org-ul">
+<li><a href="https://docs.astropy.org/en/stable/modeling/fitting.html">Fitting Models to Data — Astropy v7.0.1</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org12e44f4" class="outline-3">
+<h3 id="org12e44f4"><span class="section-number-3">2.4.</span> specutils</h3>
+<div class="outline-text-3" id="text-2-4">
+<p>
+天体スペクトルを扱うパッケージ <code>specutils</code> は輝線フィッティングを含めたスペクトル解析のためのモジュールを提供する。
+フィッティングの際には内部で <code>Astropy.modeling</code> モジュールが呼ばれている。
+ユーザーの輝線フィッティングを助けるパッケージとも言える。
+</p>
+<ul class="org-ul">
+<li><a href="https://specutils.readthedocs.io/en/stable/fitting.html">Line/Spectrum Fitting — specutils v1.19.1.dev0+g746a5d4.d20241105</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org14e4f1c" class="outline-3">
+<h3 id="org14e4f1c"><span class="section-number-3">2.5.</span> MPFIT</h3>
+<div class="outline-text-3" id="text-2-5">
+<p>
+<code>MPFIT</code> は古くから天文学で使われているフィッティングパッケージ。
+元々はFortranで書かれた <code>MINPACK-1</code> というパッケージの中のフィッティングコードをCraig MarkwardtさんがIDLで書き直した。
+それをMark RiversさんがPythonで書き直し、Sergey Koposovさんが <code>numpy</code> で実装し直した後にPython3で動くようにした。
+IDLでフィッティングといえばこのコード。
+Levenberg-Marquardt法を使っているので効率良く最小二乗問題を解けるのが売りだった。
+</p>
+<ul class="org-ul">
+<li><a href="https://eispac.readthedocs.io/en/stable/guide/07-mpfit_docs.html">MPFIT Documentation — eispac 0.1.dev108+gdfa97b1 documentation</a></li>
+<li><a href="https://github.com/segasai/astrolibpy/blob/master/mpfit/mpfit.py">astrolibpy/mpfit/mpfit.py at master · segasai/astrolibpy · GitHub</a></li>
+</ul>
+
+<p>
+<code>pip</code> でダウンロードできる形式では配布されていない。
+<code>astrolibpy</code> をダウンロードしたあと、Pythonのパスが通っている場所に <code>mpfit</code> のディレクトリを置いたら良い。
+たぶんディレクトリ直下に mpfit/_<sub>init</sub>_<sub>.py</sub> ファイルを設置する必要がある (空ファイルで良い)。
+</p>
+</div>
+</div>
+<div id="outline-container-org2c9e1da" class="outline-3">
+<h3 id="org2c9e1da"><span class="section-number-3">2.6.</span> LMFIT</h3>
+<div class="outline-text-3" id="text-2-6">
+<p>
+<code>LMFIT</code> は非線形最小二乗法を解くためのパッケージ。
+<code>scipy.optimize</code> モジュールから着想を得て、フィッティングのための便利な機能を多数導入している。
+多くのモデル、多様な最適化手法、パラメータ制御法、解の解析手法が提供されている。
+</p>
+<ul class="org-ul">
+<li><a href="https://lmfit.github.io/lmfit-py/index.html">Non-Linear Least-Squares Minimization and Curve-Fitting for Python — Non-Linear Least-Squares Minimization and Curve-Fitting for Python</a></li>
+</ul>
+
+<p>
+基本的に最適化には <code>scipy.optimize</code> が内部で使われており、 例えば <code>method='leastsq'</code> が指定されているときは <code>scipy.optimize.leastsq()</code> が使用されている。
+<code>Minimizer.minimize()</code> の説明:
+</p>
+<pre class="example" id="orge3ac086">
+In most cases, these methods wrap and use the method with the same name from `scipy.optimize`, or use `scipy.optimize.minimize` with the same `method` argument.
+</pre>
+
+<p>
+<a href="https://lmfit.github.io/lmfit-py/intro.html">Getting started</a>で述べられている <code>scipy.optimize.leastsq()</code> から改善したかった点は、
+</p>
+<ol class="org-ol">
+<li>パラメータを(本質的に意味のない)数値インデックスで指定する(<code>p[0]</code>)のではなく、名前で指定したい(<code>p['slope']</code>)。</li>
+<li>パラメータを固定したかったら作った関数を変更しなければならない。</li>
+<li>パラメータ範囲を指定する方法が頑強な方法が無いし、あったとしても全パラメータの範囲を順番に指定しなければならない。</li>
+<li>パラメータの振舞いを制限する方法がかなり複雑 (<code>p['b'] = 3*p['a']</code> としたいときなど。)。</li>
+</ol>
+
+<p>
+また <code>emcee</code> を使って最尤推定値まわりの事後分布を得る関数も提供されている。
+これはパラメータの確率分布(誤差)を調べるためであって、パラメータ推定のために用意されているわけではないと何度も注意されている。
+</p>
+<ul class="org-ul">
+<li><a href="https://lmfit.github.io/lmfit-py/fitting.html#minimizer-emcee-calculating-the-posterior-probability-distribution-of-parameters">Performing Fits and Analyzing Outputs — Non-Linear Least-Squares Minimization and Curve-Fitting for Python</a></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org0cabc15" class="outline-2">
+<h2 id="org0cabc15"><span class="section-number-2">3.</span> 理想的な線形データのフィッティング結果</h2>
+<div class="outline-text-2" id="text-3">
+</div>
+<div id="outline-container-org03be274" class="outline-3">
+<h3 id="org03be274"><span class="section-number-3">3.1.</span> データ作成</h3>
+<div class="outline-text-3" id="text-3-1">
+<ul class="org-ul">
+<li>平均: 100.0</li>
+<li>標準偏差: 10.0</li>
+<li>標本の大きさ: 30</li>
+<li>直線: \(y = 2.0 (x - 100.0) + 220.0\)</li>
+</ul>
+<p>
+<code># makefig() は菅原が編集した matplotlib の関数</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> numpy <span style="color: #0000FF; font-weight: bold;">as</span> np
+<span style="color: #0000FF; font-weight: bold;">from</span> numpy.random <span style="color: #0000FF; font-weight: bold;">import</span> default_rng
+<span style="color: #0000FF; font-weight: bold;">from</span> sugayutils.figure <span style="color: #0000FF; font-weight: bold;">import</span> makefig
+
+<span style="color: #BA36A5;">rng</span> = default_rng(222)
+
+<span style="color: #BA36A5;">size</span> = 30
+<span style="color: #BA36A5;">sigma</span> = np.full(size, 10.0)
+<span style="color: #BA36A5;">noise</span> = rng.standard_normal(size) * sigma
+<span style="color: #BA36A5;">x0</span> = 100.0
+<span style="color: #BA36A5;">x</span> = rng.normal(x0, 10, size=size)
+<span style="color: #BA36A5;">xn</span> = x - x0
+
+<span style="color: #BA36A5;">a</span>, <span style="color: #BA36A5;">b</span> = 2.0, 220.0
+<span style="color: #BA36A5;">y0</span> = a * (x - x0) + b
+<span style="color: #BA36A5;">y</span> = y0 + noise
+
+<span style="color: #BA36A5;">fig</span> = makefig(figsize=[<span style="color: #008000;">'small'</span>, 1.0])
+<span style="color: #BA36A5;">ax</span> = fig.add_subplot(1, 1, 1)
+<span style="color: #BA36A5;">_</span> = ax.scatter(x, y)
+</pre>
+</div>
+
+
+<div id="org7bf05d2" class="figure">
+<p><img src="./obipy-resources/data.png" alt="data.png" />
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org370ce9c" class="outline-3">
+<h3 id="org370ce9c"><span class="section-number-3">3.2.</span> 解析解</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+一次方程式の場合は解析解が得られている。
+係数の最尤推定値は
+</p>
+\begin{align}
+\label{eq:1}
+  a &= \frac{N\sum x_i y_i - \sum x_i \sum y_i}{N\sum x_i^2 - (\sum x_i)^2} \\
+  b &= \frac{\sum x_i^2 \sum y_i - \sum x_i \sum x_i y_i}{N\sum x_i^2 - (\sum x_i)^2}
+\end{align}
+<p>
+であり、その誤差は
+</p>
+\begin{align}
+\label{eq:2}
+  \sigma_\text{a} & = \sigma \sqrt{\frac{N}{N\sum x_i^2 - (\sum x_i)^2}} \\
+  \sigma_\text{b} & = \sigma \sqrt{\frac{\sum x_i^2}{N\sum x_i^2 - (\sum x_i)^2}} \\
+\end{align}
+<p>
+と表せる。
+</p>
+<ul class="org-ul">
+<li><a href="http://www.cc.u-ryukyu.ac.jp/~fukami/p0.pdf">物理実験III データ処理 (琉球大学深水研究室)</a></li>
+</ul>
+
+<p>
+以上より最尤推定値を求める。
+</p>
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #BA36A5;">denom</span> = size * np.<span style="color: #006FE0;">sum</span>(xn**2) - np.<span style="color: #006FE0;">sum</span>(xn) ** 2
+<span style="color: #BA36A5;">sol_analytic</span> = {
+    <span style="color: #008000;">'a'</span>: (size * np.<span style="color: #006FE0;">sum</span>(xn * y) - np.<span style="color: #006FE0;">sum</span>(xn) * np.<span style="color: #006FE0;">sum</span>(y)) / denom,
+    <span style="color: #008000;">'b'</span>: (np.<span style="color: #006FE0;">sum</span>(xn**2) * np.<span style="color: #006FE0;">sum</span>(y) - np.<span style="color: #006FE0;">sum</span>(xn) * np.<span style="color: #006FE0;">sum</span>(xn * y)) / denom,
+    <span style="color: #008000;">'s_a'</span>: sigma[0] * np.sqrt(size / denom),
+    <span style="color: #008000;">'s_b'</span>: sigma[0] * np.sqrt(np.<span style="color: #006FE0;">sum</span>(xn**2) / denom),
+}
+sol_analytic
+</pre>
+</div>
+
+<pre class="example" id="org41876f9">
+{'a': 1.8419873744634017,
+'b': 221.09327400439,
+'s_a': 0.18305375486749972,
+'s_b': 1.8375169284378194}
+</pre>
+
+<p>
+1sigma誤差の範囲に真値が収まっている。
+</p>
+</div>
+</div>
+<div id="outline-container-org9e7cb5f" class="outline-3">
+<h3 id="org9e7cb5f"><span class="section-number-3">3.3.</span> Numpy</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+<code>Polynomial.fit()</code> を使ったフィッティング手法を示す。
+デフォルトの返り値は <code>Polynomial</code> インスタンスである。
+<code>full=True</code> のキーワード引数を与えるとタプルを出力し、2番目の要素にフィッティングの情報が含まれる。
+</p>
+<ul class="org-ul">
+<li><a href="https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.Polynomial.fit.html#numpy.polynomial.polynomial.Polynomial.fit">numpy.polynomial.polynomial.Polynomial.fit — NumPy v2.2 Manual</a></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> numpy.polynomial <span style="color: #0000FF; font-weight: bold;">import</span> Polynomial
+
+<span style="color: #BA36A5;">p</span>, <span style="color: #BA36A5;">status</span> = Polynomial.fit(xn, y, 1, w=1 / sigma, full=<span style="color: #D0372D;">True</span>)
+<span style="color: #BA36A5;">p</span> = p.convert()
+
+<span style="color: #BA36A5;">sol_numpy</span> = {<span style="color: #008000;">'a'</span>: p.coef[1], <span style="color: #008000;">'b'</span>: p.coef[0], <span style="color: #008000;">'s_a'</span>: 0.0, <span style="color: #008000;">'s_b'</span>: 0.0}
+sol_numpy
+</pre>
+</div>
+
+<pre class="example">
+{'a': 1.8419873744634028, 'b': 221.09327400438997, 's_a': 0.0, 's_b': 0.0}
+</pre>
+
+<p>
+最尤推定値は解析解とほとんど正確に一致したが、誤差を出力してくれないようである。
+なお、 <code>Polynomial.fit()</code> は <code>Polynomial</code> クラスのクラスメソッドである。
+</p>
+</div>
+</div>
+<div id="outline-container-org5e545ca" class="outline-3">
+<h3 id="org5e545ca"><span class="section-number-3">3.4.</span> Scipy</h3>
+<div class="outline-text-3" id="text-3-4">
+</div>
+<div id="outline-container-org79a75dc" class="outline-4">
+<h4 id="org79a75dc"><span class="section-number-4">3.4.1.</span> curve<sub>fit</sub></h4>
+<div class="outline-text-4" id="text-3-4-1">
+<p>
+引数 <code>absolute_sigma=True</code> にすると誤差 <code>sigma</code> を絶対値で設定することになる。
+デフォルトは <code>absolute_sigma=False</code> なので相対値で指定、返り値の共分散 <code>pcov</code> も相対値になるので注意する。
+<code>pcov</code> の絶対値と相対値の関係は <code>pcov(absolute_sigma=False) = pcov(absolute_sigma=True) * chisq(popt)/(M-N)</code> 。
+引数 <code>full_output=True</code> でフィッティングに関する細かい出力が得られる。
+他にも <code>bounds</code> や <code>loss</code> など多くの引数を持つ。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> scipy.optimize <span style="color: #0000FF; font-weight: bold;">import</span> curve_fit
+
+
+<span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">func</span>(x, a, b):
+    <span style="color: #0000FF; font-weight: bold;">return</span> a * x + b
+
+
+<span style="color: #BA36A5;">popt</span>, <span style="color: #BA36A5;">pcov</span>, <span style="color: #BA36A5;">infodict</span>, <span style="color: #BA36A5;">mesg</span>, <span style="color: #BA36A5;">ier</span> = curve_fit(
+    func, xn, y, sigma=sigma, absolute_sigma=<span style="color: #D0372D;">True</span>, full_output=<span style="color: #D0372D;">True</span>
+)
+<span style="color: #BA36A5;">perr</span> = np.sqrt(np.diag(pcov))
+
+<span style="color: #BA36A5;">sol_scipy_curvefit</span> = {<span style="color: #008000;">'a'</span>: popt[0], <span style="color: #008000;">'b'</span>: popt[1], <span style="color: #008000;">'s_a'</span>: perr[0], <span style="color: #008000;">'s_b'</span>: perr[1]}
+sol_scipy_curvefit
+</pre>
+</div>
+
+<pre class="example" id="orgd13c92c">
+{'a': 1.84198738877173,
+'b': 221.09327399514368,
+'s_a': 0.18305375794763726,
+'s_b': 1.8375169220175631}
+</pre>
+
+<p>
+<code>numpy.Polynomial.fit</code> と同じ結果を示したが、解析解からの数値誤差が若干ある(実用的に何の問題もないし気にするべきではない)。
+結果には示していないが、pcovの値を見ると共分散項はおよそ-0.04であり、
+最適化されたパラメータ間の相関(共分散)がほとんどゼロであることが分かる。
+</p>
+</div>
+</div>
+<div id="outline-container-org4b4d0ee" class="outline-4">
+<h4 id="org4b4d0ee"><span class="section-number-4">3.4.2.</span> linregress</h4>
+<div class="outline-text-4" id="text-3-4-2">
+<p>
+引数 <code>alternative</code> を加えることで検定も可能らしい。
+誤差 <code>sigma</code> を与えることはできない。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> scipy <span style="color: #0000FF; font-weight: bold;">import</span> stats
+
+<span style="color: #BA36A5;">res</span> = stats.linregress(xn, y)
+<span style="color: #BA36A5;">sol_scipy_linregress</span> = {
+    <span style="color: #008000;">'a'</span>: res.slope,
+    <span style="color: #008000;">'b'</span>: res.intercept,
+    <span style="color: #008000;">'s_a'</span>: res.stderr,
+    <span style="color: #008000;">'s_b'</span>: res.intercept_stderr,
+}
+sol_scipy_linregress
+</pre>
+</div>
+
+<pre class="example" id="orgf9fe709">
+{'a': 1.8419873744634003,
+'b': 221.09327400439,
+'s_a': 0.22700227671955325,
+'s_b': 2.2786777936788623}
+</pre>
+
+<p>
+最尤推定値は解析解と一致した。
+誤差が解析解より少し大きいのは、おそらく内部でデータの誤差を相関係数やデータの標準偏差(標本標準偏差)から評価しているから。
+実際、 <code>np.std(noise)</code> の値は12であり、最尤推定値の誤差も同じくらいの倍率で大きくなっている(完全に一致はしない)。
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgd789690" class="outline-3">
+<h3 id="orgd789690"><span class="section-number-3">3.5.</span> Astropy</h3>
+<div class="outline-text-3" id="text-3-5">
+</div>
+<div id="outline-container-orgf1f19cb" class="outline-4">
+<h4 id="orgf1f19cb"><span class="section-number-4">3.5.1.</span> LinearLSQFitter</h4>
+<div class="outline-text-4" id="text-3-5-1">
+<p>
+<code>LinearLSQFitter</code> の場合。内部で <code>numpy.linalg.lstsq()</code> を使っているので誤差の出力は無し。
+</p>
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> astropy.modeling <span style="color: #0000FF; font-weight: bold;">import</span> models, fitting
+
+<span style="color: #BA36A5;">fit</span> = fitting.LinearLSQFitter()
+<span style="color: #BA36A5;">line_init</span> = models.Linear1D()   <span style="color: #9370db;"># </span><span style="color: #9370db; font-style: italic;">initial values &lt;Linear1D(slope=1., intercept=0.)&gt;</span>
+<span style="color: #BA36A5;">fitted_line</span> = fit(line_init, xn, y, weights=1 / sigma)
+<span style="color: #BA36A5;">sol_astropy_linear</span> = {<span style="color: #008000;">'a'</span>: fitted_line.slope.value, <span style="color: #008000;">'b'</span>: fitted_line.intercept.value, <span style="color: #008000;">'s_a'</span>: 0.0, <span style="color: #008000;">'s_b'</span>: 0.0}
+sol_astropy_linear
+</pre>
+</div>
+
+<pre class="example">
+{'a': 1.8419873744634014, 'b': 221.09327400439003, 's_a': 0.0, 's_b': 0.0}
+</pre>
+
+<p>
+内部の実装どおり <code>numpy.Polynomial.fit()</code> と同じ結果が得られ、解析解と一致した。
+</p>
+</div>
+</div>
+<div id="outline-container-org1e924ec" class="outline-4">
+<h4 id="org1e924ec"><span class="section-number-4">3.5.2.</span> LMLSQFitter</h4>
+<div class="outline-text-4" id="text-3-5-2">
+<p>
+<code>LMLSQFitter</code> は内部で <code>scipy.optimize.least_squares()</code> を使っている。
+引数 <code>calc_uncertainties=True</code> を与えるとパラメータ誤差を計算して <code>fitted_line.cov_matrix</code> と <code>fitted_line.stds</code> に値が入力される。
+この引数を与えなくても、 <code>fit['fit_info']</code> にフィッティングの結果は残されている。
+ちなみに、 <code>scipy.optimize.curve_fit()</code> のデフォルトの結果を修正して、与えた誤差は絶対値 (<code>absolute_sigma=True</code>) になるように内部で補正されている。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> astropy.modeling <span style="color: #0000FF; font-weight: bold;">import</span> models, fitting
+
+<span style="color: #BA36A5;">fit</span> = fitting.LMLSQFitter(calc_uncertainties=<span style="color: #D0372D;">True</span>)
+<span style="color: #BA36A5;">line_init</span> = models.Linear1D()  <span style="color: #9370db;"># </span><span style="color: #9370db; font-style: italic;">initial values &lt;Linear1D(slope=1., intercept=0.)&gt;</span>
+<span style="color: #BA36A5;">fitted_line</span> = fit(line_init, xn, y, weights=1 / sigma)
+<span style="color: #BA36A5;">sol_astropy_LM</span> = {
+    <span style="color: #008000;">'a'</span>: fitted_line.slope.value,
+    <span style="color: #008000;">'b'</span>: fitted_line.intercept.value,
+    <span style="color: #008000;">'s_a'</span>: fitted_line.stds[<span style="color: #008000;">'slope'</span>],
+    <span style="color: #008000;">'s_b'</span>: fitted_line.stds[<span style="color: #008000;">'intercept'</span>],
+}
+sol_astropy_LM
+</pre>
+</div>
+
+<pre class="example" id="orgcd42c14">
+{'a': 1.8419873744634017,
+'b': 221.09327400438997,
+'s_a': 0.1830537548674997,
+'s_b': 1.8375169284378194}
+</pre>
+
+<p>
+なぜか <code>scipy.optimize.curve_fit()</code> よりも <code>LinearSQFitter</code> に近い結果が得られた。
+<code>curve_fit()</code> は内部で <code>scipy.optimize.leastsq()</code> を使用しており、 <code>LMLSQFitter</code> は <code>scipy.optimize.least_square()</code> を使用しているので、
+内部のわずかな実装の違いが表れたのかもしれない。
+もちろん、誤差の範囲ではこれらは一致している。
+得られた誤差も <code>scipy.optimize.curve_fit()</code> に近い値が得られた。
+</p>
+
+<p>
+なお、これを実行すると
+</p>
+<pre class="example" id="org4ac53e4">
+WARNING: Model is linear in parameters; consider using linear fitting methods. [astropy.modeling.fitting]
+</pre>
+<p>
+という警告が出る。
+線形フィッティングは <code>LinearLSQFitter</code> がお薦めのようである (誤差を出力してくれないのに？)。
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgbc682fb" class="outline-3">
+<h3 id="orgbc682fb"><span class="section-number-3">3.6.</span> MPFIT</h3>
+<div class="outline-text-3" id="text-3-6">
+<p>
+コードの表記がPythonを使ううえであまり直感的ではないので、使うならさらにwrapperを作ってしまうのが便利な気がする。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> mpfit.mpfit <span style="color: #0000FF; font-weight: bold;">import</span> mpfit
+<span style="color: #0000FF; font-weight: bold;">import</span> numpy <span style="color: #0000FF; font-weight: bold;">as</span> np
+
+
+<span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">func</span>(p, fjac=<span style="color: #D0372D;">None</span>, x=<span style="color: #D0372D;">None</span>, y=<span style="color: #D0372D;">None</span>, err=<span style="color: #D0372D;">None</span>):
+    <span style="color: #BA36A5;">y0</span> = p[0] * x + p[1]
+    <span style="color: #BA36A5;">status</span> = 0
+    <span style="color: #0000FF; font-weight: bold;">return</span> [status, (y - y0) / err]
+
+
+<span style="color: #BA36A5;">p0</span> = [1.0, 200.0]
+<span style="color: #BA36A5;">functkw</span> = {<span style="color: #008000;">'x'</span>: xn, <span style="color: #008000;">'y'</span>: y, <span style="color: #008000;">'err'</span>: sigma}
+<span style="color: #BA36A5;">m</span> = mpfit(func, p0, functkw=functkw)
+
+<span style="color: #BA36A5;">sol_mpfit</span> = {
+    <span style="color: #008000;">'a'</span>: m.params[0],
+    <span style="color: #008000;">'b'</span>: m.params[1],
+    <span style="color: #008000;">'s_a'</span>: m.perror[0],
+    <span style="color: #008000;">'s_b'</span>: m.perror[1],
+}
+sol_mpfit
+</pre>
+</div>
+
+<pre class="example" id="orga997119">
+{'a': 1.8419873769467103,
+'b': 221.09327423192875,
+'s_a': 0.18305375489620923,
+'s_b': 1.8375169218509713}
+</pre>
+
+<p>
+同じMINPACK由来のコードと言えど他の手法とは実装が異なるので、異なる数値誤差が出た。
+</p>
+
+<p>
+デフォルトではプリントメッセージが表示される。
+</p>
+<pre class="example" id="org624abc3">
+Iter       1    CHI-SQUARE =  210.0576791  DOF =  28
+   P0 = 1  
+   P1 = 200  
+Iter       2    CHI-SQUARE =  43.05872579  DOF =  28
+   P0 = 1.841987377  
+   P1 = 221.0932742  
+</pre>
+<p>
+まじか、Levenberg-Marquardt法ってIteration 1回で終わるのか&#x2026; 信じられへんな&#x2026;
+</p>
+</div>
+</div>
+<div id="outline-container-orgba87e7f" class="outline-3">
+<h3 id="orgba87e7f"><span class="section-number-3">3.7.</span> LMFIT</h3>
+<div class="outline-text-3" id="text-3-7">
+</div>
+<div id="outline-container-org73072ba" class="outline-4">
+<h4 id="org73072ba"><span class="section-number-4">3.7.1.</span> 関数を使った書き方</h4>
+<div class="outline-text-4" id="text-3-7-1">
+<p>
+書き方は <code>MPFIT</code> と似ているところがある。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> numpy <span style="color: #0000FF; font-weight: bold;">as</span> np
+<span style="color: #0000FF; font-weight: bold;">import</span> lmfit
+
+
+<span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">func</span>(p, x, data, uncertainty):
+    <span style="color: #BA36A5;">y0</span> = p[<span style="color: #008000;">'slope'</span>] * x + p[<span style="color: #008000;">'intercept'</span>]
+    <span style="color: #0000FF; font-weight: bold;">return</span> (data - y0) / uncertainty
+
+
+<span style="color: #BA36A5;">params</span> = lmfit.create_params(slope=1.0, intercept=200.0)
+<span style="color: #BA36A5;">out</span> = lmfit.minimize(func, params, args=(xn, y, sigma))
+
+<span style="color: #BA36A5;">sol_lmfit</span> = {
+    <span style="color: #008000;">'a'</span>: out.params[<span style="color: #008000;">'slope'</span>].value,
+    <span style="color: #008000;">'b'</span>: out.params[<span style="color: #008000;">'intercept'</span>].value,
+    <span style="color: #008000;">'s_a'</span>: out.params[<span style="color: #008000;">'slope'</span>].stderr,
+    <span style="color: #008000;">'s_b'</span>: out.params[<span style="color: #008000;">'intercept'</span>].stderr,
+}
+sol_lmfit
+</pre>
+</div>
+
+<pre class="example" id="org5b9044a">
+{'a': 1.8419873744056405,
+'b': 221.09327400473325,
+'s_a': 0.22700227671667123,
+'s_b': 2.2786777936860263}
+</pre>
+
+<p>
+<code>scipy.optimize.leastsq()</code> を使っているが、 <code>scipy.optimize.curve_fit()</code> と数値誤差が完全に同じというわけではなさそう。
+誤差が大きくなって <code>scipy.stats.linregress</code> と同じになっているが、これは <b>内部で勝手にデータから誤差をスケールさせている</b> から。
+<code>scale_covar=False</code> を指定すると他の手法と同じ結果が得られる。
+スケールすること自体は悪くなはないが、自分の使っている手法が中で何をやっているかはちゃんと理解しておく必要があるだろう。
+</p>
+</div>
+</div>
+<div id="outline-container-org8297aaf" class="outline-4">
+<h4 id="org8297aaf"><span class="section-number-4">3.7.2.</span> Modelクラスを使った書き方</h4>
+<div class="outline-text-4" id="text-3-7-2">
+<p>
+同じ <code>lmfit</code> でも <code>Model</code> クラスを使った書き方もある。
+既存のフィッティング関数を使ったり、それと自分のオリジナルの関数を組み合わせたりする場合はこちらが便利かもしれない。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> numpy <span style="color: #0000FF; font-weight: bold;">as</span> np
+<span style="color: #0000FF; font-weight: bold;">from</span> lmfit.models <span style="color: #0000FF; font-weight: bold;">import</span> LinearModel
+
+
+<span style="color: #BA36A5;">model</span> = LinearModel()
+<span style="color: #BA36A5;">init</span> = model.guess(y, x=xn)
+<span style="color: #BA36A5;">out</span> = model.fit(y, init, x=xn, weights=1 / sigma)
+
+<span style="color: #BA36A5;">sol_lmfit2</span> = {
+    <span style="color: #008000;">'a'</span>: out.params[<span style="color: #008000;">'slope'</span>].value,
+    <span style="color: #008000;">'b'</span>: out.params[<span style="color: #008000;">'intercept'</span>].value,
+    <span style="color: #008000;">'s_a'</span>: out.params[<span style="color: #008000;">'slope'</span>].stderr,
+    <span style="color: #008000;">'s_b'</span>: out.params[<span style="color: #008000;">'intercept'</span>].stderr,
+}
+sol_lmfit2
+</pre>
+</div>
+
+<pre class="example" id="org3dd66f0">
+{'a': 1.84198737447337,
+'b': 221.09327400437255,
+'s_a': 0.22700227671776427,
+'s_b': 2.278677793677153}
+</pre>
+
+<p>
+数値誤差も含めると上の手法と完全に一致するわけではない。なぜ？
+こちらも <code>Model.fit()</code> に <code>scale_covar</code> という引数がある。
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgff02992" class="outline-3">
+<h3 id="orgff02992"><span class="section-number-3">3.8.</span> まとめ</h3>
+<div class="outline-text-3" id="text-3-8">
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> pandas <span style="color: #0000FF; font-weight: bold;">as</span> pd
+
+<span style="color: #BA36A5;">data</span> = {
+    <span style="color: #008000;">'Analytic'</span>: sol_analytic,
+    <span style="color: #008000;">'Numpy'</span>: sol_numpy,
+    <span style="color: #008000;">'Scipy curvefit'</span>: sol_scipy_curvefit,
+    <span style="color: #008000;">'Scipy linregress'</span>: sol_scipy_linregress,
+    <span style="color: #008000;">'Astropy Linear'</span>: sol_astropy_linear,
+    <span style="color: #008000;">'Astropy LM'</span>: sol_astropy_LM,
+    <span style="color: #008000;">'MPFIT'</span>: sol_mpfit,
+    <span style="color: #008000;">'LMFIT minimize'</span>: sol_lmfit,
+    <span style="color: #008000;">'LMFIT Model.fit'</span>: sol_lmfit2,
+}
+pd.DataFrame.from_dict(data, orient=<span style="color: #008000;">'index'</span>)
+</pre>
+</div>
+
+<pre class="example" id="org6a0d6be">
+                         a           b       s_a       s_b
+Analytic          1.841987  221.093274  0.183054  1.837517
+Numpy             1.841987  221.093274  0.000000  0.000000
+Scipy curvefit    1.841987  221.093274  0.183054  1.837517
+Scipy linregress  1.841987  221.093274  0.227002  2.278678
+Astropy Linear    1.841987  221.093274  0.000000  0.000000
+Astropy LM        1.841987  221.093274  0.183054  1.837517
+MPFIT             1.841987  221.093274  0.183054  1.837517
+LMFIT minimize    1.841987  221.093274  0.227002  2.278678
+LMFIT Model.fit   1.841987  221.093274  0.227002  2.278678
+</pre>
+
+<p>
+(誤差のスケールを除いて) 全ての数値が一致した。
+</p>
+</div>
+</div>
+<div id="outline-container-org1c54dc9" class="outline-3">
+<h3 id="org1c54dc9"><span class="section-number-3">3.9.</span> 図</h3>
+<div class="outline-text-3" id="text-3-9">
+<p>
+<code>LMFIT</code> は手軽にベストフィット関数の誤差範囲を示すことができる。
+</p>
+<ul class="org-ul">
+<li><a href="https://lmfit.github.io/lmfit-py/examples/documentation/model_uncertainty_pred.html#sphx-glr-examples-documentation-model-uncertainty-pred-py">Model - uncertainty pred — Non-Linear Least-Squares Minimization and Curve-Fitting for Python</a></li>
+</ul>
+<p>
+計算は以下のサイトに基づいているよう。
+</p>
+<ul class="org-ul">
+<li><a href="https://www.astro.rug.nl/software/kapteyn/kmpfittutorial.html#confidence-and-prediction-intervals">Least squares fitting with kmpfit — Kapteyn Package (home)</a>
+(新しい <code>kmpfit</code> が登場したが、さすがにもうやってられない)</li>
+</ul>
+
+<p>
+<code>scale_covar=False</code> を与えて <code>lmfit</code> で計算し直した。
+また、 <code>xx - x0</code> をどこで使うか少し考えないといけないことに注意。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> sugayutils.core <span style="color: #0000FF; font-weight: bold;">import</span> colors <span style="color: #0000FF; font-weight: bold;">as</span> col
+<span style="color: #0000FF; font-weight: bold;">from</span> sugayutils.figure <span style="color: #0000FF; font-weight: bold;">import</span> makefig
+
+<span style="color: #BA36A5;">out</span> = model.fit(y, init, x=xn, weights=1 / sigma, scale_covar=<span style="color: #D0372D;">False</span>)
+
+<span style="color: #BA36A5;">xx</span> = np.linspace(80, 130, 101)
+<span style="color: #BA36A5;">yy</span> = out.<span style="color: #006FE0;">eval</span>(x=xx - x0)
+<span style="color: #BA36A5;">ye</span> = out.eval_uncertainty(x=xx - x0, sigma=1)
+
+<span style="color: #BA36A5;">fig</span> = makefig(figsize=[<span style="color: #008000;">'small'</span>, 1.0])
+<span style="color: #BA36A5;">ax</span> = fig.add_subplot(1, 1, 1)
+ax.plot(xx, a * (xx - x0) + b, c=<span style="color: #008000;">'blue'</span>, ls=<span style="color: #008000;">'--'</span>, zorder=2)
+ax.scatter(x, y, c=<span style="color: #008000;">'blue'</span>, zorder=2)
+ax.plot(xx, yy, c=<span style="color: #008000;">'red'</span>, zorder=1)
+ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
+</pre>
+</div>
+
+<pre class="example">
+&lt;matplotlib.collections.FillBetweenPolyCollection at 0x7fc99e5dfd40&gt;
+</pre>
+
+
+<div id="orgb06e445" class="figure">
+<p><img src="./obipy-resources/fit_linear.png" alt="fit_linear.png" />
+</p>
+</div>
+
+<p>
+データを生成した新の直線を青破線、最尤推定した直線を赤実線、その誤差を淡い赤帯で示した。
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf2f3823" class="outline-2">
+<h2 id="orgf2f3823"><span class="section-number-2">4.</span> 理想的な輝線データのフィッティング結果</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-org2d88692" class="outline-3">
+<h3 id="org2d88692"><span class="section-number-3">4.1.</span> データ作成</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+ガウス関数に従う模擬輝線データを作成する。
+</p>
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> numpy <span style="color: #0000FF; font-weight: bold;">as</span> np
+<span style="color: #0000FF; font-weight: bold;">from</span> numpy.random <span style="color: #0000FF; font-weight: bold;">import</span> default_rng
+
+<span style="color: #BA36A5;">rng</span> = default_rng(222)
+
+<span style="color: #BA36A5;">size</span> = 21
+<span style="color: #BA36A5;">sigma</span> = np.linspace(1.0, 3.0, size)[::-1]
+<span style="color: #BA36A5;">noise</span> = rng.standard_normal(size) * sigma
+<span style="color: #BA36A5;">start</span> = 90.0
+<span style="color: #BA36A5;">x</span> = np.arange(size) + start
+
+<span style="color: #BA36A5;">x0</span> = 100.0
+<span style="color: #BA36A5;">w</span> = 2.0
+<span style="color: #BA36A5;">flux</span> = 40.0
+<span style="color: #BA36A5;">y0</span> = 10.0
+<span style="color: #BA36A5;">y_line</span> = flux * np.exp(-0.5 * (x - x0) ** 2/ w ** 2) / np.sqrt(2 * np.pi) / w
+<span style="color: #BA36A5;">y</span> = y0 + y_line + noise
+
+<span style="color: #BA36A5;">sol_answer</span> = {
+    <span style="color: #008000;">'x0'</span>: x0,
+    <span style="color: #008000;">'e_x0'</span>: 0.0,
+    <span style="color: #008000;">'w'</span>: w,
+    <span style="color: #008000;">'e_w'</span>: 0.0,
+    <span style="color: #008000;">'f'</span>: flux,
+    <span style="color: #008000;">'e_f'</span>: 0.0,
+    <span style="color: #008000;">'y0'</span>: y0,
+    <span style="color: #008000;">'e_y0'</span>: 0.0,
+}
+</pre>
+</div>
+
+<p>
+ここで、厳密にはフラックスの保存を考えずにガウス関数を離散化してフィッティングしていることに注意する。
+線幅sigmaが2ピクセルあるのでほとんど問題ないはずだが、線幅が細すぎる場合にはこのガウス関数の離散化はフラックスを全く保存しない。
+</p>
+</div>
+</div>
+<div id="outline-container-orgd232d06" class="outline-3">
+<h3 id="orgd232d06"><span class="section-number-3">4.2.</span> Scipy</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+初期値 <code>p0</code> を与えないと収束しないだろう。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> scipy.optimize <span style="color: #0000FF; font-weight: bold;">import</span> curve_fit
+
+
+<span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">gauss</span>(x, x0, w, flux, y0):
+    <span style="color: #BA36A5;">y_line</span> = flux * np.exp(-0.5 * (x - x0) ** 2 / w**2) / np.sqrt(2 * np.pi) / w
+    <span style="color: #0000FF; font-weight: bold;">return</span> y0 + y_line
+
+
+<span style="color: #BA36A5;">p0_x0</span>, <span style="color: #BA36A5;">p0_w</span>, <span style="color: #BA36A5;">p0_f</span>, <span style="color: #BA36A5;">p0_y0</span> = np.mean(y * x) / np.mean(y), 1.0, np.<span style="color: #006FE0;">max</span>(y) * 2.0, np.mean(y)
+<span style="color: #BA36A5;">p0</span> = [p0_x0, p0_w, p0_f, p0_y0]
+<span style="color: #BA36A5;">popt</span>, <span style="color: #BA36A5;">pcov</span>, <span style="color: #BA36A5;">infodict</span>, <span style="color: #BA36A5;">mesg</span>, <span style="color: #BA36A5;">ier</span> = curve_fit(
+    gauss, x, y, p0=p0, sigma=sigma, absolute_sigma=<span style="color: #D0372D;">True</span>, full_output=<span style="color: #D0372D;">True</span>
+)
+<span style="color: #BA36A5;">perr</span> = np.sqrt(np.diag(pcov))
+
+<span style="color: #BA36A5;">sol_scipy</span> = {
+    <span style="color: #008000;">'x0'</span>: popt[0],
+    <span style="color: #008000;">'e_x0'</span>: perr[0],
+    <span style="color: #008000;">'w'</span>: popt[1],
+    <span style="color: #008000;">'e_w'</span>: perr[1],
+    <span style="color: #008000;">'f'</span>: popt[2],
+    <span style="color: #008000;">'e_f'</span>: perr[2],
+    <span style="color: #008000;">'y0'</span>: popt[3],
+    <span style="color: #008000;">'e_y0'</span>: perr[3],
+}
+sol_scipy
+</pre>
+</div>
+
+<pre class="example" id="org9ce0c97">
+{'x0': 100.24469301948592,
+'e_x0': 0.3519444307764577,
+'w': 1.6269735406285912,
+'e_w': 0.37345397962760474,
+'f': 31.175842723920148,
+'e_f': 7.0277508837556475,
+'y0': 10.337014096545635,
+'e_y0': 0.4525080145096782}
+</pre>
+</div>
+</div>
+<div id="outline-container-org5ee58fc" class="outline-3">
+<h3 id="org5ee58fc"><span class="section-number-3">4.3.</span> Astropy</h3>
+<div class="outline-text-3" id="text-4-3">
+<ul class="org-ul">
+<li>面積を変数に持つガウス関数を使いたいので <code>AreaGaussian1D</code> を定義する必要がある: <a href="https://docs.astropy.org/en/latest/modeling/jointfitter.html#example-spectral-line">JointFitter — Astropy v7.1.dev604+g07b8873e0</a>。</li>
+<li>輝線幅 <code>stddev</code> に定義域があるので <code>fitter</code> はLM法ではなく <code>TRFLSQFitter</code> を選んだ。</li>
+<li>連続光と輝線の和を足し算で定義すると、アウトプットの変数には番号 "<sub>0</sub>" や "<sub>1</sub>" がつく。</li>
+</ul>
+<p>
+モデルを組むのに考えないといけないことがちょっと多くて気が逸らされそうな印象。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> astropy.modeling <span style="color: #0000FF; font-weight: bold;">import</span> models, fitting, Fittable1DModel
+<span style="color: #0000FF; font-weight: bold;">from</span> astropy.modeling.parameters <span style="color: #0000FF; font-weight: bold;">import</span> Parameter
+<span style="color: #0000FF; font-weight: bold;">from</span> astropy.modeling.functional_models <span style="color: #0000FF; font-weight: bold;">import</span> FLOAT_EPSILON
+
+
+<span style="color: #0000FF; font-weight: bold;">class</span> <span style="color: #6434A3;">AreaGaussian1D</span>(Fittable1DModel):
+    <span style="color: #BA36A5;">area</span> = Parameter(default=1)
+    <span style="color: #BA36A5;">mean</span> = Parameter(default=0)
+    <span style="color: #BA36A5;">stddev</span> = Parameter(default=1, bounds=(FLOAT_EPSILON, <span style="color: #D0372D;">None</span>))
+
+    @<span style="color: #006FE0;">staticmethod</span>
+    <span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">evaluate</span>(x, area, mean, stddev):
+        <span style="color: #0000FF; font-weight: bold;">return</span> (area / (stddev * np.sqrt(2 * np.pi))) * np.exp(
+            -0.5 * (x - mean) ** 2 / stddev**2
+        )
+
+
+<span style="color: #BA36A5;">line</span> = AreaGaussian1D(area=p0_f, mean=p0_x0, stddev=p0_w)
+<span style="color: #BA36A5;">const</span> = models.Const1D(amplitude=p0_y0)
+<span style="color: #BA36A5;">fit</span> = fitting.TRFLSQFitter(calc_uncertainties=<span style="color: #D0372D;">True</span>)
+<span style="color: #BA36A5;">sol</span> = fit(line + const, x, y, weights=1 / sigma)
+
+<span style="color: #BA36A5;">sol_astropy</span> = {
+    <span style="color: #008000;">'x0'</span>: sol.mean_0.value,
+    <span style="color: #008000;">'e_x0'</span>: sol.stds[<span style="color: #008000;">'mean_0'</span>],
+    <span style="color: #008000;">'w'</span>: sol.stddev_0.value,
+    <span style="color: #008000;">'e_w'</span>: sol.stds[<span style="color: #008000;">'stddev_0'</span>],
+    <span style="color: #008000;">'f'</span>: sol.area_0.value,
+    <span style="color: #008000;">'e_f'</span>: sol.stds[<span style="color: #008000;">'area_0'</span>],
+    <span style="color: #008000;">'y0'</span>: sol.amplitude_1.value,
+    <span style="color: #008000;">'e_y0'</span>: sol.stds[<span style="color: #008000;">'amplitude_1'</span>],
+}
+sol_astropy
+</pre>
+</div>
+
+<pre class="example" id="org52de5e8">
+{'x0': 100.24473610204825,
+'e_x0': 0.35192975287232203,
+'w': 1.627041764794084,
+'e_w': 0.3736855128006802,
+'f': 31.176803560406576,
+'e_f': 7.027771300910829,
+'y0': 10.336972337844252,
+'e_y0': 0.4525082896217146}
+</pre>
+
+<p>
+既存のモデルを使うとフィッティングをとても楽にしてくれるはずだが、
+逆に自分でモデルを組まないといけない場合はちょっとめんどくさい。
+(Pythonではこれくらいのユーザー定義関数を作るのはあたりまえという感覚を持っていた方がいいというのはある。)
+</p>
+</div>
+</div>
+<div id="outline-container-org4892b45" class="outline-3">
+<h3 id="org4892b45"><span class="section-number-3">4.4.</span> specutils</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+はじめにスペクトルのオブジェクト <code>specutils.Spectrum1D</code> を定義する。
+入力する引数(<code>flux</code>, <code>spectral_axis</code>)等は <code>astropy.units.Quantity</code> でないといけないので適当に定義する。
+<code>specutils.fitting.estimate_line_parameters()</code> という関数はどうやらパラメータをざっくり推定するための関数。本来は初期値を与えるのに使えるのかもしれない。
+今回のモデルは連続光が含まれているので、 <code>specutils.fitting.fit_lines()</code> をはじめから使う。
+</p>
+
+<p>
+<code>Spectrum1D</code> はデータに単位を含むので、当て嵌めるモデルも単位計算に対応させる必要がある。
+<code>AreaGaussian1D</code> に <code>_parameter_units_for_data_units()</code> メソッドを追加して、
+各パラメータの単位を横軸の波長(インプット)と縦軸のエネルギー密度(アウトプット)の単位を使って構築してやる必要がある。
+</p>
+<ul class="org-ul">
+<li><a href="https://docs.astropy.org/en/stable/modeling/add-units.html">Adding support for units in a model (Advanced) — Astropy v7.0.1</a></li>
+</ul>
+
+<p>
+データの誤差は本来は <code>Spectrum1D</code> に格納しておくのが良いが、その場合は <code>astropy.nddata.nduncertainty.StdDevUncertainty</code> を使って誤差の性質を明示する必要がある。
+フィッティングのときにこの誤差を考慮するためには、 <code>fit_lines()</code> で <code>weights='unc'</code> と引数を渡す必要がある。
+<code>weights=1/sigma</code> のように引数を渡せば <code>StdDevUncertainty</code> を使う必要がないが、この場合も <code>weights</code> に与えられる配列は単位を持つ必要がある。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> astropy.units <span style="color: #0000FF; font-weight: bold;">as</span> u
+<span style="color: #0000FF; font-weight: bold;">from</span> astropy.modeling <span style="color: #0000FF; font-weight: bold;">import</span> models, fitting, Fittable1DModel
+<span style="color: #0000FF; font-weight: bold;">from</span> astropy.nddata.nduncertainty <span style="color: #0000FF; font-weight: bold;">import</span> StdDevUncertainty
+<span style="color: #0000FF; font-weight: bold;">from</span> specutils <span style="color: #0000FF; font-weight: bold;">import</span> Spectrum1D
+<span style="color: #0000FF; font-weight: bold;">from</span> specutils.fitting <span style="color: #0000FF; font-weight: bold;">import</span> fit_lines
+<span style="color: #0000FF; font-weight: bold;">from</span> specutils.manipulation <span style="color: #0000FF; font-weight: bold;">import</span> extract_region
+
+
+<span style="color: #0000FF; font-weight: bold;">class</span> <span style="color: #6434A3;">AreaGaussian1D</span>(Fittable1DModel):
+    <span style="color: #BA36A5;">area</span> = Parameter(default=1)
+    <span style="color: #BA36A5;">mean</span> = Parameter(default=0)
+    <span style="color: #BA36A5;">stddev</span> = Parameter(default=1, bounds=(FLOAT_EPSILON, <span style="color: #D0372D;">None</span>))
+
+    @<span style="color: #006FE0;">staticmethod</span>
+    <span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">evaluate</span>(x, area, mean, stddev):
+        <span style="color: #0000FF; font-weight: bold;">return</span> (area / (stddev * np.sqrt(2 * np.pi))) * np.exp(
+            -0.5 * (x - mean) ** 2 / stddev**2
+        )
+
+    <span style="color: #9370db;"># </span><span style="color: #9370db; font-style: italic;">Required</span>
+    <span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">_parameter_units_for_data_units</span>(<span style="color: #0000FF; font-weight: bold;">self</span>, inputs_unit, outputs_unit):
+        <span style="color: #0000FF; font-weight: bold;">return</span> {
+            <span style="color: #008000;">"area"</span>: outputs_unit[<span style="color: #0000FF; font-weight: bold;">self</span>.outputs[0]] * inputs_unit[<span style="color: #0000FF; font-weight: bold;">self</span>.inputs[0]],
+            <span style="color: #008000;">"mean"</span>: inputs_unit[<span style="color: #0000FF; font-weight: bold;">self</span>.inputs[0]],
+            <span style="color: #008000;">"stddev"</span>: inputs_unit[<span style="color: #0000FF; font-weight: bold;">self</span>.inputs[0]],
+        }
+
+
+<span style="color: #BA36A5;">line</span> = AreaGaussian1D(
+    area=p0_f * u.erg / u.s / u.cm**2, mean=p0_x0 * u.AA, stddev=p0_w * u.AA
+)
+<span style="color: #BA36A5;">const</span> = models.Const1D(amplitude=p0_y0 * u.erg / u.s / u.cm**2 / u.AA)
+<span style="color: #BA36A5;">spec</span> = Spectrum1D(
+    flux=y * u.erg / u.s / u.cm**2 / u.AA,
+    spectral_axis=x * u.AA,
+    uncertainty=StdDevUncertainty(sigma * u.erg / u.s / u.cm**2 / u.AA),
+)
+<span style="color: #BA36A5;">sol</span> = fit_lines(spec, line + const, weights=<span style="color: #008000;">'unc'</span>)
+
+<span style="color: #BA36A5;">sol_specutils</span> = {
+    <span style="color: #008000;">'x0'</span>: sol.mean_0.value,
+    <span style="color: #008000;">'e_x0'</span>: sol.stds[<span style="color: #008000;">'mean_0'</span>],
+    <span style="color: #008000;">'w'</span>: sol.stddev_0.value,
+    <span style="color: #008000;">'e_w'</span>: sol.stds[<span style="color: #008000;">'stddev_0'</span>],
+    <span style="color: #008000;">'f'</span>: sol.area_0.value,
+    <span style="color: #008000;">'e_f'</span>: sol.stds[<span style="color: #008000;">'area_0'</span>],
+    <span style="color: #008000;">'y0'</span>: sol.amplitude_1.value,
+    <span style="color: #008000;">'e_y0'</span>: sol.stds[<span style="color: #008000;">'amplitude_1'</span>],
+}
+sol_specutils
+</pre>
+</div>
+
+<pre class="example" id="org2e33a6c">
+{'x0': 100.24473610204825,
+'e_x0': 0.35192975287232203,
+'w': 1.627041764794084,
+'e_w': 0.3736855128006802,
+'f': 31.176803560406576,
+'e_f': 7.027771300910829,
+'y0': 10.336972337844252,
+'e_y0': 0.4525082896217146}
+</pre>
+
+<p>
+総じて、フィッティングするだけならかなり面倒くさい。
+<code>specutils</code> を使っているなら便利だが(単位もその中で自然に使うと思うので)、フィッティングをするためだけに使うにはオーバースペック。
+</p>
+</div>
+</div>
+<div id="outline-container-org39e4838" class="outline-3">
+<h3 id="org39e4838"><span class="section-number-3">4.5.</span> MPFIT</h3>
+<div class="outline-text-3" id="text-4-5">
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> mpfit.mpfit <span style="color: #0000FF; font-weight: bold;">import</span> mpfit
+<span style="color: #0000FF; font-weight: bold;">import</span> numpy <span style="color: #0000FF; font-weight: bold;">as</span> np
+
+
+<span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">gauss</span>(x, x0, w, flux, y0):
+    <span style="color: #BA36A5;">y_line</span> = flux * np.exp(-0.5 * (x - x0) ** 2 / w**2) / np.sqrt(2 * np.pi) / w
+    <span style="color: #0000FF; font-weight: bold;">return</span> y0 + y_line
+
+
+<span style="color: #0000FF; font-weight: bold;">def</span> <span style="color: #006699;">func</span>(p, fjac=<span style="color: #D0372D;">None</span>, x=<span style="color: #D0372D;">None</span>, y=<span style="color: #D0372D;">None</span>, err=<span style="color: #D0372D;">None</span>):
+    <span style="color: #BA36A5;">model</span> = gauss(x, p[0], p[1], p[2], p[3])
+    <span style="color: #BA36A5;">status</span> = 0
+    <span style="color: #0000FF; font-weight: bold;">return</span> [status, (y - model) / err]
+
+
+<span style="color: #BA36A5;">p0</span> = [p0_x0, p0_w, p0_f, p0_y0]
+<span style="color: #BA36A5;">functkw</span> = {<span style="color: #008000;">'x'</span>: x, <span style="color: #008000;">'y'</span>: y, <span style="color: #008000;">'err'</span>: sigma}
+<span style="color: #BA36A5;">m</span> = mpfit(func, p0, functkw=functkw)
+
+<span style="color: #BA36A5;">sol_mpfit</span> = {
+    <span style="color: #008000;">'x0'</span>: m.params[0],
+    <span style="color: #008000;">'e_x0'</span>: m.perror[0],
+    <span style="color: #008000;">'w'</span>: m.params[1],
+    <span style="color: #008000;">'e_w'</span>: m.perror[1],
+    <span style="color: #008000;">'f'</span>: m.params[2],
+    <span style="color: #008000;">'e_f'</span>: m.perror[2],
+    <span style="color: #008000;">'y0'</span>: m.params[3],
+    <span style="color: #008000;">'e_y0'</span>: m.perror[3],
+}
+sol_mpfit
+</pre>
+</div>
+
+<pre class="example" id="org5aecfc0">
+{'x0': 100.24472021324937,
+'e_x0': 0.3519250939614858,
+'w': 1.627045790857027,
+'e_w': 0.37343125462216553,
+'f': 31.17668577297413,
+'e_f': 7.0274247725102175,
+'y0': 10.336978317619911,
+'e_y0': 0.4524998123023251}
+</pre>
+
+<p>
+<code>specutils</code> のあとに実装するとめっちゃ楽に感じる&#x2026;
+なお、フィッティングが収束するまでに30回iterationしている。
+</p>
+</div>
+</div>
+<div id="outline-container-org5ed02c4" class="outline-3">
+<h3 id="org5ed02c4"><span class="section-number-3">4.6.</span> LMFIT</h3>
+<div class="outline-text-3" id="text-4-6">
+<p>
+たまたま <code>GaussianModel</code> の引数 <code>amplitude</code> がフラックスに相当したので楽に実装できた。
+なお、内部でピーク値 <code>height</code> も自動的に計算されている。誤差伝播がどこまで正しいかは知らない。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> numpy <span style="color: #0000FF; font-weight: bold;">as</span> np
+<span style="color: #0000FF; font-weight: bold;">from</span> lmfit.models <span style="color: #0000FF; font-weight: bold;">import</span> ConstantModel, GaussianModel
+
+<span style="color: #BA36A5;">const</span> = ConstantModel()
+<span style="color: #BA36A5;">gauss</span> = GaussianModel()
+<span style="color: #BA36A5;">model</span> = const + gauss
+<span style="color: #BA36A5;">init</span> = const.guess(y, x=x)
+init.update(gauss.guess(y, x=x))
+<span style="color: #BA36A5;">out</span> = model.fit(y, init, x=x, weights=1 / sigma, scale_covar=<span style="color: #D0372D;">False</span>)
+
+<span style="color: #BA36A5;">sol_lmfit</span> = {
+    <span style="color: #008000;">'x0'</span>: out.params[<span style="color: #008000;">'center'</span>].value,
+    <span style="color: #008000;">'e_x0'</span>: out.params[<span style="color: #008000;">'center'</span>].stderr,
+    <span style="color: #008000;">'w'</span>: out.params[<span style="color: #008000;">'sigma'</span>].value,
+    <span style="color: #008000;">'e_w'</span>: out.params[<span style="color: #008000;">'sigma'</span>].stderr,
+    <span style="color: #008000;">'f'</span>: out.params[<span style="color: #008000;">'amplitude'</span>].value,
+    <span style="color: #008000;">'e_f'</span>: out.params[<span style="color: #008000;">'amplitude'</span>].stderr,
+    <span style="color: #008000;">'y0'</span>: out.params[<span style="color: #008000;">'c'</span>].value,
+    <span style="color: #008000;">'e_y0'</span>: out.params[<span style="color: #008000;">'c'</span>].stderr,
+}
+sol_lmfit
+</pre>
+</div>
+
+<pre class="example" id="org5fb7281">
+{'x0': 100.24474812193493,
+'e_x0': 0.3519061226112018,
+'w': 1.6271080677992757,
+'e_w': 0.37343511682123093,
+'f': 31.17740729614346,
+'e_f': 7.027139625729403,
+'y0': 10.336947140254642,
+'e_y0': 0.4524926545009989}
+</pre>
+</div>
+</div>
+<div id="outline-container-org2edee26" class="outline-3">
+<h3 id="org2edee26"><span class="section-number-3">4.7.</span> まとめ</h3>
+<div class="outline-text-3" id="text-4-7">
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> pandas <span style="color: #0000FF; font-weight: bold;">as</span> pd
+
+<span style="color: #BA36A5;">data</span> = {
+    <span style="color: #008000;">'True'</span>: sol_answer,
+    <span style="color: #008000;">'Scipy'</span>: sol_scipy,
+    <span style="color: #008000;">'Astropy'</span>: sol_astropy,
+    <span style="color: #008000;">'specutils'</span>: sol_specutils,
+    <span style="color: #008000;">'MPFIT'</span>: sol_mpfit,
+    <span style="color: #008000;">'LMFIT'</span>: sol_lmfit,
+}
+pd.DataFrame.from_dict(data, orient=<span style="color: #008000;">'index'</span>)
+</pre>
+</div>
+
+<pre class="example" id="orgc942833">
+                   x0      e_x0         w       e_w          f       e_f  \
+True       100.000000  0.000000  2.000000  0.000000  40.000000  0.000000
+Scipy      100.244693  0.351944  1.626974  0.373454  31.175843  7.027751
+Astropy    100.244736  0.351930  1.627042  0.373686  31.176804  7.027771
+specutils  100.244736  0.351930  1.627042  0.373686  31.176804  7.027771
+MPFIT      100.244720  0.351925  1.627046  0.373431  31.176686  7.027425
+LMFIT      100.244748  0.351906  1.627108  0.373435  31.177407  7.027140
+
+                  y0      e_y0
+True       10.000000  0.000000
+Scipy      10.337014  0.452508
+Astropy    10.336972  0.452508
+specutils  10.336972  0.452508
+MPFIT      10.336978  0.452500
+LMFIT      10.336947  0.452493
+</pre>
+
+<p>
+線形フィッティングよりも数値誤差が大きいものの、結果は全て一致した。
+</p>
+</div>
+</div>
+<div id="outline-container-org9ad4213" class="outline-3">
+<h3 id="org9ad4213"><span class="section-number-3">4.8.</span> 図</h3>
+<div class="outline-text-3" id="text-4-8">
+<div class="org-src-container">
+<pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> sugayutils.core <span style="color: #0000FF; font-weight: bold;">import</span> colors <span style="color: #0000FF; font-weight: bold;">as</span> col
+<span style="color: #0000FF; font-weight: bold;">from</span> sugayutils.figure <span style="color: #0000FF; font-weight: bold;">import</span> makefig
+
+<span style="color: #BA36A5;">xx</span> = np.linspace(start, start + size, 101)
+<span style="color: #BA36A5;">yy</span> = out.<span style="color: #006FE0;">eval</span>(x=xx)
+<span style="color: #BA36A5;">ye</span> = out.eval_uncertainty(x=xx, sigma=1)
+
+<span style="color: #BA36A5;">fig</span> = makefig(figsize=[<span style="color: #008000;">'small'</span>, 0.7])
+<span style="color: #BA36A5;">ax</span> = fig.add_subplot(1, 1, 1)
+<span style="color: #BA36A5;">ytrue</span> = flux * np.exp(-0.5 * (xx - x0) ** 2/ w ** 2) / np.sqrt(2 * np.pi) / w + y0
+ax.plot(xx, ytrue, c=<span style="color: #008000;">'black'</span>, ls=<span style="color: #008000;">'--'</span>, lw=1.0, zorder=2)
+ax.step(x, y, c=<span style="color: #008000;">'black'</span>, lw=0.7, where=<span style="color: #008000;">'mid'</span>, zorder=1)
+ax.errorbar(x, y, yerr=sigma, c=<span style="color: #008000;">'black'</span>, ls=<span style="color: #008000;">'None'</span>, zorder=2)
+ax.plot(xx, yy, c=<span style="color: #008000;">'red'</span>, lw=1.5, zorder=3)
+ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
+</pre>
+</div>
+
+<pre class="example">
+&lt;matplotlib.collections.FillBetweenPolyCollection at 0x7f5a17df07d0&gt;
+</pre>
+
+
+<div id="org85345ea" class="figure">
+<p><img src="./obipy-resources/gauss.png" alt="gauss.png" />
+</p>
+</div>
+
+<p>
+なお、ガウス関数の面積と線幅の推定値には相関があるので、モデル関数の不定性を図示する際には
+この相関関係を無視すると不定性を過小評価してしまうので注意する。
+<code>lmfit</code> は考慮しようとしている風だが、ちゃんとできているかどうかは知らない。
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: sugayu</p>
+<p class="date">Created: 2025-03-06 木 17:56</p>
+<p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

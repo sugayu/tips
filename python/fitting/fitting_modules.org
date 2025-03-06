@@ -1,6 +1,8 @@
 #+title: *Fittingに使われるPythonモジュールの比較*
 #+AUTHOR: sugayu
-#+LATEX_CLASS: jsarticle2
+#+LATEX_CLASS: jsarticle
+#+LATEX_CLASS_OPTIONS: [a4paper, 8pt, notitlepage, uplatex, dvipdfmx]
+#+LATEX_HEADER: \setlength{\textheight}{58\baselineskip}
 #+OPTIONS: toc:nil
 
 * 導入
@@ -52,9 +54,9 @@ User Interfaceが関数ではなくクラス中心で複雑なので、それに
 内部で変数変換したり ~scipy.optimize~ のフィッティング関数のアウトプットを変換したりしているので、
 コードを見るとフィッティング結果をどう扱うかの勉強になるかも？
 
-用意されているおすすめの最適化手法は、単純な線形の場合は ~LinearLSQFitter~、
+用意されているおすすめの最適化手法は、単純な線形の場合は ~LinearLSQFitter~ 、
 非線形の場合は ~TRFLSQFitter~, ~DogBoxLSQFitter~, ~LMLSQFitter~ の3種類である。
-これらの最適化手法は内部で ~scipy.optimize~ を使っているが、~LinearLSQFitter~ だけは例外的に ~numpy.linalg.lstsq()~ を使っている。
+これらの最適化手法は内部で ~scipy.optimize~ を使っているが、 ~LinearLSQFitter~ だけは例外的に ~numpy.linalg.lstsq()~ を使っている。
 パラメータ範囲が指定されていない小さな最適化であれば ~LMLSQFitter~,
 範囲が指定されているなら ~TRFLSQFitter~, ~DogBoxLSQFitter~ が良いとのこと。
 アルゴリズムが不安定なので、 ~LMLSQFitter~ を使う場合はパラメータ範囲を指定できない。
@@ -107,7 +109,7 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 - 標準偏差: 10.0
 - 標本の大きさ: 30
 - 直線: \(y = 2.0 (x - 100.0) + 220.0\)
-=# ~makefig()~ は菅原が編集した ~matplotlib~ の関数=
+=# makefig() は菅原が編集した matplotlib の関数=
 #+begin_src ipython :session :ipyfile ./obipy-resources/data.png :exports both :async t :results raw drawer :eval never-export
   import numpy as np
   from numpy.random import default_rng
@@ -277,7 +279,7 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 
 ** Astropy
 *** LinearLSQFitter
-LinearLSQFitterの場合。内部で ~numpy.linalg.lstsq()~ を使っているので誤差の出力は無し。
+~LinearLSQFitter~ の場合。内部で ~numpy.linalg.lstsq()~ を使っているので誤差の出力は無し。
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
   from astropy.modeling import models, fitting
 
