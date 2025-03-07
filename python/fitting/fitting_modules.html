@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-03-06 木 17:56 -->
+<!-- 2025-03-07 金 09:43 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>*Fittingに使われるPythonモジュールの比較*</title>
@@ -229,8 +229,8 @@
 <body>
 <div id="content" class="content">
 <h1 class="title"><b>Fittingに使われるPythonモジュールの比較</b></h1>
-<div id="outline-container-org0cfb624" class="outline-2">
-<h2 id="org0cfb624"><span class="section-number-2">1.</span> 導入</h2>
+<div id="outline-container-orgdcf9d62" class="outline-2">
+<h2 id="orgdcf9d62"><span class="section-number-2">1.</span> 導入</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 最尤法(Maximum Likelihood Methods)を提供するデータのフィッティングに使用可能なPythonモジュールは数多くある。
@@ -243,12 +243,12 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org0cade90" class="outline-2">
-<h2 id="org0cade90"><span class="section-number-2">2.</span> 比較対象のPythonモジュール</h2>
+<div id="outline-container-org321c9f3" class="outline-2">
+<h2 id="org321c9f3"><span class="section-number-2">2.</span> 比較対象のPythonモジュール</h2>
 <div class="outline-text-2" id="text-2">
 </div>
-<div id="outline-container-org2e32528" class="outline-3">
-<h3 id="org2e32528"><span class="section-number-3">2.1.</span> NumPy</h3>
+<div id="outline-container-org6df48d8" class="outline-3">
+<h3 id="org6df48d8"><span class="section-number-3">2.1.</span> NumPy</h3>
 <div class="outline-text-3" id="text-2-1">
 <p>
 <code>NumPy</code> は <code>polynomial</code> という多項式を扱うモジュールを提供している。
@@ -263,8 +263,8 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf207478" class="outline-3">
-<h3 id="orgf207478"><span class="section-number-3">2.2.</span> Scipy</h3>
+<div id="outline-container-orgaeb7c11" class="outline-3">
+<h3 id="orgaeb7c11"><span class="section-number-3">2.2.</span> Scipy</h3>
 <div class="outline-text-3" id="text-2-2">
 <p>
 <code>SciPy</code> は <code>optimize</code> という最適化のためのモジュールを提供している。
@@ -276,7 +276,7 @@ LM法の場合は最尤推定にFortranで実装されたMINPACKというプロ�
 データの誤差 <code>sigma</code> の中に誤差の相関(共分散)を入れることもできる。
 </p>
 <ul class="org-ul">
-<li><a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html">curve<sub>fit</sub> — SciPy v1.15.2 Manual</a></li>
+<li><a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html">curve_fit — SciPy v1.15.2 Manual</a></li>
 </ul>
 
 <p>
@@ -290,8 +290,8 @@ LM法の場合は最尤推定にFortranで実装されたMINPACKというプロ�
 </ul>
 </div>
 </div>
-<div id="outline-container-org9614b6c" class="outline-3">
-<h3 id="org9614b6c"><span class="section-number-3">2.3.</span> Astropy</h3>
+<div id="outline-container-org1114f94" class="outline-3">
+<h3 id="org1114f94"><span class="section-number-3">2.3.</span> Astropy</h3>
 <div class="outline-text-3" id="text-2-3">
 <p>
 天文解析パッケージ <code>Astropy</code> は <code>modeling</code> というモジュールを提供している。
@@ -325,8 +325,8 @@ User Interfaceが関数ではなくクラス中心で複雑なので、それに
 </ul>
 </div>
 </div>
-<div id="outline-container-org12e44f4" class="outline-3">
-<h3 id="org12e44f4"><span class="section-number-3">2.4.</span> specutils</h3>
+<div id="outline-container-orga39be9d" class="outline-3">
+<h3 id="orga39be9d"><span class="section-number-3">2.4.</span> specutils</h3>
 <div class="outline-text-3" id="text-2-4">
 <p>
 天体スペクトルを扱うパッケージ <code>specutils</code> は輝線フィッティングを含めたスペクトル解析のためのモジュールを提供する。
@@ -338,8 +338,8 @@ User Interfaceが関数ではなくクラス中心で複雑なので、それに
 </ul>
 </div>
 </div>
-<div id="outline-container-org14e4f1c" class="outline-3">
-<h3 id="org14e4f1c"><span class="section-number-3">2.5.</span> MPFIT</h3>
+<div id="outline-container-org00e95ef" class="outline-3">
+<h3 id="org00e95ef"><span class="section-number-3">2.5.</span> MPFIT</h3>
 <div class="outline-text-3" id="text-2-5">
 <p>
 <code>MPFIT</code> は古くから天文学で使われているフィッティングパッケージ。
@@ -356,12 +356,12 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 <p>
 <code>pip</code> でダウンロードできる形式では配布されていない。
 <code>astrolibpy</code> をダウンロードしたあと、Pythonのパスが通っている場所に <code>mpfit</code> のディレクトリを置いたら良い。
-たぶんディレクトリ直下に mpfit/_<sub>init</sub>_<sub>.py</sub> ファイルを設置する必要がある (空ファイルで良い)。
+たぶんディレクトリ直下に mpfit/__init__.py ファイルを設置する必要がある (空ファイルで良い)。
 </p>
 </div>
 </div>
-<div id="outline-container-org2c9e1da" class="outline-3">
-<h3 id="org2c9e1da"><span class="section-number-3">2.6.</span> LMFIT</h3>
+<div id="outline-container-orgb89ffd5" class="outline-3">
+<h3 id="orgb89ffd5"><span class="section-number-3">2.6.</span> LMFIT</h3>
 <div class="outline-text-3" id="text-2-6">
 <p>
 <code>LMFIT</code> は非線形最小二乗法を解くためのパッケージ。
@@ -376,8 +376,9 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 基本的に最適化には <code>scipy.optimize</code> が内部で使われており、 例えば <code>method='leastsq'</code> が指定されているときは <code>scipy.optimize.leastsq()</code> が使用されている。
 <code>Minimizer.minimize()</code> の説明:
 </p>
-<pre class="example" id="orge3ac086">
-In most cases, these methods wrap and use the method with the same name from `scipy.optimize`, or use `scipy.optimize.minimize` with the same `method` argument.
+<pre class="example" id="org69c872f">
+In most cases, these methods wrap and use the method with the same name from `scipy.optimize`,
+or use `scipy.optimize.minimize` with the same `method` argument.
 </pre>
 
 <p>
@@ -400,12 +401,12 @@ In most cases, these methods wrap and use the method with the same name from `sc
 </div>
 </div>
 </div>
-<div id="outline-container-org0cabc15" class="outline-2">
-<h2 id="org0cabc15"><span class="section-number-2">3.</span> 理想的な線形データのフィッティング結果</h2>
+<div id="outline-container-org2c533c2" class="outline-2">
+<h2 id="org2c533c2"><span class="section-number-2">3.</span> 理想的な線形データのフィッティング結果</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-org03be274" class="outline-3">
-<h3 id="org03be274"><span class="section-number-3">3.1.</span> データ作成</h3>
+<div id="outline-container-orgf18eba2" class="outline-3">
+<h3 id="orgf18eba2"><span class="section-number-3">3.1.</span> データ作成</h3>
 <div class="outline-text-3" id="text-3-1">
 <ul class="org-ul">
 <li>平均: 100.0</li>
@@ -441,14 +442,14 @@ In most cases, these methods wrap and use the method with the same name from `sc
 </div>
 
 
-<div id="org7bf05d2" class="figure">
-<p><img src="./obipy-resources/data.png" alt="data.png" />
+<div id="org3f643f9" class="figure">
+<p><img src="./obipy-resources/data.png" alt="data.png" width="50%" />
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org370ce9c" class="outline-3">
-<h3 id="org370ce9c"><span class="section-number-3">3.2.</span> 解析解</h3>
+<div id="outline-container-org74fadb2" class="outline-3">
+<h3 id="org74fadb2"><span class="section-number-3">3.2.</span> 解析解</h3>
 <div class="outline-text-3" id="text-3-2">
 <p>
 一次方程式の場合は解析解が得られている。
@@ -489,7 +490,7 @@ sol_analytic
 </pre>
 </div>
 
-<pre class="example" id="org41876f9">
+<pre class="example" id="org7048171">
 {'a': 1.8419873744634017,
 'b': 221.09327400439,
 's_a': 0.18305375486749972,
@@ -501,8 +502,8 @@ sol_analytic
 </p>
 </div>
 </div>
-<div id="outline-container-org9e7cb5f" class="outline-3">
-<h3 id="org9e7cb5f"><span class="section-number-3">3.3.</span> Numpy</h3>
+<div id="outline-container-org82e9da6" class="outline-3">
+<h3 id="org82e9da6"><span class="section-number-3">3.3.</span> Numpy</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 <code>Polynomial.fit()</code> を使ったフィッティング手法を示す。
@@ -533,12 +534,12 @@ sol_numpy
 </p>
 </div>
 </div>
-<div id="outline-container-org5e545ca" class="outline-3">
-<h3 id="org5e545ca"><span class="section-number-3">3.4.</span> Scipy</h3>
+<div id="outline-container-org824c5a2" class="outline-3">
+<h3 id="org824c5a2"><span class="section-number-3">3.4.</span> Scipy</h3>
 <div class="outline-text-3" id="text-3-4">
 </div>
-<div id="outline-container-org79a75dc" class="outline-4">
-<h4 id="org79a75dc"><span class="section-number-4">3.4.1.</span> curve<sub>fit</sub></h4>
+<div id="outline-container-org3a179b9" class="outline-4">
+<h4 id="org3a179b9"><span class="section-number-4">3.4.1.</span> curve_fit</h4>
 <div class="outline-text-4" id="text-3-4-1">
 <p>
 引数 <code>absolute_sigma=True</code> にすると誤差 <code>sigma</code> を絶対値で設定することになる。
@@ -566,7 +567,7 @@ sol_scipy_curvefit
 </pre>
 </div>
 
-<pre class="example" id="orgd13c92c">
+<pre class="example" id="org50a3bbe">
 {'a': 1.84198738877173,
 'b': 221.09327399514368,
 's_a': 0.18305375794763726,
@@ -580,8 +581,8 @@ sol_scipy_curvefit
 </p>
 </div>
 </div>
-<div id="outline-container-org4b4d0ee" class="outline-4">
-<h4 id="org4b4d0ee"><span class="section-number-4">3.4.2.</span> linregress</h4>
+<div id="outline-container-org29e19d3" class="outline-4">
+<h4 id="org29e19d3"><span class="section-number-4">3.4.2.</span> linregress</h4>
 <div class="outline-text-4" id="text-3-4-2">
 <p>
 引数 <code>alternative</code> を加えることで検定も可能らしい。
@@ -602,7 +603,7 @@ sol_scipy_linregress
 </pre>
 </div>
 
-<pre class="example" id="orgf9fe709">
+<pre class="example" id="orgc91d6a2">
 {'a': 1.8419873744634003,
 'b': 221.09327400439,
 's_a': 0.22700227671955325,
@@ -617,12 +618,12 @@ sol_scipy_linregress
 </div>
 </div>
 </div>
-<div id="outline-container-orgd789690" class="outline-3">
-<h3 id="orgd789690"><span class="section-number-3">3.5.</span> Astropy</h3>
+<div id="outline-container-orgef236f8" class="outline-3">
+<h3 id="orgef236f8"><span class="section-number-3">3.5.</span> Astropy</h3>
 <div class="outline-text-3" id="text-3-5">
 </div>
-<div id="outline-container-orgf1f19cb" class="outline-4">
-<h4 id="orgf1f19cb"><span class="section-number-4">3.5.1.</span> LinearLSQFitter</h4>
+<div id="outline-container-orgd1666cf" class="outline-4">
+<h4 id="orgd1666cf"><span class="section-number-4">3.5.1.</span> LinearLSQFitter</h4>
 <div class="outline-text-4" id="text-3-5-1">
 <p>
 <code>LinearLSQFitter</code> の場合。内部で <code>numpy.linalg.lstsq()</code> を使っているので誤差の出力は無し。
@@ -647,8 +648,8 @@ sol_astropy_linear
 </p>
 </div>
 </div>
-<div id="outline-container-org1e924ec" class="outline-4">
-<h4 id="org1e924ec"><span class="section-number-4">3.5.2.</span> LMLSQFitter</h4>
+<div id="outline-container-orgff181c5" class="outline-4">
+<h4 id="orgff181c5"><span class="section-number-4">3.5.2.</span> LMLSQFitter</h4>
 <div class="outline-text-4" id="text-3-5-2">
 <p>
 <code>LMLSQFitter</code> は内部で <code>scipy.optimize.least_squares()</code> を使っている。
@@ -673,7 +674,7 @@ sol_astropy_LM
 </pre>
 </div>
 
-<pre class="example" id="orgcd42c14">
+<pre class="example" id="org80621ae">
 {'a': 1.8419873744634017,
 'b': 221.09327400438997,
 's_a': 0.1830537548674997,
@@ -691,7 +692,7 @@ sol_astropy_LM
 <p>
 なお、これを実行すると
 </p>
-<pre class="example" id="org4ac53e4">
+<pre class="example" id="org3031a86">
 WARNING: Model is linear in parameters; consider using linear fitting methods. [astropy.modeling.fitting]
 </pre>
 <p>
@@ -701,8 +702,8 @@ WARNING: Model is linear in parameters; consider using linear fitting methods. [
 </div>
 </div>
 </div>
-<div id="outline-container-orgbc682fb" class="outline-3">
-<h3 id="orgbc682fb"><span class="section-number-3">3.6.</span> MPFIT</h3>
+<div id="outline-container-orgb14e3d0" class="outline-3">
+<h3 id="orgb14e3d0"><span class="section-number-3">3.6.</span> MPFIT</h3>
 <div class="outline-text-3" id="text-3-6">
 <p>
 コードの表記がPythonを使ううえであまり直感的ではないので、使うならさらにwrapperを作ってしまうのが便利な気がする。
@@ -733,7 +734,7 @@ sol_mpfit
 </pre>
 </div>
 
-<pre class="example" id="orga997119">
+<pre class="example" id="orgb07cec1">
 {'a': 1.8419873769467103,
 'b': 221.09327423192875,
 's_a': 0.18305375489620923,
@@ -747,7 +748,7 @@ sol_mpfit
 <p>
 デフォルトではプリントメッセージが表示される。
 </p>
-<pre class="example" id="org624abc3">
+<pre class="example" id="org5ba4c53">
 Iter       1    CHI-SQUARE =  210.0576791  DOF =  28
    P0 = 1  
    P1 = 200  
@@ -760,12 +761,12 @@ Iter       2    CHI-SQUARE =  43.05872579  DOF =  28
 </p>
 </div>
 </div>
-<div id="outline-container-orgba87e7f" class="outline-3">
-<h3 id="orgba87e7f"><span class="section-number-3">3.7.</span> LMFIT</h3>
+<div id="outline-container-orgba747c2" class="outline-3">
+<h3 id="orgba747c2"><span class="section-number-3">3.7.</span> LMFIT</h3>
 <div class="outline-text-3" id="text-3-7">
 </div>
-<div id="outline-container-org73072ba" class="outline-4">
-<h4 id="org73072ba"><span class="section-number-4">3.7.1.</span> 関数を使った書き方</h4>
+<div id="outline-container-org21fb929" class="outline-4">
+<h4 id="org21fb929"><span class="section-number-4">3.7.1.</span> 関数を使った書き方</h4>
 <div class="outline-text-4" id="text-3-7-1">
 <p>
 書き方は <code>MPFIT</code> と似ているところがある。
@@ -794,7 +795,7 @@ sol_lmfit
 </pre>
 </div>
 
-<pre class="example" id="org5b9044a">
+<pre class="example" id="org4d7e7a2">
 {'a': 1.8419873744056405,
 'b': 221.09327400473325,
 's_a': 0.22700227671667123,
@@ -809,8 +810,8 @@ sol_lmfit
 </p>
 </div>
 </div>
-<div id="outline-container-org8297aaf" class="outline-4">
-<h4 id="org8297aaf"><span class="section-number-4">3.7.2.</span> Modelクラスを使った書き方</h4>
+<div id="outline-container-org9a1e7b5" class="outline-4">
+<h4 id="org9a1e7b5"><span class="section-number-4">3.7.2.</span> Modelクラスを使った書き方</h4>
 <div class="outline-text-4" id="text-3-7-2">
 <p>
 同じ <code>lmfit</code> でも <code>Model</code> クラスを使った書き方もある。
@@ -836,7 +837,7 @@ sol_lmfit2
 </pre>
 </div>
 
-<pre class="example" id="org3dd66f0">
+<pre class="example" id="orgc0600c2">
 {'a': 1.84198737447337,
 'b': 221.09327400437255,
 's_a': 0.22700227671776427,
@@ -850,8 +851,8 @@ sol_lmfit2
 </div>
 </div>
 </div>
-<div id="outline-container-orgff02992" class="outline-3">
-<h3 id="orgff02992"><span class="section-number-3">3.8.</span> まとめ</h3>
+<div id="outline-container-orgb9927b6" class="outline-3">
+<h3 id="orgb9927b6"><span class="section-number-3">3.8.</span> まとめ</h3>
 <div class="outline-text-3" id="text-3-8">
 <div class="org-src-container">
 <pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> pandas <span style="color: #0000FF; font-weight: bold;">as</span> pd
@@ -871,7 +872,7 @@ pd.DataFrame.from_dict(data, orient=<span style="color: #008000;">'index'</span>
 </pre>
 </div>
 
-<pre class="example" id="org6a0d6be">
+<pre class="example" id="orgd3a53b9">
                          a           b       s_a       s_b
 Analytic          1.841987  221.093274  0.183054  1.837517
 Numpy             1.841987  221.093274  0.000000  0.000000
@@ -889,8 +890,8 @@ LMFIT Model.fit   1.841987  221.093274  0.227002  2.278678
 </p>
 </div>
 </div>
-<div id="outline-container-org1c54dc9" class="outline-3">
-<h3 id="org1c54dc9"><span class="section-number-3">3.9.</span> 図</h3>
+<div id="outline-container-orgefa109f" class="outline-3">
+<h3 id="orgefa109f"><span class="section-number-3">3.9.</span> 図</h3>
 <div class="outline-text-3" id="text-3-9">
 <p>
 <code>LMFIT</code> は手軽にベストフィット関数の誤差範囲を示すことができる。
@@ -935,8 +936,8 @@ ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
 </pre>
 
 
-<div id="orgb06e445" class="figure">
-<p><img src="./obipy-resources/fit_linear.png" alt="fit_linear.png" />
+<div id="org207f0dd" class="figure">
+<p><img src="./obipy-resources/fit_linear.png" alt="fit_linear.png" width="50%" />
 </p>
 </div>
 
@@ -946,12 +947,12 @@ ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
 </div>
 </div>
 </div>
-<div id="outline-container-orgf2f3823" class="outline-2">
-<h2 id="orgf2f3823"><span class="section-number-2">4.</span> 理想的な輝線データのフィッティング結果</h2>
+<div id="outline-container-orgee321cb" class="outline-2">
+<h2 id="orgee321cb"><span class="section-number-2">4.</span> 理想的な輝線データのフィッティング結果</h2>
 <div class="outline-text-2" id="text-4">
 </div>
-<div id="outline-container-org2d88692" class="outline-3">
-<h3 id="org2d88692"><span class="section-number-3">4.1.</span> データ作成</h3>
+<div id="outline-container-org57fe913" class="outline-3">
+<h3 id="org57fe913"><span class="section-number-3">4.1.</span> データ作成</h3>
 <div class="outline-text-3" id="text-4-1">
 <p>
 ガウス関数に従う模擬輝線データを作成する。
@@ -994,8 +995,8 @@ ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
 </p>
 </div>
 </div>
-<div id="outline-container-orgd232d06" class="outline-3">
-<h3 id="orgd232d06"><span class="section-number-3">4.2.</span> Scipy</h3>
+<div id="outline-container-org9b93927" class="outline-3">
+<h3 id="org9b93927"><span class="section-number-3">4.2.</span> Scipy</h3>
 <div class="outline-text-3" id="text-4-2">
 <p>
 初期値 <code>p0</code> を与えないと収束しないだろう。
@@ -1031,7 +1032,7 @@ sol_scipy
 </pre>
 </div>
 
-<pre class="example" id="org9ce0c97">
+<pre class="example" id="org870f210">
 {'x0': 100.24469301948592,
 'e_x0': 0.3519444307764577,
 'w': 1.6269735406285912,
@@ -1043,13 +1044,13 @@ sol_scipy
 </pre>
 </div>
 </div>
-<div id="outline-container-org5ee58fc" class="outline-3">
-<h3 id="org5ee58fc"><span class="section-number-3">4.3.</span> Astropy</h3>
+<div id="outline-container-org5b29d2d" class="outline-3">
+<h3 id="org5b29d2d"><span class="section-number-3">4.3.</span> Astropy</h3>
 <div class="outline-text-3" id="text-4-3">
 <ul class="org-ul">
 <li>面積を変数に持つガウス関数を使いたいので <code>AreaGaussian1D</code> を定義する必要がある: <a href="https://docs.astropy.org/en/latest/modeling/jointfitter.html#example-spectral-line">JointFitter — Astropy v7.1.dev604+g07b8873e0</a>。</li>
 <li>輝線幅 <code>stddev</code> に定義域があるので <code>fitter</code> はLM法ではなく <code>TRFLSQFitter</code> を選んだ。</li>
-<li>連続光と輝線の和を足し算で定義すると、アウトプットの変数には番号 "<sub>0</sub>" や "<sub>1</sub>" がつく。</li>
+<li>連続光と輝線の和を足し算で定義すると、アウトプットの変数には番号 "_0" や "_1" がつく。</li>
 </ul>
 <p>
 モデルを組むのに考えないといけないことがちょっと多くて気が逸らされそうな印象。
@@ -1092,7 +1093,7 @@ sol_astropy
 </pre>
 </div>
 
-<pre class="example" id="org52de5e8">
+<pre class="example" id="orgab13b18">
 {'x0': 100.24473610204825,
 'e_x0': 0.35192975287232203,
 'w': 1.627041764794084,
@@ -1110,8 +1111,8 @@ sol_astropy
 </p>
 </div>
 </div>
-<div id="outline-container-org4892b45" class="outline-3">
-<h3 id="org4892b45"><span class="section-number-3">4.4.</span> specutils</h3>
+<div id="outline-container-org116a9be" class="outline-3">
+<h3 id="org116a9be"><span class="section-number-3">4.4.</span> specutils</h3>
 <div class="outline-text-3" id="text-4-4">
 <p>
 はじめにスペクトルのオブジェクト <code>specutils.Spectrum1D</code> を定義する。
@@ -1189,7 +1190,7 @@ sol_specutils
 </pre>
 </div>
 
-<pre class="example" id="org2e33a6c">
+<pre class="example" id="org71641fd">
 {'x0': 100.24473610204825,
 'e_x0': 0.35192975287232203,
 'w': 1.627041764794084,
@@ -1206,8 +1207,8 @@ sol_specutils
 </p>
 </div>
 </div>
-<div id="outline-container-org39e4838" class="outline-3">
-<h3 id="org39e4838"><span class="section-number-3">4.5.</span> MPFIT</h3>
+<div id="outline-container-orgfffe060" class="outline-3">
+<h3 id="orgfffe060"><span class="section-number-3">4.5.</span> MPFIT</h3>
 <div class="outline-text-3" id="text-4-5">
 <div class="org-src-container">
 <pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> mpfit.mpfit <span style="color: #0000FF; font-weight: bold;">import</span> mpfit
@@ -1243,7 +1244,7 @@ sol_mpfit
 </pre>
 </div>
 
-<pre class="example" id="org5aecfc0">
+<pre class="example" id="orge71156f">
 {'x0': 100.24472021324937,
 'e_x0': 0.3519250939614858,
 'w': 1.627045790857027,
@@ -1260,8 +1261,8 @@ sol_mpfit
 </p>
 </div>
 </div>
-<div id="outline-container-org5ed02c4" class="outline-3">
-<h3 id="org5ed02c4"><span class="section-number-3">4.6.</span> LMFIT</h3>
+<div id="outline-container-orga8e67fc" class="outline-3">
+<h3 id="orga8e67fc"><span class="section-number-3">4.6.</span> LMFIT</h3>
 <div class="outline-text-3" id="text-4-6">
 <p>
 たまたま <code>GaussianModel</code> の引数 <code>amplitude</code> がフラックスに相当したので楽に実装できた。
@@ -1293,7 +1294,7 @@ sol_lmfit
 </pre>
 </div>
 
-<pre class="example" id="org5fb7281">
+<pre class="example" id="org89e3560">
 {'x0': 100.24474812193493,
 'e_x0': 0.3519061226112018,
 'w': 1.6271080677992757,
@@ -1305,8 +1306,8 @@ sol_lmfit
 </pre>
 </div>
 </div>
-<div id="outline-container-org2edee26" class="outline-3">
-<h3 id="org2edee26"><span class="section-number-3">4.7.</span> まとめ</h3>
+<div id="outline-container-org94aa3eb" class="outline-3">
+<h3 id="org94aa3eb"><span class="section-number-3">4.7.</span> まとめ</h3>
 <div class="outline-text-3" id="text-4-7">
 <div class="org-src-container">
 <pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">import</span> pandas <span style="color: #0000FF; font-weight: bold;">as</span> pd
@@ -1323,7 +1324,7 @@ pd.DataFrame.from_dict(data, orient=<span style="color: #008000;">'index'</span>
 </pre>
 </div>
 
-<pre class="example" id="orgc942833">
+<pre class="example" id="org71d009e">
                    x0      e_x0         w       e_w          f       e_f  \
 True       100.000000  0.000000  2.000000  0.000000  40.000000  0.000000
 Scipy      100.244693  0.351944  1.626974  0.373454  31.175843  7.027751
@@ -1346,8 +1347,8 @@ LMFIT      10.336947  0.452493
 </p>
 </div>
 </div>
-<div id="outline-container-org9ad4213" class="outline-3">
-<h3 id="org9ad4213"><span class="section-number-3">4.8.</span> 図</h3>
+<div id="outline-container-orgcbbb31a" class="outline-3">
+<h3 id="orgcbbb31a"><span class="section-number-3">4.8.</span> 図</h3>
 <div class="outline-text-3" id="text-4-8">
 <div class="org-src-container">
 <pre class="src src-ipython"><span style="color: #0000FF; font-weight: bold;">from</span> sugayutils.core <span style="color: #0000FF; font-weight: bold;">import</span> colors <span style="color: #0000FF; font-weight: bold;">as</span> col
@@ -1373,8 +1374,8 @@ ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
 </pre>
 
 
-<div id="org85345ea" class="figure">
-<p><img src="./obipy-resources/gauss.png" alt="gauss.png" />
+<div id="org1d0ab92" class="figure">
+<p><img src="./obipy-resources/gauss.png" alt="gauss.png" width="50%" />
 </p>
 </div>
 
@@ -1389,7 +1390,7 @@ ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: sugayu</p>
-<p class="date">Created: 2025-03-06 木 17:56</p>
+<p class="date">Created: 2025-03-07 金 09:43</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

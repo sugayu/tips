@@ -1,5 +1,5 @@
-% Created 2025-03-06 木 18:02
-\documentclass[a4paper, 8pt, notitlepage, uplatex, dvipdfmx]{jsarticle}
+% Created 2025-03-07 金 09:33
+\documentclass[a4paper, 9pt, notitlepage, uplatex, dvipdfmx]{jsarticle}
 \usepackage[dvipdfmx]{graphicx, color}
 \usepackage{ulem}
 \usepackage[utf8]{inputenc}
@@ -9,6 +9,8 @@
 \usepackage{natbib}
 \usepackage{amsmath, amssymb, amsthm}
 \definecolor{shadecolor}{gray}{0.92}
+\definecolor{bgcode}{gray}{0.98}
+\usemintedstyle{friendly}
 \usepackage[dvipdfmx,colorlinks=true,linkcolor=blue,filecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{pxjahyper}
 \surroundwithmdframed[backgroundcolor=shadecolor,hidealllines=true]{verbatim}
@@ -19,7 +21,7 @@
 \setlength{\textheight}{45\baselineskip}
 \addtolength{\textheight}{\topskip}
 
-\setlength{\textheight}{58\baselineskip}
+\setlength{\textheight}{54\baselineskip}
 \author{sugayu}
 \date{\today}
 \title{\textbf{Fittingに使われるPythonモジュールの比較}}
@@ -27,7 +29,7 @@
 
 \maketitle
 \section{導入}
-\label{sec:orgd7ef9d6}
+\label{sec:org8cc2c74}
 最尤法(Maximum Likelihood Methods)を提供するデータのフィッティングに使用可能なPythonモジュールは数多くある。
 これらを比較することで、
 (1) 使用感の違いを見る、
@@ -36,9 +38,9 @@
 ことを目的とする。
 ベイズ統計やMCMCのパッケージの比較は目的としていない。
 \section{比較対象のPythonモジュール}
-\label{sec:orgc65a184}
+\label{sec:orgdf3c0f7}
 \subsection{NumPy}
-\label{sec:orgc24a421}
+\label{sec:orgfc1de6d}
 \texttt{NumPy} は \texttt{polynomial} という多項式を扱うモジュールを提供している。
 この中で \texttt{fit()} というメソッドが提供されており、これを使ってモデルの最適化が可能である。
 内部で \texttt{numpy.linalg.lstsq()} という最適化関数を使っており、\(|y - Ax |\) を最小化するという説明があるものの最適化手法は不明。
@@ -49,7 +51,7 @@
 \item \href{https://numpy.org/doc/stable/reference/generated/numpy.linalg.lstsq.html\#numpy.linalg.lstsq}{numpy.linalg.lstsq — NumPy v2.2 Manual}
 \end{itemize}
 \subsection{Scipy}
-\label{sec:orgf6272cf}
+\label{sec:orgf79f88d}
 \texttt{SciPy} は \texttt{optimize} という最適化のためのモジュールを提供している。
 この中で \texttt{curve\_fit()} という関数は非線形最小二乗法によりモデルの最適化を行う。
 \texttt{method} 引数により最適化手法をLevenberg-Marquardt法、Trust Region Reflective法、dogleg法の中から選べる。
@@ -58,7 +60,7 @@ LM法の場合は最尤推定にFortranで実装されたMINPACKというプロ�
 他の手法の場合は最尤推定に \texttt{scipy.optimize.least\_square()} という新しい関数を使用している。
 データの誤差 \texttt{sigma} の中に誤差の相関(共分散)を入れることもできる。
 \begin{itemize}
-\item \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve\_fit.html}{curve\textsubscript{fit} — SciPy v1.15.2 Manual}
+\item \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve\_fit.html}{curve\_fit — SciPy v1.15.2 Manual}
 \end{itemize}
 
 2変数の間の線形回帰は \texttt{linregress()} という関数でも与えられており、こちらを使えば関数を指定してやる必要がない。
@@ -69,7 +71,7 @@ LM法の場合は最尤推定にFortranで実装されたMINPACKというプロ�
 \item \href{https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.linregress.html\#scipy.stats.linregress}{linregress — SciPy v1.15.2 Manual}
 \end{itemize}
 \subsection{Astropy}
-\label{sec:org22b30ff}
+\label{sec:org9eb326e}
 天文解析パッケージ \texttt{Astropy} は \texttt{modeling} というモジュールを提供している。
 天文関係で使うと思われるモデルやフィッティングの関数、単位付き変数のフィッティングが整備されているので、
 使いたいモデルが実装されていないか確認する価値がある。
@@ -95,7 +97,7 @@ User Interfaceが関数ではなくクラス中心で複雑なので、それに
 \item \href{https://docs.astropy.org/en/stable/modeling/fitting.html}{Fitting Models to Data — Astropy v7.0.1}
 \end{itemize}
 \subsection{specutils}
-\label{sec:orgfc40bd3}
+\label{sec:orge76c49a}
 天体スペクトルを扱うパッケージ \texttt{specutils} は輝線フィッティングを含めたスペクトル解析のためのモジュールを提供する。
 フィッティングの際には内部で \texttt{Astropy.modeling} モジュールが呼ばれている。
 ユーザーの輝線フィッティングを助けるパッケージとも言える。
@@ -103,7 +105,7 @@ User Interfaceが関数ではなくクラス中心で複雑なので、それに
 \item \href{https://specutils.readthedocs.io/en/stable/fitting.html}{Line/Spectrum Fitting — specutils v1.19.1.dev0+g746a5d4.d20241105}
 \end{itemize}
 \subsection{MPFIT}
-\label{sec:orgcf29e1f}
+\label{sec:orgc7e6f33}
 \texttt{MPFIT} は古くから天文学で使われているフィッティングパッケージ。
 元々はFortranで書かれた \texttt{MINPACK-1} というパッケージの中のフィッティングコードをCraig MarkwardtさんがIDLで書き直した。
 それをMark RiversさんがPythonで書き直し、Sergey Koposovさんが \texttt{numpy} で実装し直した後にPython3で動くようにした。
@@ -116,9 +118,9 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 
 \texttt{pip} でダウンロードできる形式では配布されていない。
 \texttt{astrolibpy} をダウンロードしたあと、Pythonのパスが通っている場所に \texttt{mpfit} のディレクトリを置いたら良い。
-たぶんディレクトリ直下に mpfit/\_\textsubscript{init}\_\textsubscript{.py} ファイルを設置する必要がある (空ファイルで良い)。
+たぶんディレクトリ直下に mpfit/\_\_init\_\_.py ファイルを設置する必要がある (空ファイルで良い)。
 \subsection{LMFIT}
-\label{sec:org5f35a31}
+\label{sec:orgb836d51}
 \texttt{LMFIT} は非線形最小二乗法を解くためのパッケージ。
 \texttt{scipy.optimize} モジュールから着想を得て、フィッティングのための便利な機能を多数導入している。
 多くのモデル、多様な最適化手法、パラメータ制御法、解の解析手法が提供されている。
@@ -129,7 +131,8 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 基本的に最適化には \texttt{scipy.optimize} が内部で使われており、 例えば \texttt{method='leastsq'} が指定されているときは \texttt{scipy.optimize.leastsq()} が使用されている。
 \texttt{Minimizer.minimize()} の説明:
 \begin{verbatim}
-In most cases, these methods wrap and use the method with the same name from `scipy.optimize`, or use `scipy.optimize.minimize` with the same `method` argument.
+In most cases, these methods wrap and use the method with the same name from `scipy.optimize`,
+or use `scipy.optimize.minimize` with the same `method` argument.
 \end{verbatim}
 
 \href{https://lmfit.github.io/lmfit-py/intro.html}{Getting started}で述べられている \texttt{scipy.optimize.leastsq()} から改善したかった点は、
@@ -146,9 +149,9 @@ In most cases, these methods wrap and use the method with the same name from `sc
 \item \href{https://lmfit.github.io/lmfit-py/fitting.html\#minimizer-emcee-calculating-the-posterior-probability-distribution-of-parameters}{Performing Fits and Analyzing Outputs — Non-Linear Least-Squares Minimization and Curve-Fitting for Python}
 \end{itemize}
 \section{理想的な線形データのフィッティング結果}
-\label{sec:org35c8a2e}
+\label{sec:org4a007d0}
 \subsection{データ作成}
-\label{sec:org6ab1a8c}
+\label{sec:orgd3393f0}
 \begin{itemize}
 \item 平均: 100.0
 \item 標準偏差: 10.0
@@ -156,7 +159,7 @@ In most cases, these methods wrap and use the method with the same name from `sc
 \item 直線: \(y = 2.0 (x - 100.0) + 220.0\)
 \end{itemize}
 \texttt{\# makefig() は菅原が編集した matplotlib の関数}
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import numpy as np
 from numpy.random import default_rng
 from sugayutils.figure import makefig
@@ -182,10 +185,10 @@ _ = ax.scatter(x, y)
 \phantomsection
 \label{}
 \begin{center}
-\includegraphics[width=1.0\linewidth]{./obipy-resources/data.png}
+\includegraphics[width=0.5\textwidth]{./obipy-resources/data.png}
 \end{center}
 \subsection{解析解}
-\label{sec:org90e6171}
+\label{sec:org8e45a28}
 一次方程式の場合は解析解が得られている。
 係数の最尤推定値は
 \begin{align}
@@ -205,7 +208,7 @@ _ = ax.scatter(x, y)
 \end{itemize}
 
 以上より最尤推定値を求める。
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 denom = size * np.sum(xn**2) - np.sum(xn) ** 2
 sol_analytic = {
     'a': (size * np.sum(xn * y) - np.sum(xn) * np.sum(y)) / denom,
@@ -227,14 +230,14 @@ sol_analytic
 
 1sigma誤差の範囲に真値が収まっている。
 \subsection{Numpy}
-\label{sec:orgd972dc2}
+\label{sec:org1305aa8}
 \texttt{Polynomial.fit()} を使ったフィッティング手法を示す。
 デフォルトの返り値は \texttt{Polynomial} インスタンスである。
 \texttt{full=True} のキーワード引数を与えるとタプルを出力し、2番目の要素にフィッティングの情報が含まれる。
 \begin{itemize}
 \item \href{https://numpy.org/doc/stable/reference/generated/numpy.polynomial.polynomial.Polynomial.fit.html\#numpy.polynomial.polynomial.Polynomial.fit}{numpy.polynomial.polynomial.Polynomial.fit — NumPy v2.2 Manual}
 \end{itemize}
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from numpy.polynomial import Polynomial
 
 p, status = Polynomial.fit(xn, y, 1, w=1 / sigma, full=True)
@@ -253,16 +256,16 @@ sol_numpy
 最尤推定値は解析解とほとんど正確に一致したが、誤差を出力してくれないようである。
 なお、 \texttt{Polynomial.fit()} は \texttt{Polynomial} クラスのクラスメソッドである。
 \subsection{Scipy}
-\label{sec:orgae93679}
-\subsubsection{curve\textsubscript{fit}}
-\label{sec:org3933005}
+\label{sec:org52cb7e7}
+\subsubsection{curve\_fit}
+\label{sec:org986d1b1}
 引数 \texttt{absolute\_sigma=True} にすると誤差 \texttt{sigma} を絶対値で設定することになる。
 デフォルトは \texttt{absolute\_sigma=False} なので相対値で指定、返り値の共分散 \texttt{pcov} も相対値になるので注意する。
 \texttt{pcov} の絶対値と相対値の関係は \texttt{pcov(absolute\_sigma=False) = pcov(absolute\_sigma=True) * chisq(popt)/(M-N)} 。
 引数 \texttt{full\_output=True} でフィッティングに関する細かい出力が得られる。
 他にも \texttt{bounds} や \texttt{loss} など多くの引数を持つ。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from scipy.optimize import curve_fit
 
 
@@ -292,11 +295,11 @@ sol_scipy_curvefit
 結果には示していないが、pcovの値を見ると共分散項はおよそ-0.04であり、
 最適化されたパラメータ間の相関(共分散)がほとんどゼロであることが分かる。
 \subsubsection{linregress}
-\label{sec:org492e565}
+\label{sec:org9a53b0e}
 引数 \texttt{alternative} を加えることで検定も可能らしい。
 誤差 \texttt{sigma} を与えることはできない。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from scipy import stats
 
 res = stats.linregress(xn, y)
@@ -322,11 +325,11 @@ sol_scipy_linregress
 誤差が解析解より少し大きいのは、おそらく内部でデータの誤差を相関係数やデータの標準偏差(標本標準偏差)から評価しているから。
 実際、 \texttt{np.std(noise)} の値は12であり、最尤推定値の誤差も同じくらいの倍率で大きくなっている(完全に一致はしない)。
 \subsection{Astropy}
-\label{sec:orge3e2e14}
+\label{sec:org2157464}
 \subsubsection{LinearLSQFitter}
-\label{sec:orgb14cfab}
+\label{sec:org936af52}
 \texttt{LinearLSQFitter} の場合。内部で \texttt{numpy.linalg.lstsq()} を使っているので誤差の出力は無し。
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from astropy.modeling import models, fitting
 
 fit = fitting.LinearLSQFitter()
@@ -344,13 +347,13 @@ sol_astropy_linear
 
 内部の実装どおり \texttt{numpy.Polynomial.fit()} と同じ結果が得られ、解析解と一致した。
 \subsubsection{LMLSQFitter}
-\label{sec:orgdd7d47d}
+\label{sec:org116b6a1}
 \texttt{LMLSQFitter} は内部で \texttt{scipy.optimize.least\_squares()} を使っている。
 引数 \texttt{calc\_uncertainties=True} を与えるとパラメータ誤差を計算して \texttt{fitted\_line.cov\_matrix} と \texttt{fitted\_line.stds} に値が入力される。
 この引数を与えなくても、 \texttt{fit['fit\_info']} にフィッティングの結果は残されている。
 ちなみに、 \texttt{scipy.optimize.curve\_fit()} のデフォルトの結果を修正して、与えた誤差は絶対値 (\texttt{absolute\_sigma=True}) になるように内部で補正されている。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from astropy.modeling import models, fitting
 
 fit = fitting.LMLSQFitter(calc_uncertainties=True)
@@ -387,10 +390,10 @@ WARNING: Model is linear in parameters; consider using linear fitting methods. [
 という警告が出る。
 線形フィッティングは \texttt{LinearLSQFitter} がお薦めのようである (誤差を出力してくれないのに？)。
 \subsection{MPFIT}
-\label{sec:orgb3583d9}
+\label{sec:orgdfc115d}
 コードの表記がPythonを使ううえであまり直感的ではないので、使うならさらにwrapperを作ってしまうのが便利な気がする。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from mpfit.mpfit import mpfit
 import numpy as np
 
@@ -436,12 +439,12 @@ Iter       2    CHI-SQUARE =  43.05872579  DOF =  28
 \end{verbatim}
 まじか、Levenberg-Marquardt法ってIteration 1回で終わるのか\ldots{} 信じられへんな\ldots{}
 \subsection{LMFIT}
-\label{sec:org3ffdc2e}
+\label{sec:orgc85e022}
 \subsubsection{関数を使った書き方}
-\label{sec:orga8a085f}
+\label{sec:orga1778cf}
 書き方は \texttt{MPFIT} と似ているところがある。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import numpy as np
 import lmfit
 
@@ -477,11 +480,11 @@ sol_lmfit
 \texttt{scale\_covar=False} を指定すると他の手法と同じ結果が得られる。
 スケールすること自体は悪くなはないが、自分の使っている手法が中で何をやっているかはちゃんと理解しておく必要があるだろう。
 \subsubsection{Modelクラスを使った書き方}
-\label{sec:org12eeaa9}
+\label{sec:orge43cfc5}
 同じ \texttt{lmfit} でも \texttt{Model} クラスを使った書き方もある。
 既存のフィッティング関数を使ったり、それと自分のオリジナルの関数を組み合わせたりする場合はこちらが便利かもしれない。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import numpy as np
 from lmfit.models import LinearModel
 
@@ -511,8 +514,8 @@ sol_lmfit2
 数値誤差も含めると上の手法と完全に一致するわけではない。なぜ？
 こちらも \texttt{Model.fit()} に \texttt{scale\_covar} という引数がある。
 \subsection{まとめ}
-\label{sec:org5c88113}
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\label{sec:org9fd8fce}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import pandas as pd
 
 data = {
@@ -546,7 +549,7 @@ LMFIT Model.fit   1.841987  221.093274  0.227002  2.278678
 
 (誤差のスケールを除いて) 全ての数値が一致した。
 \subsection{図}
-\label{sec:org5e487a8}
+\label{sec:orgdb994b3}
 \texttt{LMFIT} は手軽にベストフィット関数の誤差範囲を示すことができる。
 \begin{itemize}
 \item \href{https://lmfit.github.io/lmfit-py/examples/documentation/model\_uncertainty\_pred.html\#sphx-glr-examples-documentation-model-uncertainty-pred-py}{Model - uncertainty pred — Non-Linear Least-Squares Minimization and Curve-Fitting for Python}
@@ -560,7 +563,7 @@ LMFIT Model.fit   1.841987  221.093274  0.227002  2.278678
 \texttt{scale\_covar=False} を与えて \texttt{lmfit} で計算し直した。
 また、 \texttt{xx - x0} をどこで使うか少し考えないといけないことに注意。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from sugayutils.core import colors as col
 from sugayutils.figure import makefig
 
@@ -585,16 +588,16 @@ ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
 \end{verbatim}
 
 \begin{center}
-\includegraphics[width=1.0\linewidth]{./obipy-resources/fit_linear.png}
+\includegraphics[width=0.5\textwidth]{./obipy-resources/fit_linear.png}
 \end{center}
 
 データを生成した新の直線を青破線、最尤推定した直線を赤実線、その誤差を淡い赤帯で示した。
 \section{理想的な輝線データのフィッティング結果}
-\label{sec:org948a8c6}
+\label{sec:org2507f38}
 \subsection{データ作成}
-\label{sec:org9c5e32c}
+\label{sec:org386d352}
 ガウス関数に従う模擬輝線データを作成する。
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import numpy as np
 from numpy.random import default_rng
 
@@ -628,10 +631,10 @@ sol_answer = {
 ここで、厳密にはフラックスの保存を考えずにガウス関数を離散化してフィッティングしていることに注意する。
 線幅sigmaが2ピクセルあるのでほとんど問題ないはずだが、線幅が細すぎる場合にはこのガウス関数の離散化はフラックスを全く保存しない。
 \subsection{Scipy}
-\label{sec:org80badb5}
+\label{sec:org6ca654c}
 初期値 \texttt{p0} を与えないと収束しないだろう。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from scipy.optimize import curve_fit
 
 
@@ -673,15 +676,15 @@ sol_scipy
 'e_y0': 0.4525080145096782}
 \end{verbatim}
 \subsection{Astropy}
-\label{sec:org2beccca}
+\label{sec:orgcd8dda1}
 \begin{itemize}
 \item 面積を変数に持つガウス関数を使いたいので \texttt{AreaGaussian1D} を定義する必要がある: \href{https://docs.astropy.org/en/latest/modeling/jointfitter.html\#example-spectral-line}{JointFitter — Astropy v7.1.dev604+g07b8873e0}。
 \item 輝線幅 \texttt{stddev} に定義域があるので \texttt{fitter} はLM法ではなく \texttt{TRFLSQFitter} を選んだ。
-\item 連続光と輝線の和を足し算で定義すると、アウトプットの変数には番号 "\textsubscript{0}" や "\textsubscript{1}" がつく。
+\item 連続光と輝線の和を足し算で定義すると、アウトプットの変数には番号 "\_0" や "\_1" がつく。
 \end{itemize}
 モデルを組むのに考えないといけないことがちょっと多くて気が逸らされそうな印象。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from astropy.modeling import models, fitting, Fittable1DModel
 from astropy.modeling.parameters import Parameter
 from astropy.modeling.functional_models import FLOAT_EPSILON
@@ -734,7 +737,7 @@ sol_astropy
 逆に自分でモデルを組まないといけない場合はちょっとめんどくさい。
 (Pythonではこれくらいのユーザー定義関数を作るのはあたりまえという感覚を持っていた方がいいというのはある。)
 \subsection{specutils}
-\label{sec:orgd9d6df7}
+\label{sec:org594bba4}
 はじめにスペクトルのオブジェクト \texttt{specutils.Spectrum1D} を定義する。
 入力する引数(\texttt{flux}, \texttt{spectral\_axis})等は \texttt{astropy.units.Quantity} でないといけないので適当に定義する。
 \texttt{specutils.fitting.estimate\_line\_parameters()} という関数はどうやらパラメータをざっくり推定するための関数。本来は初期値を与えるのに使えるのかもしれない。
@@ -751,7 +754,7 @@ sol_astropy
 フィッティングのときにこの誤差を考慮するためには、 \texttt{fit\_lines()} で \texttt{weights='unc'} と引数を渡す必要がある。
 \texttt{weights=1/sigma} のように引数を渡せば \texttt{StdDevUncertainty} を使う必要がないが、この場合も \texttt{weights} に与えられる配列は単位を持つ必要がある。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import astropy.units as u
 from astropy.modeling import models, fitting, Fittable1DModel
 from astropy.nddata.nduncertainty import StdDevUncertainty
@@ -820,8 +823,8 @@ sol_specutils
 総じて、フィッティングするだけならかなり面倒くさい。
 \texttt{specutils} を使っているなら便利だが(単位もその中で自然に使うと思うので)、フィッティングをするためだけに使うにはオーバースペック。
 \subsection{MPFIT}
-\label{sec:org012f194}
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\label{sec:org580a7e7}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from mpfit.mpfit import mpfit
 import numpy as np
 
@@ -870,11 +873,11 @@ sol_mpfit
 \texttt{specutils} のあとに実装するとめっちゃ楽に感じる\ldots{}
 なお、フィッティングが収束するまでに30回iterationしている。
 \subsection{LMFIT}
-\label{sec:org21e5dd8}
+\label{sec:org6658c17}
 たまたま \texttt{GaussianModel} の引数 \texttt{amplitude} がフラックスに相当したので楽に実装できた。
 なお、内部でピーク値 \texttt{height} も自動的に計算されている。誤差伝播がどこまで正しいかは知らない。
 
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import numpy as np
 from lmfit.models import ConstantModel, GaussianModel
 
@@ -911,8 +914,8 @@ sol_lmfit
 'e_y0': 0.4524926545009989}
 \end{verbatim}
 \subsection{まとめ}
-\label{sec:org46c93d9}
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\label{sec:org1d67503}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import pandas as pd
 
 data = {
@@ -948,8 +951,8 @@ LMFIT      10.336947  0.452493
 
 線形フィッティングよりも数値誤差が大きいものの、結果は全て一致した。
 \subsection{図}
-\label{sec:org1331f13}
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\label{sec:org5f9e9fd}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from sugayutils.core import colors as col
 from sugayutils.figure import makefig
 
@@ -974,7 +977,7 @@ ax.fill_between(xx, yy - ye, yy + ye, color=col.bpink, zorder=0)
 \end{verbatim}
 
 \begin{center}
-\includegraphics[width=1.0\linewidth]{./obipy-resources/gauss.png}
+\includegraphics[width=0.5\textwidth]{./obipy-resources/gauss.png}
 \end{center}
 
 なお、ガウス関数の面積と線幅の推定値には相関があるので、モデル関数の不定性を図示する際には

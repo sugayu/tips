@@ -1,9 +1,9 @@
 #+title: *Fittingに使われるPythonモジュールの比較*
 #+AUTHOR: sugayu
 #+LATEX_CLASS: jsarticle
-#+LATEX_CLASS_OPTIONS: [a4paper, 8pt, notitlepage, uplatex, dvipdfmx]
-#+LATEX_HEADER: \setlength{\textheight}{58\baselineskip}
-#+OPTIONS: toc:nil
+#+LATEX_CLASS_OPTIONS: [a4paper, 9pt, notitlepage, uplatex, dvipdfmx]
+#+LATEX_HEADER: \setlength{\textheight}{54\baselineskip}
+#+OPTIONS: toc:nil ^:nil
 
 * 導入
 最尤法(Maximum Likelihood Methods)を提供するデータのフィッティングに使用可能なPythonモジュールは数多くある。
@@ -90,7 +90,8 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 基本的に最適化には ~scipy.optimize~ が内部で使われており、 例えば ~method='leastsq'~ が指定されているときは ~scipy.optimize.leastsq()~ が使用されている。
 ~Minimizer.minimize()~ の説明:
 #+begin_example
-  In most cases, these methods wrap and use the method with the same name from `scipy.optimize`, or use `scipy.optimize.minimize` with the same `method` argument.
+  In most cases, these methods wrap and use the method with the same name from `scipy.optimize`,
+  or use `scipy.optimize.minimize` with the same `method` argument.
 #+end_example
 
 [[https://lmfit.github.io/lmfit-py/intro.html][Getting started]]で述べられている ~scipy.optimize.leastsq()~ から改善したかった点は、
@@ -136,6 +137,8 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 #+RESULTS:
 :results:
 # Out[2]:
+#+ATTR_HTML: :width 50%
+#+ATTR_LATEX: :width 0.5\textwidth
 [[file:./obipy-resources/data.png]]
 :end:
 
@@ -541,6 +544,8 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 :results:
 # Out[44]:
 : <matplotlib.collections.FillBetweenPolyCollection at 0x7fc99e5dfd40>
+#+ATTR_HTML: :width 50%
+#+ATTR_LATEX: :width 0.5\textwidth
 [[file:./obipy-resources/fit_linear.png]]
 :end:
 
@@ -939,6 +944,8 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 :results:
 # Out[29]:
 : <matplotlib.collections.FillBetweenPolyCollection at 0x7f5a17df07d0>
+#+ATTR_HTML: :width 50%
+#+ATTR_LATEX: :width 0.5\textwidth
 [[file:./obipy-resources/gauss.png]]
 :end:
 

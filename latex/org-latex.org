@@ -22,6 +22,7 @@ Emacs上におけるLaTeXクラスは ~init.el~ に自分で調整して指定�
 クラスのオプションを指定したい場合は以下のようにしてオプションを変更できる。
 #+begin_example
   ,#+LATEX_CLASS_OPTIONS: [oneside,twocolumn]
+  ,#+LATEX_CLASS_OPTIONS: [a4paper, 9pt, notitlepage, uplatex, dvipdfmx]
 #+end_example
 デフォルトのコンパイラは ~ptex2pdf -u -l~ を使って ~uplatex~ を起動させている(はず)。
 英文のクラスにする際にはコンパイラを変更する。
@@ -36,9 +37,12 @@ Emacs上におけるLaTeXクラスは ~init.el~ に自分で調整して指定�
   ,#+LATEX_HEADER: \subtitle{2024/09/02--2024/09/08}
 #+end_example
 これらのヘッダー情報は、他の書類にも共通する内容であれば ~init.el~ に書きこんだり ~\input{}~ で挿入したりして共通化するのが良い。
-目次(Table of Contents)を表示したくない場合には以下を打つ。
+
+他にもorg文書を他の形式へ出力する際の細かな設定は[[info:org#Export Settings][org#Export Settings]]に書かれてある。
+例えば、目次(Table of Contents)を表示したくない場合やアンダーバーを下小文字にしたくない場合には以下を打つ。
 #+begin_example
   ,#+OPTIONS: toc:nil
+  ,#+OPTIONS: ^:nil
 #+end_example
 
 * 要素の挿入
@@ -68,6 +72,10 @@ F = \int_{-\infty}^{\infty} f_{\nu} d\nu
 ** 画像
 画像は ~org-mode~ と同じ要領で入れる。
 ~#+ATTR_HTML: :width 30%~ を使えばHTML上で各画像のサイズを変更できる。
+~#+ATTR_LATEX: :width 0.38\textwidth~ を使えばLaTeX上でサイズを変更できる。
+- [[info:org#Images in HTML export][org#Images in HTML export]]
+- [[info:org#Images in LaTeX export][org#Images in LaTeX export]]
+- [[https://emacs.stackexchange.com/questions/38689/org-images-in-latex-export-set-default-width][org mode - org Images in LaTeX export set default width - Emacs Stack Exchange]]
 
 #+CAPTION: ここにキャプションが入る。M83は南の回転花火銀河とも呼ばれているらしい (Credit: CTIO/NOIRLab/DOE/NSF/AURA)。
 #+NAME: fig:m83

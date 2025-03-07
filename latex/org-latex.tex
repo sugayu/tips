@@ -1,12 +1,18 @@
-% Created 2024-10-29 火 19:43
+% Created 2025-03-07 金 09:30
 \documentclass[a4paper, 10pt, notitlepage, uplatex, dvipdfmx]{jsarticle}
-\usepackage{color}
-\definecolor{shadecolor}{gray}{0.92}
+\usepackage[dvipdfmx]{graphicx, color}
+\usepackage{ulem}
+\usepackage[utf8]{inputenc}
+\usepackage{mlmodern}
+\usepackage{mdframed}
+\usepackage{minted}
 \usepackage{natbib}
+\usepackage{amsmath, amssymb, amsthm}
+\definecolor{shadecolor}{gray}{0.92}
+\definecolor{bgcode}{gray}{0.98}
+\usemintedstyle{friendly}
 \usepackage[dvipdfmx,colorlinks=true,linkcolor=blue,filecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{pxjahyper}
-\usepackage{minted}
-\usepackage{mdframed}
 \surroundwithmdframed[backgroundcolor=shadecolor,hidealllines=true]{verbatim}
 \renewcommand{\baselinestretch}{0.9}
 \setlength{\voffset}{-0.7in}
@@ -15,11 +21,6 @@
 \setlength{\textheight}{45\baselineskip}
 \addtolength{\textheight}{\topskip}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
-\usepackage{amsmath, amssymb, amsthm}
-\usepackage[dvipdfmx]{graphicx, color}
-\usepackage{ulem}
 \newcommand{\NaID}{\mbox{Na\,{\sc i}\,D}}
 \author{sugayu}
 \date{\today}
@@ -28,7 +29,7 @@
 
 \maketitle
 \section{org-modeにおける\LaTeX{}文章の書き方}
-\label{sec:org04b4cbd}
+\label{sec:org5c59a17}
 org-exportを使うことでorg文章を\LaTeX{}文章へ変換することができる。
 パッケージ名は \texttt{ox-latex} 。
 
@@ -44,6 +45,7 @@ Emacs上における\LaTeX{}クラスは \texttt{init.el} に自分で調整し�
 クラスのオプションを指定したい場合は以下のようにしてオプションを変更できる。
 \begin{verbatim}
 #+LATEX_CLASS_OPTIONS: [oneside,twocolumn]
+#+LATEX_CLASS_OPTIONS: [a4paper, 9pt, notitlepage, uplatex, dvipdfmx]
 \end{verbatim}
 デフォルトのコンパイラは \texttt{ptex2pdf -u -l} を使って \texttt{uplatex} を起動させている(はず)。
 英文のクラスにする際にはコンパイラを変更する。
@@ -58,14 +60,17 @@ Emacs上における\LaTeX{}クラスは \texttt{init.el} に自分で調整し�
 #+LATEX_HEADER: \subtitle{2024/09/02--2024/09/08}
 \end{verbatim}
 これらのヘッダー情報は、他の書類にも共通する内容であれば \texttt{init.el} に書きこんだり \texttt{\textbackslash{}input\{\}} で挿入したりして共通化するのが良い。
-目次(Table of Contents)を表示したくない場合には以下を打つ。
+
+他にもorg文書を他の形式へ出力する際の細かな設定は\href{info:org\#Export Settings}{org\#Export Settings}に書かれてある。
+例えば、目次(Table of Contents)を表示したくない場合やアンダーバーを下小文字にしたくない場合には以下を打つ。
 \begin{verbatim}
 #+OPTIONS: toc:nil
+#+OPTIONS: ^:nil
 \end{verbatim}
 \section{要素の挿入}
-\label{sec:org8eed237}
+\label{sec:orga0b5e0c}
 \subsection{数式}
-\label{sec:org91c9d3e}
+\label{sec:org911c88f}
 \texttt{org-mode} は\LaTeX{}の数式の仕様を導入してくれているので、そのまま使うことができる。
 文章中に数式を挿入すると \(\Sigma_{n = 0}^{\infty} (1/x)^n < 1\ (x = 2)\) のようになる。
 数式環境で挿入すると
@@ -77,7 +82,7 @@ F = \int_{-\infty}^{\infty} f_{\nu} d\nu
 式番号も式\ref{eq:1}のように参照することができる。
 このとき \texttt{\#+NAME} を使ってラベルをつける必要があることに注意する。
 \subsection{表}
-\label{sec:org33391cc}
+\label{sec:org1726269}
 \texttt{org-table} が使える。
 
 \begin{center}
@@ -92,13 +97,18 @@ M101 & \(1\times10^{-22}\) & \(4\times10^{-23}\) & \(1\times10^{-23}\)\\
 \end{tabular}
 \end{center}
 \subsection{画像}
-\label{sec:org0517414}
+\label{sec:orgab0471a}
 画像は \texttt{org-mode} と同じ要領で入れる。
 \texttt{\#+ATTR\_HTML: :width 30\%} を使えばHTML上で各画像のサイズを変更できる。
+\texttt{\#+ATTR\_LATEX: :width 0.38\textbackslash{}textwidth} を使えば\LaTeX{}上でサイズを変更できる。
+\begin{itemize}
+\item \href{info:org\#Images in HTML export}{org\#Images in HTML export}
+\item \href{info:org\#Images in LaTeX export}{org\#Images in \LaTeX{} export}
+\end{itemize}
 
 \begin{figure}[htbp]
 \centering
-\includegraphics[width=.9\linewidth]{m83.jpg}
+\includegraphics[width=1.0\linewidth]{m83.jpg}
 \caption{\label{fig:m83}ここにキャプションが入る。M83は南の回転花火銀河とも呼ばれているらしい (Credit: CTIO/NOIRLab/DOE/NSF/AURA)。}
 \end{figure}
 
@@ -106,7 +116,7 @@ M101 & \(1\times10^{-22}\) & \(4\times10^{-23}\) & \(1\times10^{-23}\)\\
 また、画像と本文の間に1行空けないと\LaTeX{}変換時に画像をうまく認識してくれないので、画像の次の行は別段落として扱われる。
 引用は「画像\ref{fig:m83}」のようにやる。
 \subsection{コード}
-\label{sec:org3393c03}
+\label{sec:orgc40e900}
 \texttt{org-babel} を使ってPythonコードが挿入できる。
 デフォルトでは\LaTeX{}に出力したときソースコードは全て \texttt{verbatim} で囲まれている。
 そのためソースコードに装飾を施すためには工夫が必要になる。
@@ -117,7 +127,7 @@ M101 & \(1\times10^{-22}\) & \(4\times10^{-23}\) & \(1\times10^{-23}\)\\
 
 ソースコードをハイライトするパッケージとして \texttt{minted} が使える。
 以下のコマンドで \texttt{minted} を使うことができる。
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{common-lisp}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{common-lisp}
 (setq org-latex-listings 'minted)
 \end{minted}
 \texttt{org-latex-minted-options} で \texttt{minted} 用の設定を記述することができる。
@@ -128,20 +138,20 @@ M101 & \(1\times10^{-22}\) & \(4\times10^{-23}\) & \(1\times10^{-23}\)\\
 
 コードを書いたときのアウトプットは \texttt{:exports} 設定に依る。
 デフォルトの \texttt{:exports} は \texttt{code} なので、Pythonコードは \texttt{python} 環境のときはコードがそのまま表示される。
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{python}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{python}
 import numpy as np
 a = np.arange(10)
 print(a)
 \end{minted}
 
 \texttt{ob-ipython} でも同様で、結果を実行していたとしても \texttt{:exports code} の場合は実行されない。
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import numpy as np
 np.arange(10)
 \end{minted}
 
 このとき \texttt{ob-ipython} を使って計算結果を走らせていたとしても、 \texttt{:results} に \texttt{drawer} が入っていると表示されないので注意する。
-\begin{minted}[frame=lines,framesep=2mm,linenos=true,breaklines]{ipython}
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import numpy as np
 np.arange(10)
 \end{minted}
