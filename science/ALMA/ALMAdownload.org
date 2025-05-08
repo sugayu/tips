@@ -1,0 +1,24 @@
+#+title: *ALMAデータのダウンロード方法*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle
+#+OPTIONS: toc:nil
+
+* 自分がPIの観測データ
+自分がPIの観測データにはSnooPI経由でアクセスできる。
+欲しいデータのScheduling Blockを選択し、Archive Queryを押す。
+ALMAアーカイブが開かれるので以下公開済みデータと同様にする。
+
+* 公開済みデータ
+ダウンロードしたいデータを選ぶ。
+較正済みデータが欲しい場合はfitsファイルをダウンロードすれば良い。
+
+** 自分で較正する場合
+~scriptForPI.py~ を使って自分で較正してmeasurement setを作成する場合には、まずREADMEを読む。
+「Create the calibrated Measurement Sets」の項目に従って *auxiliary.tar と *asdm.tar をダウンロードする。
+なぜかダウンロード項目に raw/*asdm.tar は含まれていないので、左上の「Open Legacy Request Handler」を開く。
+ダウンロード可能な項目から、product (とraw(semipass))以外のファイルをダウンロードする。
+~download-files.sh~ のようなファイルがダウンロードされたら任意の場所で実行する。
+尋ねられる項目に従って、tarファイルの展開まで行う。
+以上を実行すると、現在のディレクトリに観測プロポーザル番号が名付けられたディレクトリが作成され、
+その中にダウンロードされたデータが入っている。
+あとはそのデータを較正すれば良い。
