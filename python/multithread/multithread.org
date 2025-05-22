@@ -1,7 +1,6 @@
 #+title: *Multi-Threadingの使い方*
 #+AUTHOR: sugayu
 #+LATEX_CLASS: jsarticle
-#+LATEX_HEADER: \newcommand{\NaID}{\mbox{Na\,{\sc i}\,D}}
 #+OPTIONS: toc:nil
 
 * いつ使うのか
