@@ -2,6 +2,8 @@
 *.synctex(busy)
 *.pygtex
 *.pygstyle
+*.minted
+*.tex
 ltximg/
 /python/.DS_Store
 /python/fitting/.DS_Store
