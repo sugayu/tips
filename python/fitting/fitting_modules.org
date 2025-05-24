@@ -718,11 +718,10 @@ Levenberg-Marquardt法を使っているので効率良く最小二乗問題を�
 
 #+begin_src ipython :session :exports both :async t :results raw drawer :eval never-export
   import astropy.units as u
-  from astropy.modeling import models, fitting, Fittable1DModel
+  from astropy.modeling import models, Fittable1DModel
   from astropy.nddata.nduncertainty import StdDevUncertainty
   from specutils import Spectrum1D
   from specutils.fitting import fit_lines
-  from specutils.manipulation import extract_region
 
 
   class AreaGaussian1D(Fittable1DModel):
