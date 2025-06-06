@@ -1,0 +1,28 @@
+#+title: *Elisp---Emacs LISP*
+#+AUTHOR: sugayu
+#+OPTIONS: toc:nil
+
+* 基本構文
+** 条件分岐
+単純な条件分岐には ~if~ が使える。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (if t
+      (message "Print this if True")
+    (message "Print this if false"))
+#+end_src
+
+#+RESULTS:
+:results:
+Print this if True
+:end:
+
+複数の条件分岐には ~cond~ が使える。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (cond ((eq "a" "not a") "False")
+        (t "True"))
+#+end_src
+
+#+RESULTS:
+:results:
+True
+:end:
