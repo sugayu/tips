@@ -76,6 +76,8 @@ F = \int_{-\infty}^{\infty} f_{\nu} d\nu
 - [[info:org#Images in HTML export][org#Images in HTML export]]
 - [[info:org#Images in LaTeX export][org#Images in LaTeX export]]
 - [[https://emacs.stackexchange.com/questions/38689/org-images-in-latex-export-set-default-width][org mode - org Images in LaTeX export set default width - Emacs Stack Exchange]]
+emacsの設定では、 ~(setq org-latex-image-default-width "1.0\\linewidth")~ などとすれば
+exportする際の画像の大きさを一括で変更することができる。
 
 #+CAPTION: ここにキャプションが入る。M83は南の回転花火銀河とも呼ばれているらしい (Credit: CTIO/NOIRLab/DOE/NSF/AURA)。
 #+NAME: fig:m83
