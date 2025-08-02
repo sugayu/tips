@@ -135,6 +135,7 @@ f-stringとLaTeX記法は併存できる。
 ~matplotlib.gridspec.GridSpec~ を使うと引数 ~width_ratios~ などを使ってより柔軟なグリッドを作ることができる。
 ~GridSpec~ は ~fig.subplots()~ に引数として与えることもできるが、
 ~fig.add_subplot()~ で個別にパネルを作ることで ~projection~ などを柔軟に対応させられる。
+
 #+begin_src ipython :ipyfile ./obipy-resources/params_grids.png :session :exports code :results raw :eval never-export
   from matplotlib.gridspec import GridSpec
   gs = GridSpec(1, 2, width_ratios=(1.5, 1))
@@ -152,3 +153,47 @@ f-stringとLaTeX記法は併存できる。
 [[file:./obipy-resources/params_grids.png]]
 
 参照: [[https://stackoverflow.com/questions/10388462/matplotlib-different-size-subplots][python - Matplotlib different size subplots - Stack Overflow]]
+
+* 図
+** Nonuniform image
+ピクセルの形が長方形になるような、各列や行によってピクセル幅が異なる画像を作成する際には
+~NonUniformImage~ を使う。
+~ax.imshow~ は画像(Image)を定義する以外に[[https://github.com/matplotlib/matplotlib/blob/v3.10.5/lib/matplotlib/axes/_axes.py#L5750-L5996][内部で様々な設定を同時にしてくれている]]が、
+~NonUniformImage~ を使う場合には自分で画像の設定をする必要がある。
+例えば、以下の例では ~extent~ 自体は ~NonUniformImage~ を呼ぶ際に設定しているが、
+画像の縦横サイズ ~xlim~ と ~ylim~ は自動では設定されないので、
+ ~im.set_extent()~ を明示的に呼ぶことで ~extent~ に合わせて画像サイズを設定している。
+
+#+begin_src ipython :ipyfile ./obipy-resources/params_image_nonuniformimage.png :session :exports code :results raw :eval never-export
+  from matplotlib.image import NonUniformImage
+
+  fig = makefig(figsize=['small', 0.6])
+
+  x = (np.arange(15) - 7.0)
+  x = x**3 / 7.0**3 * 3.0
+  y = (np.arange(9) - 4.0)
+  image = np.exp(-0.5 * (x[None, ...]**2 + y[..., None]**2))
+  extent = (-3.5, 3.5, -4.5, 4.5)
+  kw = dict(
+      extent=extent,
+      origin='lower',
+      cmap='YlGn',
+  )
+
+  ax = fig.add_subplot(1, 2, 1)
+  im = NonUniformImage(ax, interpolation='nearest', **kw)
+  im.set_data(x, y, image)
+  im.set_extent(extent)
+  ax.add_image(im)
+  ax.set_aspect('auto')
+
+  ax = fig.add_subplot(1, 2, 2)
+  ax.imshow(image, aspect='auto', **kw)
+  _ = ax.set_title('Uniform (worng scale)')
+#+end_src
+
+#+RESULTS:
+# Out[49]:
+[[file:./obipy-resources/params_image_nonuniformimage.png]]
+
+- [[https://matplotlib.org/stable/gallery/images_contours_and_fields/image_nonuniform.html][Image nonuniform — Matplotlib 3.10.5 documentation]]
