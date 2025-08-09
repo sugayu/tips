@@ -25,7 +25,7 @@
 # Out[2]:
 [[file:./obipy-resources/fiducial.png]]
 
-* 目盛り
+* 座標
 
 ** 目盛り反転
 #+begin_src ipython :ipyfile ./obipy-resources/params_tick_inverse.png :session :exports code :results raw :eval never-export
@@ -66,6 +66,30 @@
 #+RESULTS:
 # Out[23]:
 [[file:./obipy-resources/params_ticks.png]]
+
+** データ座標と相対座標のあいだの変換
+デフォルトのプロットはデータ座標が使われており、
+描画領域 ~Axes~ に対する相対座標を使う場合は ~transform~ を使う。
+両軸を座標変換する ~ax.transAxes~ は ~Axes~ の属性なのでそのまま使う。
+片軸だけの変換はプライベート属性で与えられているので、メソッドを通じて使う。
+このメソッドは引数 ~which~ をとれるので必要があれば与える。
+なぜか「x軸」を相対座標に変換したいときに ~ax.get_yaxis_transform()~ を使うので、
+間違えないように注意する。
+
+#+begin_src ipython :ipyfile ./obipy-resources/params_coord_transform.png :session :exports both :results raw drawer :eval never-export
+  ax = plot_fiducial()
+  ax.text(-1.0, -1.0, 'Data coord.\n (-1, -1)')
+  ax.text(0.7, 0.7, 'Axes coord.\n (0.7, 0.7)', transform=ax.transAxes)
+  ax.text(-1.0, 0.7, 'y: Axes coord.\n (-1, 0.7).', transform=ax.get_xaxis_transform())
+  ax.text(0.7, -1.0, 'x: Axes coord.\n (0.7, -1)', transform=ax.get_yaxis_transform())
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[31]:
+: Text(0.7, -1.0, 'x: Axes coord.\n (0.7, -1)')
+[[file:./obipy-resources/params_coord_transform.png]]
+:end:
 
 * テキスト
 
