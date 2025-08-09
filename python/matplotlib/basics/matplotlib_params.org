@@ -87,8 +87,67 @@ f-stringとLaTeX記法は併存できる。
 [[file:./obipy-resources/params_text_fstring_latex.png]]
 
 * 矢印
-** arrow
-データ座標を使って矢印を描く。
+** annotate
+もともとはテキストに矢印をつけるための機能だが、テキストを入れずに矢印のみを書くこともできる。
+- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html][matplotlib.axes.Axes.annotate — Matplotlib 3.10.5 documentation]]
+詳細な設定は ~ArrowStyle~ から ~arrwostyle~ を選び、それに対して変更を加えることでできる。
+各パラメータの数字の単位はpt。おそらく描画領域の大きさに対して矢印のサイズが決まる。
+- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.ArrowStyle.html#matplotlib.patches.ArrowStyle][matplotlib.patches.ArrowStyle — Matplotlib 3.10.5 documentation]]
+- [[https://matplotlib.org/stable/gallery/text_labels_and_annotations/fancyarrow_demo.html][Annotation arrow style reference — Matplotlib 3.10.5 documentation]]
+
+*注意すべき点* として、
+デフォルトでは ~shrinkA=2.0~ 、 ~shrinkB=2.0~ に設定されており、
+そのままでは指定した位置から少し離れた位置に矢印の先端が来るように設定されている。
+annotateは何かを指し示すための機能なので、おそらく指し示す物から少し離れた位置に
+始点を置きたかったのであろう。
+また、 ~mutation_scale~ を指定することで初期値から拡大縮小できるが、
+この値の初期値はテキストサイズ ~font.size~ と同じ値になっているので
+入れた値の数だけ倍々に拡大縮小されるわけではないので注意する。
+
+#+begin_src ipython :ipyfile ./obipy-resources/params_annotate.png :session :exports both :results raw drawer :eval never-export
+  from matplotlib.patches import ArrowStyle
+  import matplotlib as mpl
+  fontsize = mpl.rcParams['font.size']
+
+  ax = plot_fiducial()
+  arrowstyles = [
+      ArrowStyle('->', head_length=0.4, head_width=0.2),  # default
+      ArrowStyle('<|-|>', head_length=0.4, head_width=0.2),  # default
+      ArrowStyle('<|-|>', head_length=0.4, head_width=0.2),  # default
+      ArrowStyle('<|-|>', head_length=1.2, head_width=0.2),
+      ArrowStyle('<|-|>', head_length=0.4, head_width=0.6),
+      ArrowStyle('<|-|>'),  # default
+  ]
+  ax.axvline(-0.5, ls='--', c='gray')
+  ax.axvline(1.5, ls='--', c='gray')
+  for i, arrowstyle in enumerate(arrowstyles):
+      shrink = 0.0 if i != 2 else 10.0
+      mu = fontsize if i != 5 else 5.0 * fontsize
+      annotate = ax.annotate(
+          "",
+          (-0.5, -1.5 + i * 0.5),
+          xytext=(1.5, -1.0 + i * 0.5),
+          arrowprops=dict(
+              arrowstyle=arrowstyle,
+              facecolor='pink',
+              edgecolor='red',
+              shrinkA=shrink,
+              shrinkB=shrink,
+              mutation_scale=mu,
+          ),
+          c='black',
+      )
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[26]:
+[[file:./obipy-resources/params_annotate.png]]
+:end:
+
+** arrow (discouraged)
+データ座標を使って矢印を描くための機能だが、現在の使用は非推奨になっている。掲載は参考までに。
+- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.arrow.html][matplotlib.axes.Axes.arrow — Matplotlib 3.10.5 documentation]]
 #+begin_src ipython :ipyfile ./obipy-resources/params_arrow.png :session :exports code :results raw :eval never-export
   ax = plot_fiducial()
   _ = ax.arrow(
