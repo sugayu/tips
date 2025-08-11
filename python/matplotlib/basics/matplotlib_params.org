@@ -2,8 +2,10 @@
 #+AUTHOR: sugayu
 #+LATEX_CLASS: jsarticle2
 
+\newpage
+
 * 基準の図
-#+begin_src ipython :ipyfile ./obipy-resources/fiducial.png :session :exports code :results raw :eval never-export
+#+begin_src ipython :ipyfile ./obipy-resources/fiducial.png :session :exports both :results raw drawer :eval never-export
   from numpy.random import default_rng
   from sugayutils.figure import makefig
 
@@ -22,22 +24,32 @@
 #+end_src
 
 #+RESULTS:
+:results:
 # Out[2]:
 [[file:./obipy-resources/fiducial.png]]
+:end:
 
 * 座標
 
-** 目盛り反転
-#+begin_src ipython :ipyfile ./obipy-resources/params_tick_inverse.png :session :exports code :results raw :eval never-export
+** 目盛り
+- 反転 :: ~ax.invert_xaxis()~ 。
+- 文字列 :: ~ax.set_xticks()~ 。
+  デフォルトの設定でminor ticksを表示しているので、これを消すために再度同じメソッドを使用している。
+
+#+begin_src ipython :ipyfile ./obipy-resources/params_tick_setting.png :session :exports both :results raw drawer :eval never-export
   ax = plot_fiducial()
+  ax.set_xticks([-1, 0, 1, 2], labels=['a', 'b', 'c', 'd'])
+  ax.set_xticks([], minor=True)
   _ = ax.invert_xaxis()
 #+end_src
 
 #+RESULTS:
-# Out[4]:
-[[file:./obipy-resources/params_tick_inverse.png]]
+:results:
+# Out[6]:
+[[file:./obipy-resources/params_tick_setting.png]]
+:end:
 
-** 目盛りの数字
+** 目盛りの細かい変更
 目盛りの情報はテキストとして格納されている。
 #+begin_src ipython :session :exports both :results output drawer :eval never-export
   ax = plot_fiducial()
@@ -64,7 +76,7 @@
 #+end_src
 
 #+RESULTS:
-# Out[23]:
+# Out[7]:
 [[file:./obipy-resources/params_ticks.png]]
 
 ** データ座標と相対座標のあいだの変換
@@ -113,11 +125,12 @@ f-stringとLaTeX記法は併存できる。
 * 矢印
 ** annotate
 もともとはテキストに矢印をつけるための機能だが、テキストを入れずに矢印のみを書くこともできる。
-- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html][matplotlib.axes.Axes.annotate — Matplotlib 3.10.5 documentation]]
+- [[https://matplotlib.org/stable/users/explain/text/annotations.html][Annotations (詳細)]]
+- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html][matplotlib.axes.Axes.annotate]]
 詳細な設定は ~ArrowStyle~ から ~arrwostyle~ を選び、それに対して変更を加えることでできる。
 各パラメータの数字の単位はpt。おそらく描画領域の大きさに対して矢印のサイズが決まる。
-- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.ArrowStyle.html#matplotlib.patches.ArrowStyle][matplotlib.patches.ArrowStyle — Matplotlib 3.10.5 documentation]]
-- [[https://matplotlib.org/stable/gallery/text_labels_and_annotations/fancyarrow_demo.html][Annotation arrow style reference — Matplotlib 3.10.5 documentation]]
+- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.ArrowStyle.html#matplotlib.patches.ArrowStyle][matplotlib.patches.ArrowStyle]]
+- [[https://matplotlib.org/stable/gallery/text_labels_and_annotations/fancyarrow_demo.html][Annotation arrow style reference]]
 
 *注意すべき点* として、
 デフォルトでは ~shrinkA=2.0~ 、 ~shrinkB=2.0~ に設定されており、
