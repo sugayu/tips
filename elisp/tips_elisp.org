@@ -1,6 +1,9 @@
 #+title: *Elisp---Emacs LISP*
 #+AUTHOR: sugayu
 
+* マニュアル
+- [[info:elisp][Emacs Lisp Manual]]
+
 * 基本構文
 
 ** 条件分岐
@@ -83,11 +86,29 @@ Lispでは基本的にループは使わずに、 ~map~ 系の関数を使うは
 - f ~file-name-directory~ :: 与えたファイルが存在するディレクトリを返す。
 
 ** 作業するカレントバッファを設定する
-一時的に別のバッファを操作する場合、 ~set-buffer~ でそのバッファを設定する。
+非対話的に、一時的に別のバッファを操作する場合、 ~set-buffer~ でそのバッファを設定する。
 #+begin_src emacs-lisp :results raw drawer :eval never-export
   (save-current-buffer
     (set-buffer (get-buffer-create "new-buffer")))
 #+end_src
+
+- [[info:elisp#Current Buffer][elisp#Current Buffer]]
+
+** バッファをウィンドウに表示する
+選択したバッファをウィンドウに表示して対話的に操作したいときは ~pop-to-buffer-same-window~ を使う。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (let* ((path (expand-file-name ".emacs.d/init.el" (getenv "HOME")))
+         (buffer (or (get-file-buffer path)
+                     (find-buffer-visiting path))))
+    (when buffer
+      (pop-to-buffer-same-window buffer)))
+#+end_src
+
+異なるウィンドウにバッファを表示するには ~pop-to-buffer~ を使う。
+
+~switch-to-buffer~ もあるが、こちらを使えばいいらしい。知らんけど。
+- [[https://emacs.stackexchange.com/questions/27712/switch-to-buffer-vs-pop-to-buffer-same-window][`switch-to-buffer` vs. `pop-to-buffer-same-window` - Emacs Stack Exchange]]
+- [[info:elisp#Switching Buffers][elisp#Switching Buffers]]
 
 ** ファイルを開いているバッファを得る
 以下の二つの関数を使うと目的のバッファが見つかると考えられる。
@@ -118,20 +139,6 @@ Lispでは基本的にループは使わずに、 ~map~ 系の関数を使うは
 ~find-file~ や ~find-file-noselect~ はファイルを開いたあとに、
 メジャーモードの指定やhookの実行など非対話的モードでは必要ない操作や副作用が多い。
 - [[https://emacs.stackexchange.com/questions/2868/whats-wrong-with-find-file-noselect][What's wrong with `find-file-noselect`? - Emacs Stack Exchange]]
-
-** バッファをウィンドウに表示する
-選択したバッファをウィンドウに表示するには ~pop-to-buffer-same-window~ を使う。
-#+begin_src emacs-lisp :results raw drawer :eval never-export
-  (let* ((path (expand-file-name ".emacs.d/init.el" (getenv "HOME")))
-         (buffer (or (get-file-buffer path)
-                     (find-buffer-visiting path))))
-    (when buffer
-      (pop-to-buffer-same-window buffer)))
-#+end_src
-
-~switch-to-buffer~ もあるが、こちらを使えばいいらしい。知らんけど。
-- [[https://emacs.stackexchange.com/questions/27712/switch-to-buffer-vs-pop-to-buffer-same-window][`switch-to-buffer` vs. `pop-to-buffer-same-window` - Emacs Stack Exchange]]
-- [[info:elisp#Switching Buffers][elisp#Switching Buffers]]
 
 ** ファイルをリストする
 ~directory-files~ で指定したディレクトリのファイルをリストにすることができる。
@@ -243,6 +250,22 @@ Lispでは基本的にループは使わずに、 ~map~ 系の関数を使うは
 | 2025w40.org | 2025w39.org |
 :end:
 
+* コマンド
+** prefix arguments
+コマンドの直前に数字を付与することで、コマンドの挙動を変更することができる。
+このときの数字を prefix arguments と呼ぶ。
+
+prefix argumentsを付与した挙動をキーバインドに登録したいときは、
+prefix argumentsを付与した場合の関数を別で作ってそちらをキーに登録する。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (defun command-with-prefix ()
+    (interactive)
+    (let ((current-prefix-arg '(4))) ; C-u
+      (call-interactively 'command)))
+  (bind-key "C-?" command-with-prefix)
+#+end_src
+
+- [[info:elisp#Prefix Command Arguments][elisp#Prefix Command Arguments]]
 
 * Link
 - [[info:elisp][elisp]]
