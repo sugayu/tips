@@ -1,0 +1,23 @@
+#+title: *コマンドメモ*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle
+
+* 同期
+** 一定期間使っていたパソコンから、別のパソコン(anotherPC)へ期間中に編集したファイルを同期させたい
+~find~ と ~rsync~ を組み合わせる。
+#+begin_src bash
+  find ./Documents -mtime -50 > list
+  rsync -avhun --files-from=list ./ anotherPC:
+#+end_src
+~find~ のオプション ~-mtime -X~ でX日前から現在までに最終更新日時があるファイルを検索する。
+~rsync~ のオプション ~--files-from=~ を使うとファイルリストを指定できる。
+~rsync~ のsrcディレクトリにはファイルリストの相対パスの始点を指定する。
+
+ただしこのままだと ~find~ はキャッシュファイルや ~git~ 管理されたファイルなどを大量に拾うので、
+手作業可能な範囲であれば目で見て同期するファイルを選ぶ。
+不要なファイルは例えば
+#+begin_example
+  - .DS_Store
+  - .mypy_cache
+  - .git/*
+#+end_example
