@@ -1,4 +1,6 @@
 #+title: Gitの細かいところ
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle
 
 * Git commands
 ** git force pull
@@ -9,3 +11,34 @@
 #+end_src
 
 - [[https://qiita.com/Yinaura/items/30992f25b87f76af3ba2][Git で force pull する方法 ( $ git reset --hard origin/branch_name ) #Git - Qiita]]
+
+** git diff と git apply
+~git~ で編集差分を取得するには ~git diff~ を使う。
+ファイルに書き込まれた編集差分を反映するには ~git apply~ を使う。
+
+このコマンドを使うのは非常にニッチな要望なのは承知のうえで、使用する機会があった。
+論文管理に使用しているbibdeskが論文pdfのパスをバイト列で保存する。
+各パソコンでそのパスが異なり、論文を新しく保存する度にそのパソコン用にファイルパスを上書きする。
+つまり、複数のパソコンで共有しているbibtexファイルの全項目のpdfファイルパスが毎回上書きされることになる。
+これは ~git~ 管理すべきものではないので、pdfファイルパス以外の要素だけを ~git~ で管理できるようにしたい。
+
+まず ~git diff~ で編集差分を出力してファイルに書き込み、これをパッチファイルと呼ぶ。
+パッチファイルのうちpdfファイルパスしか編集していない変更箇所は削除してしまう。
+この作業は ~convert_diff.py~ としてpythonスクリプトに書き起こした。
+bibtexファイルを編集前に戻す。
+最後に ~git apply~ で編集差分パッチファイルの内容を適用する。
+この一連の流れをまとめると以下のとおり。
+#+begin_src bash
+  git diff > temp.patch
+  python convert_diff.py
+  git restore reference.bib
+  git apply --reject --whitespace=fix temp2.patch
+#+end_src
+
+注意事項として、
+1. ~git restore reference.bib~ のまえに絶対バックアップをとった方が良い。
+2. pythonスクリプトで自動処理できるようにはしているが、編集内容は目視で確認した方が確実。
+~git apply --reject --whitespace=fix~ はこれらのオプションが無ければパッチファイルがなぜかうまく適用できない。
+~--whitespace=fix~ の部分は、パッチファイルの末尾に空白がある場合でも動くようにするオプションである。
+
+- [[https://stackoverflow.com/questions/4770177/git-apply-fails-with-patch-does-not-apply-error][git apply fails with "patch does not apply" error - Stack Overflow]]
