@@ -1,8 +1,8 @@
 #+title: *Elisp---Emacs LISP*
 #+AUTHOR: sugayu
-#+OPTIONS: toc:nil
 
 * 基本構文
+
 ** 条件分岐
 単純な条件分岐には ~if~ が使える。
 #+begin_src emacs-lisp :results raw drawer :eval never-export
@@ -26,3 +26,21 @@ Print this if True
 :results:
 True
 :end:
+
+パターンマッチには ~pcase~ が使える。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (pcase "answer"
+    (`answer 'ans)
+    ((pred stringp) 'string)
+    (_ 'fallback))
+#+end_src
+
+#+RESULTS:
+:results:
+string
+:end:
+
+- [[https://qiita.com/t-suwa/items/20a4ebf37b0a57ff88b2][Emacs：パターンマッチでスクレイピング #Emacs - Qiita]]
+
+** 判定
+- derived-mode-p :: 現在のbufferのmode判定 ~(derived-mode-p 'org-mode)~ 。返り値はmode名。
