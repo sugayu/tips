@@ -44,3 +44,30 @@ string
 
 ** 判定
 - derived-mode-p :: 現在のbufferのmode判定 ~(derived-mode-p 'org-mode)~ 。返り値はmode名。
+- file-exists-p :: 文字列のファイル名が存在するか。
+
+* ファイルとバッファ
+- [[info:elisp#Visiting Files][elisp#Visiting Files]]
+ファイルに対して、バッファは一時的な編集の場であり、
+一般に言う「ファイルを開く」はEmacsではファイル内容をバッファに読み込む、と言う。
+
+** ファイルに書き込む
+新規や既存のファイルを開いて書き込むだけなら、 ~with-temp-file~ を使う。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (with-temp-file "filename"
+    (insert "#+title: This is title\n"))
+#+end_src
+
+~find-file~ や ~find-file-noselect~ はファイルを開いたあとに、
+メジャーモードの指定やhookの実行など非対話的モードでは必要ない操作や副作用が多い。
+- [[https://emacs.stackexchange.com/questions/2868/whats-wrong-with-find-file-noselect][What's wrong with `find-file-noselect`? - Emacs Stack Exchange]]
+
+** カレントバッファを設定する
+一時的に別のバッファを操作する場合、 ~set-buffer~ でそのバッファを設定する。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (save-current-buffer
+    (set-buffer (get-buffer-create "new-buffer")))
+#+end_src
+
+* Link
+- [[info:elisp][elisp]]
