@@ -1,8 +1,8 @@
 #+title: *Elisp---Emacs LISP*
 #+AUTHOR: sugayu
-#+OPTIONS: toc:nil
 
 * 基本構文
+
 ** 条件分岐
 単純な条件分岐には ~if~ が使える。
 #+begin_src emacs-lisp :results raw drawer :eval never-export
@@ -26,3 +26,70 @@ Print this if True
 :results:
 True
 :end:
+
+パターンマッチには ~pcase~ が使える。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (pcase "answer"
+    (`answer 'ans)
+    ((pred stringp) 'string)
+    (_ 'fallback))
+#+end_src
+
+#+RESULTS:
+:results:
+string
+:end:
+
+- [[https://qiita.com/t-suwa/items/20a4ebf37b0a57ff88b2][Emacs：パターンマッチでスクレイピング #Emacs - Qiita]]
+
+** 判定
+- derived-mode-p :: 現在のbufferのmode判定 ~(derived-mode-p 'org-mode)~ 。返り値はmode名。
+- file-exists-p :: 文字列のファイル名が存在するか。
+
+* ファイルとバッファ
+- [[info:elisp#Visiting Files][elisp#Visiting Files]]
+ファイルに対して、バッファは一時的な編集の場であり、
+一般に言う「ファイルを開く」はEmacsではファイル内容をバッファに読み込む、と言う。
+
+** 便利な変数・関数
+ファイル名とバッファ名は異なるので、与える引数の間違いに注意する。
+- v ~buffer-file-name~ :: 現在のバッファの名前
+- f ~file-name-directory~ :: 与えたファイルが存在するディレクトリを返す。
+
+** カレントバッファを設定する
+一時的に別のバッファを操作する場合、 ~set-buffer~ でそのバッファを設定する。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (save-current-buffer
+    (set-buffer (get-buffer-create "new-buffer")))
+#+end_src
+
+** ファイルに書き込む
+新規や既存のファイルを開いて書き込むだけなら、 ~with-temp-file~ を使う。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (with-temp-file "filename"
+    (insert "#+title: This is title\n"))
+#+end_src
+
+~find-file~ や ~find-file-noselect~ はファイルを開いたあとに、
+メジャーモードの指定やhookの実行など非対話的モードでは必要ない操作や副作用が多い。
+- [[https://emacs.stackexchange.com/questions/2868/whats-wrong-with-find-file-noselect][What's wrong with `find-file-noselect`? - Emacs Stack Exchange]]
+
+** ファイルをリストする
+~directory-files~ で指定したディレクトリのファイルをリストにすることができる。
+オプションは
+- FULL :: 絶対パスを返す。
+- MATCH :: 正規表現マッチを行う。
+- NOSORT :: 並びかえない。あとから自分で並びかえるときに使う。
+- COUNT :: 指定した数だけしかファイルを返さない。
+例として、実際に作った、現在のディレクトリ上にある
+特定の名前を持つファイルリストを作って逆順に並びかえるコマンドを挙げる。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (defun my/directory-journal-files ()
+    (reverse
+     (sort
+      (directory-files (file-name-directory buffer-file-name) nil "20..w...org" t)
+      'string-lessp)))
+#+end_src
+
+* Link
+- [[info:elisp][elisp]]
