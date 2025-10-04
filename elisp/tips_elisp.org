@@ -4,6 +4,8 @@
 * 基本構文
 
 ** 条件分岐
+- [[info:elisp#Conditionals][elisp#Conditionals]]
+
 単純な条件分岐には ~if~ が使える。
 #+begin_src emacs-lisp :results raw drawer :eval never-export
   (if t
@@ -15,6 +17,19 @@
 :results:
 Print this if True
 :end:
+
+~t~ のときのみの実行は ~when~ が使える。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (when t
+    (message "Print this when True.")
+    (message "Recieve sequential commands."))
+#+end_src
+
+#+RESULTS:
+:results:
+Recieve sequential commands.
+:end:
+
 
 複数の条件分岐には ~cond~ が使える。
 #+begin_src emacs-lisp :results raw drawer :eval never-export
@@ -48,6 +63,7 @@ string
 
 * ファイルとバッファ
 - [[info:elisp#Visiting Files][elisp#Visiting Files]]
+- [[info:elisp#Buffer File Name][elisp#Buffer File Name]]
 ファイルに対して、バッファは一時的な編集の場であり、
 一般に言う「ファイルを開く」はEmacsではファイル内容をバッファに読み込む、と言う。
 
@@ -56,12 +72,31 @@ string
 - v ~buffer-file-name~ :: 現在のバッファの名前
 - f ~file-name-directory~ :: 与えたファイルが存在するディレクトリを返す。
 
-** カレントバッファを設定する
+** 作業するカレントバッファを設定する
 一時的に別のバッファを操作する場合、 ~set-buffer~ でそのバッファを設定する。
 #+begin_src emacs-lisp :results raw drawer :eval never-export
   (save-current-buffer
     (set-buffer (get-buffer-create "new-buffer")))
 #+end_src
+
+** ファイルを開いているバッファを得る
+以下の二つの関数を使うと目的のバッファが見つかると考えられる。
+- f ~get-file-buffer~ :: ファイルをvisitしているバッファを返す
+- f ~find-buffer-visiting~ :: ファイルをvisitしているかもしれないバッファを返す
+バッファが見つからない場合、これらは ~nil~ を返す。
+
+例はorg-macs.elより:
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (defun org-find-base-buffer-visiting (file)
+    "Like `find-buffer-visiting' but always return the base buffer.
+  FILE is the file name passed to `find-buffer-visiting'."
+    (let ((buf (or (get-file-buffer file)
+                   (find-buffer-visiting file))))
+      (org-base-buffer buf)))
+#+end_src
+
+** 新しいファイルを開く
+- f ~find-file-noselect~ :: ファイルをバッファに読み込み、バッファを返す。それを現在のバッファにしたり表示したりはしない。
 
 ** ファイルに書き込む
 新規や既存のファイルを開いて書き込むだけなら、 ~with-temp-file~ を使う。
@@ -73,6 +108,20 @@ string
 ~find-file~ や ~find-file-noselect~ はファイルを開いたあとに、
 メジャーモードの指定やhookの実行など非対話的モードでは必要ない操作や副作用が多い。
 - [[https://emacs.stackexchange.com/questions/2868/whats-wrong-with-find-file-noselect][What's wrong with `find-file-noselect`? - Emacs Stack Exchange]]
+
+** バッファをウィンドウに表示する
+選択したバッファをウィンドウに表示するには ~pop-to-buffer-same-window~ を使う。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (let* ((path (expand-file-name ".emacs.d/init.el" (getenv "HOME")))
+         (buffer (or (get-file-buffer path)
+                     (find-buffer-visiting path))))
+    (when buffer
+      (pop-to-buffer-same-window buffer)))
+#+end_src
+
+~switch-to-buffer~ もあるが、こちらを使えばいいらしい。知らんけど。
+- [[https://emacs.stackexchange.com/questions/27712/switch-to-buffer-vs-pop-to-buffer-same-window][`switch-to-buffer` vs. `pop-to-buffer-same-window` - Emacs Stack Exchange]]
+- [[info:elisp#Switching Buffers][elisp#Switching Buffers]]
 
 ** ファイルをリストする
 ~directory-files~ で指定したディレクトリのファイルをリストにすることができる。
@@ -89,6 +138,23 @@ string
      (sort
       (directory-files (file-name-directory buffer-file-name) nil "20..w...org" t)
       'string-lessp)))
+#+end_src
+
+* カーソル移動とマーカー
+
+** バッファ内でカーソルを移動させる
+~goto-char~ を使う。
+引数には ~POSITION~ を与える。1がバッファの先頭になる。
+
+** バッファの開始点と終了点に移動する
+- f ~point-min~ :: バッファ内で許されうる最小の位置を返す。
+- f ~point-max~ :: バッファ内で許されうる最大の位置を返す。
+おそらく「許されうる」がポイントで、
+バッファがnarrowingなどで狭まっていた場合には、狭まった範囲の最小値・最大値を返すと思われる。
+
+以下の式を評価する(~C-x C-e~)とバッファの最後に移動する。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (goto-char (point-max))
 #+end_src
 
 * Link
