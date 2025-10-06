@@ -1,0 +1,78 @@
+#+title: *Macの小技*
+#+AUTHOR: sugayu
+
+
+* Launchd
+** 基本
+Macにおける定期実行は ~launchd~ を使う。
+ユーザーが行う定期実行は file:~/Library/LaunchAgents/ にplistファイルを置き、
+システムが行う定期実行は file:/Library/LaunchDaemons/ にファイルを置く。
+システムが行う場合にはroot権限が必要。
+
+** plistファイル
+plistファイルのサンプルは以下のとおり。
+これを com.my.command.plist のような名前で上記ディレクトリに保存する。
+
+#+begin_example
+  <?xml version="1.0" encoding="UTF-8"?>
+  <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+  <plist version="1.0">
+  <dict>
+  	<key>Label</key>
+  	<string>com.my.command</string>
+  	<key>ProgramArguments</key>
+  	<array>
+  		<string>/Users/sugayu/bin/command</string>
+  	</array>
+  	<key>RunAtLoad</key>
+  	<true/>
+  	<!-- <key>StartInterval</key> -->
+  	<!-- <integer>30</integer> -->
+  	<key>StartCalendarInterval</key>
+  	<dict>
+  		<key>Hour</key>
+  		<integer>2</integer>
+  		<key>Minute</key>
+  		<integer>0</integer>
+  	</dict>
+  	<key>StandardOutPath</key>
+  	<string>/Users/sugayu/log/command.out</string>
+  	<key>StandardErrorPath</key>
+  	<string>/Users/sugayu/log/command.err</string>
+  </dict>
+  </plist>
+#+end_example
+
+- Label :: 識別名
+- ProgramArguments :: 実行するコマンド。<string>を並列させることでオプションなどを表現する。
+- RunAtLoad :: コマンド登録時に一度実行する。
+- StartInterval :: n秒ごとに実行する。
+- StartCalendarInterval :: 指定した時刻に実行する。
+- StandardOutPath :: 標準出力のファイル名。
+- StandardErrorPath :: 標準エラー出力のファイル名。
+
+** コマンド
+定期実行するにはこのplistを登録する必要がある。
+登録には
+#+begin_src bash
+  launchctl load ~/Library/LaunchAgents/com.my.command.plist
+#+end_src
+登録の解除には
+#+begin_src bash
+  launchctl unload ~/Library/LaunchAgents/com.my.command.plist
+#+end_src
+定期実行として登録されている全プログラムの一覧 (めっちゃ出てくるので ~grep~ で絞り込んだ方が良い)。
+#+begin_src bash
+  launchctl list
+#+end_src
+
+** エラー
+初回に次のようなエラーが出て動かなかった。
+#+begin_example
+  Load failed: 5: Input/output error
+  Try running `launchctl bootstrap` as root for richer errors.
+#+end_example
+が、よく見るとplistファイルの構文が間違っていただけだった。
+
+** リンク
+- [[https://qiita.com/rsahara/items/7d37a4cb6c73329d4683][launchdで定期的にスクリプトを実行 #launchd - Qiita]]
