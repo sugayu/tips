@@ -2,6 +2,27 @@
 #+AUTHOR: sugayu
 #+LATEX_CLASS: jsarticle
 
+* Emacsデーモン
+~Emacs~ のバックグラウンド実行には ~emacs --daemon~ と ~emacsclient~ を使う。
+#+begin_src bash
+  emacs --daemon="name"
+#+end_src
+でサーバー名を指定して ~Emacs~ を立ち上げることができる。
+サーバー名を指定しなくても立ち上げることができるが、既に ~Emacs~ を立ち上げているときは、それを検知するので別のサーバーを立ち上げることができない。
+
+その ~Emacs~ への指示は
+#+begin_src bash
+  emacsclient -a "" -s "name" -e "(function)" -w 20
+#+end_src
+などで行う。詳しくは ~man emacsclient~ を参照。
+サーバーを落とすには
+#+begin_src bash
+  emacsclient -e "(kill-emacs)"
+#+end_src
+を行う。 ~kill-emacs~ のかわりに ~save-buffers-kill-emacs~ でも良い。
+
+~emacs-mac~ の場合、これらのコマンドは file:/Applications/Emacs.app/Contents/MacOS/ 内に格納されている。
+
 * 同期
 ** 一定期間使っていたパソコンから、別のパソコン(anotherPC)へ期間中に編集したファイルを同期させたい
 ~find~ と ~rsync~ を組み合わせる。
