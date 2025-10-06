@@ -41,4 +41,6 @@ bibtexファイルを編集前に戻す。
 ~git apply --reject --whitespace=fix~ はこれらのオプションが無ければパッチファイルがなぜかうまく適用できない。
 ~--whitespace=fix~ の部分は、パッチファイルの末尾に空白がある場合でも動くようにするオプションである。
 
+~magit~ 上の操作は ~w a~ (~magit-apply-patch~; Apply patches → plain patch)
+
 - [[https://stackoverflow.com/questions/4770177/git-apply-fails-with-patch-does-not-apply-error][git apply fails with "patch does not apply" error - Stack Overflow]]
