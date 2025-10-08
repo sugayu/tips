@@ -168,6 +168,10 @@ Lispでは基本的にループは使わずに、 ~map~ 系の関数を使うは
 #+end_src
 
 * リスト処理
+** リスト基本
+- f ~length~ :: リストの長さを返す。
+- f ~member~ :: リストが要素を含むかどうか調べる。
+
 ** リスト結合
 #+begin_src emacs-lisp :results raw drawer :eval never-export
   (append '(1 2 3) '(3 4 5))
