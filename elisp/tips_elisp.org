@@ -57,6 +57,15 @@ string
 
 - [[https://qiita.com/t-suwa/items/20a4ebf37b0a57ff88b2][Emacs：パターンマッチでスクレイピング #Emacs - Qiita]]
 
+** ループ
+Lispでは基本的にループは使わずに、 ~map~ 系の関数を使うはず。それでも一応ループも用意されている。
+
+リストに対して同じ操作を繰り返すときには ~dolist~ が使える。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (dolist (buffer (buffer-list))
+    (kill-buffer (buffer-name buffer)))
+#+end_src
+
 ** 判定
 - derived-mode-p :: 現在のbufferのmode判定 ~(derived-mode-p 'org-mode)~ 。返り値はmode名。
 - file-exists-p :: 文字列のファイル名が存在するか。
@@ -70,6 +79,7 @@ string
 ** 便利な変数・関数
 ファイル名とバッファ名は異なるので、与える引数の間違いに注意する。
 - v ~buffer-file-name~ :: 現在のバッファの名前
+- f ~buffer-name~ :: バッファ自体は特殊な名前構造を持っている。バッファの名前を文字列で返す。
 - f ~file-name-directory~ :: 与えたファイルが存在するディレクトリを返す。
 
 ** 作業するカレントバッファを設定する
@@ -156,6 +166,79 @@ string
 #+begin_src emacs-lisp :results raw drawer :eval never-export
   (goto-char (point-max))
 #+end_src
+
+* リスト処理
+** リスト結合
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (append '(1 2 3) '(3 4 5))
+#+end_src
+
+#+RESULTS:
+:results:
+| 1 | 2 | 3 | 3 | 4 | 5 |
+:end:
+
+** リストの要素処理
+要素の削除は ~delete~ (破壊的) か ~remove~ (非破壊的)。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (let* ((a '(2 3 4))
+         (b '(2 3 4))
+         (c (remove 3 b)))
+    (delete 3 a)
+    (append a '("/") b '("/") c))
+#+end_src
+
+#+RESULTS:
+:results:
+| 2 | 4 | / | 2 | 3 | 4 | / | 2 | 4 |
+:end:
+
+** 同一要素に対する処理
+重複の無いリストにするには ~delete-dups~ (破壊的) か ~seq-uniq~ (非破壊的) を使う。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (let ((a '(2 3 4 6 6 3 7 2 4))
+        (b '(2 3 4 6 6 3 7 2 4)))
+    (delete-dups a)
+    (seq-uniq b)
+    (append a '("/") b))
+#+end_src
+
+#+RESULTS:
+:results:
+| 2 | 3 | 4 | 6 | 7 | / | 2 | 3 | 4 | 6 | 6 | 3 | 7 | 2 | 4 |
+:end:
+
+重複している要素をリストから除くには ~seq-difference~ が使える。
+引数の順番は、前者のリストから後者に含まれるものを除く、を意味するので注意する。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (let ((a '(2 3 4 6 6 3 7 2 4))
+        (b '(2 3 4 6)))
+    (seq-difference a b))
+#+end_src
+
+#+RESULTS:
+:results:
+| 7 |
+:end:
+
+- 便利な関数は [[file:/usr/local/Cellar/emacs-mac@29/emacs-29.4-mac-10.1/Emacs.app/Contents/Resources/lisp/emacs-lisp/seq.el.gz][seq.el.gz]] に含まれていると思われる。
+
+* 文字列処理
+** 検索
+文字列内の検索には ~string-match~ が正規表現とともに使える。
+#+begin_src emacs-lisp :results raw drawer :eval never-export
+  (remove nil
+          (mapcar (lambda (buffer)
+                    (when (string-match (format-time-string "%Yw...org") (buffer-name buffer))
+                      (buffer-name buffer)))
+                  (buffer-list)))
+#+end_src
+
+#+RESULTS:
+:results:
+| 2025w40.org | 2025w39.org |
+:end:
+
 
 * Link
 - [[info:elisp][elisp]]
