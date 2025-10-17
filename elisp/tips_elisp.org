@@ -250,6 +250,84 @@ Lispでは基本的にループは使わずに、 ~map~ 系の関数を使うは
 | 2025w40.org | 2025w39.org |
 :end:
 
+* 変数の設定方法
+** defvar
+Lisp に標準的に備わっている関数。変数をグローバルに定義する。
+既に変数に値が設定されている場合、何もしない。また、定義と同時に値を格納しなくてもよい。
+変数は動的なスコープを持っているので、値が変更されると既に定義されている他の関数に影響を及ぼす。
+docstringsを付与することができ、ここに変数の説明を書くことでヘルプから参照することができる。
+
+#+begin_quote
+You will be one step closer to achieving Emacs zen[1].
+In other words, it is more idiomatic and elegant to define variables prior to their use.
+#+end_quote
+[[https://emacs.stackexchange.com/questions/38284/init-el-setq-or-defvar][variables - init.el - setq or defvar - Emacs Stack Exchange]]
+
+** setq
+Lisp に標準的に備わっている関数。変数に値を格納する。
+変数が事前に定義されていない場合の振舞いは本来的には決まっていない。
+Emacs ではおそらく新たに変数が定義されることになると思われる。
+望むらくは、事前に ~defvar~ もしくは ~let~ などで事前に変数が定義されている必要がある。
+変数に値を設定するのが仕事なので、 変数がlocal-variable の場合はlocalな値を設定する。
+
+** defvar-local
+ローカル変数を定義する。同時に格納される値はグローバル (デフォルト) となる。
+~setq~ で値を格納すると、バッファローカル変数の値が変更される。
+
+** setq-local
+バッファローカル変数に値を設定する。
+これはグローバル変数に対してもローカルな値を格納することができ、
+この場合は ~make-local-variable~ の後に ~setq~ をすることと振舞いは同じである。
+
+** setq-default
+変数が local-variable かどうかに関わらず、変数をglobalに設定する。
+おそらく、 ~defvar-local~ で定義された変数のデフォルト値を変更するためのもの。
+
+** let
+そのスコープ内でのみ有効な、一時的な変数を定義する。
+内部で変数の値を変更する際には ~setq~ を使い、その値は ~let~ のスコープ外には適用されない。
+
+** customize-set-variable
+パッケージの設定変数を変更する。これを使うことで振舞いや初期化に関する変数を変更したことを明示する。
+パッケージにおける変数定義の際、 ~:custom-set~ などの性質が定義されていると
+~setq~ ではこのプロパティ(関数)が動かないので変数が正しく定義できない可能性がある。
+~defcustom~ によって定義された変数については、これを使うのが無難という意見が多い。
+この関数は与えられた第2引数を評価してから代入して返すことに注意する。
+
+~use-package~ を使っている場合は ~:custom~ を使うことでこの関数が呼び出されていたが、
+現在は ~(load custom-file)~ との変数の二重設定を防ぐために ~custom-theme-set-variables~ に変更されている。
+
+[[help:customize-set-variable]]
+
+** custom-set-variables
+~customize~ や ~customize-option~ でインタラクティブに変更された変数は ~custom-file~ に一覧で格納される。
+この一覧を読み直すのが ~custom-set-variables~ 。
+ユーザーが手で変更することは推奨されていないし、 init.el で使うことも推奨されていないと思われる。
+内部で ~user~ を theme とした ~custom-theme-set-variables~ を呼び出している。
+この関数は与えられた第2引数を評価せずに表現としてそのまま ~:saved-value~ プロパティに保存し、
+変数に値が既に与えられていた場合もしくはパッケージがロードされて変数が定義された場合に
+保存していた表現を評価して代入する。
+この点で ~customize-set-variable~ とは振舞いが異なるので注意する。
+
+~use-package~ では元となる関数 ~custom-theme-set-variables~ が使われているが、
+~customize-option~ で変数の情報を確認したときには設定した内容は正しく反映されていない。
+おそらく、 ~use-package~ の関数評価順番の問題で、関数が定義される前に値が格納されるので、
+後に変数が定義された際に ~:saved-value~ に格納済みの表現を評価されるが、このときに
+元々 ~custom-theme-set-variables~ を通じて定義されている事実や設定したコメントの反映が
+うまくなされていないと予想する。
+- [[https://macowners.club/posts/setq-vs-customize-set-variable/][Setq vs customize-set-variable | macOS & (open-source) Software]]
+
+[[help:custom-set-variables]]
+
+** setopt
+Emacs 29 から導入された。
+~customize-set-variable~ の糖衣構文と考えるのが良いらしい。
+[[https://www.reddit.com/r/emacs/comments/178em7u/why_was_setopt_introduced_in_emacs_29/][Why was setopt introduced in emacs 29 ? | reddit]]
+ただし、 ~setq~ のように複数の変数と値の組を変更可能で、
+~custom-file~ には変更内容が記録されない。
+
+
+
 * コマンド
 ** prefix arguments
 コマンドの直前に数字を付与することで、コマンドの挙動を変更することができる。
