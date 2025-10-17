@@ -1,4 +1,4 @@
-% Created 2025-08-02 土 14:33
+% Created 2025-08-02 土 15:40
 \documentclass[a4paper, 10pt, notitlepage, twocolumn, uplatex, oneside, dvipdfmx]{jsarticle}
 \usepackage[dvipdfmx]{graphicx, color}
 \usepackage{ulem}
@@ -32,7 +32,7 @@
 \tableofcontents
 
 \section{基準の図}
-\label{sec:orgfe9c605}
+\label{sec:org1e9be9e}
 \begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from numpy.random import default_rng
 from sugayutils.figure import makefig
@@ -55,10 +55,10 @@ _ = plot_fiducial()
 \includegraphics[width=1.0\linewidth]{./obipy-resources/fiducial.png}
 \end{center}
 \section{目盛り}
-\label{sec:org30c575c}
+\label{sec:org23a9d4e}
 
 \subsection{目盛り反転}
-\label{sec:org5fe16c1}
+\label{sec:org2daefc5}
 \begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 ax = plot_fiducial()
 _ = ax.invert_xaxis()
@@ -68,7 +68,7 @@ _ = ax.invert_xaxis()
 \includegraphics[width=1.0\linewidth]{./obipy-resources/params_tick_inverse.png}
 \end{center}
 \subsection{目盛りの数字}
-\label{sec:org7e37333}
+\label{sec:orgd15c10c}
 目盛りの情報はテキストとして格納されている。
 \begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 ax = plot_fiducial()
@@ -97,10 +97,10 @@ for i, xticklabel in enumerate(ax.get_xticklabels()):
 \includegraphics[width=1.0\linewidth]{./obipy-resources/params_ticks.png}
 \end{center}
 \section{テキスト}
-\label{sec:org09f8468}
+\label{sec:orgdd51e1e}
 
 \subsection{f-stringと\LaTeX{}}
-\label{sec:orgdf6c43e}
+\label{sec:org863de21}
 f-stringと\LaTeX{}記法は併存できる。
 このときf-string記法の\{\}が\LaTeX{}記法と衝突することにより、\LaTeX{}記法の\{\}に変更が加わる。
 \begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
@@ -117,9 +117,9 @@ _ = ax.text(
 \includegraphics[width=1.0\linewidth]{./obipy-resources/params_text_fstring_latex.png}
 \end{center}
 \section{矢印}
-\label{sec:orgdf8320b}
+\label{sec:orgd7b1a71}
 \subsection{arrow}
-\label{sec:orgd1c79fc}
+\label{sec:org4179615}
 データ座標を使って矢印を描く。
 \begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 ax = plot_fiducial()
@@ -139,7 +139,7 @@ _ = ax.arrow(
 \includegraphics[width=1.0\linewidth]{./obipy-resources/params_arrow.png}
 \end{center}
 \section{大量の線}
-\label{sec:org4490afc}
+\label{sec:org2127733}
 一斉に同じ種類の線をプロットするには \texttt{mcoll.LineCollection} を使って、返り値を \texttt{ax.add\_collection()} で加えると良い。
 \begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 import matplotlib.collections as mcoll
@@ -162,11 +162,12 @@ _ = ax.add_collection(linecollection)
 \includegraphics[width=1.0\linewidth]{./obipy-resources/params_lines.png}
 \end{center}
 \section{グリッド分け}
-\label{sec:org6ee1f4f}
+\label{sec:org1d419ec}
 \texttt{fig.subplots()} と \texttt{fig.subplots\_adjust()} の組み合わせでもグリッドを切れるが、
 \texttt{matplotlib.gridspec.GridSpec} を使うと引数 \texttt{width\_ratios} などを使ってより柔軟なグリッドを作ることができる。
 \texttt{GridSpec} は \texttt{fig.subplots()} に引数として与えることもできるが、
 \texttt{fig.add\_subplot()} で個別にパネルを作ることで \texttt{projection} などを柔軟に対応させられる。
+
 \begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
 from matplotlib.gridspec import GridSpec
 gs = GridSpec(1, 2, width_ratios=(1.5, 1))
@@ -184,4 +185,51 @@ _ = ax1.plot(np.arange(0., 10.0), np.arange(0., 10.0), np.arange(0., 10.0))
 \end{center}
 
 参照: \href{https://stackoverflow.com/questions/10388462/matplotlib-different-size-subplots}{python - Matplotlib different size subplots - Stack Overflow}
+\section{図}
+\label{sec:org38da2c8}
+\subsection{Nonuniform image}
+\label{sec:org55dbc1e}
+ピクセルの形が長方形になるような、各列や行によってピクセル幅が異なる画像を作成する際には
+\texttt{NonUniformImage} を使う。
+\texttt{ax.imshow} は画像(Image)を定義する以外に\href{https://github.com/matplotlib/matplotlib/blob/v3.10.5/lib/matplotlib/axes/\_axes.py\#L5750-L5996}{内部で様々な設定を同時にしてくれている}が、
+\texttt{NonUniformImage} を使う場合には自分で画像の設定をする必要がある。
+例えば、以下の例では \texttt{extent} 自体は \texttt{NonUniformImage} を呼ぶ際に設定しているが、
+画像の縦横サイズ \texttt{xlim} と \texttt{ylim} は自動では設定されないので、
+ \texttt{im.set\_extent()} を明示的に呼ぶことで \texttt{extent} に合わせて画像サイズを設定している。
+
+\begin{minted}[frame=lines,framesep=2mm,breaklines,bgcolor=bgcode]{ipython}
+from matplotlib.image import NonUniformImage
+
+fig = makefig(figsize=['small', 0.6])
+
+x = (np.arange(15) - 7.0)
+x = x**3 / 7.0**3 * 3.0
+y = (np.arange(9) - 4.0)
+image = np.exp(-0.5 * (x[None, ...]**2 + y[..., None]**2))
+extent = (-3.5, 3.5, -4.5, 4.5)
+kw = dict(
+    extent=extent,
+    origin='lower',
+    cmap='YlGn',
+)
+
+ax = fig.add_subplot(1, 2, 1)
+im = NonUniformImage(ax, interpolation='nearest', **kw)
+im.set_data(x, y, image)
+im.set_extent(extent)
+ax.add_image(im)
+ax.set_aspect('auto')
+
+ax = fig.add_subplot(1, 2, 2)
+ax.imshow(image, aspect='auto', **kw)
+_ = ax.set_title('Uniform (worng scale)')
+\end{minted}
+
+\begin{center}
+\includegraphics[width=1.0\linewidth]{./obipy-resources/params_image_nonuniformimage.png}
+\end{center}
+
+\begin{itemize}
+\item \href{https://matplotlib.org/stable/gallery/images\_contours\_and\_fields/image\_nonuniform.html}{Image nonuniform — Matplotlib 3.10.5 documentation}
+\end{itemize}
 \end{document}

@@ -2,8 +2,10 @@
 #+AUTHOR: sugayu
 #+LATEX_CLASS: jsarticle2
 
+\newpage
+
 * 基準の図
-#+begin_src ipython :ipyfile ./obipy-resources/fiducial.png :session :exports code :results raw :eval never-export
+#+begin_src ipython :ipyfile ./obipy-resources/fiducial.png :session :exports both :results raw drawer :eval never-export
   from numpy.random import default_rng
   from sugayutils.figure import makefig
 
@@ -22,22 +24,32 @@
 #+end_src
 
 #+RESULTS:
+:results:
 # Out[2]:
 [[file:./obipy-resources/fiducial.png]]
+:end:
 
-* 目盛り
+* 座標
 
-** 目盛り反転
-#+begin_src ipython :ipyfile ./obipy-resources/params_tick_inverse.png :session :exports code :results raw :eval never-export
+** 目盛り
+- 反転 :: ~ax.invert_xaxis()~ 。
+- 文字列 :: ~ax.set_xticks()~ 。
+  デフォルトの設定でminor ticksを表示しているので、これを消すために再度同じメソッドを使用している。
+
+#+begin_src ipython :ipyfile ./obipy-resources/params_tick_setting.png :session :exports both :results raw drawer :eval never-export
   ax = plot_fiducial()
+  ax.set_xticks([-1, 0, 1, 2], labels=['a', 'b', 'c', 'd'])
+  ax.set_xticks([], minor=True)
   _ = ax.invert_xaxis()
 #+end_src
 
 #+RESULTS:
-# Out[4]:
-[[file:./obipy-resources/params_tick_inverse.png]]
+:results:
+# Out[6]:
+[[file:./obipy-resources/params_tick_setting.png]]
+:end:
 
-** 目盛りの数字
+** 目盛りの細かい変更
 目盛りの情報はテキストとして格納されている。
 #+begin_src ipython :session :exports both :results output drawer :eval never-export
   ax = plot_fiducial()
@@ -64,8 +76,32 @@
 #+end_src
 
 #+RESULTS:
-# Out[23]:
+# Out[7]:
 [[file:./obipy-resources/params_ticks.png]]
+
+** データ座標と相対座標のあいだの変換
+デフォルトのプロットはデータ座標が使われており、
+描画領域 ~Axes~ に対する相対座標を使う場合は ~transform~ を使う。
+両軸を座標変換する ~ax.transAxes~ は ~Axes~ の属性なのでそのまま使う。
+片軸だけの変換はプライベート属性で与えられているので、メソッドを通じて使う。
+このメソッドは引数 ~which~ をとれるので必要があれば与える。
+なぜか「x軸」を相対座標に変換したいときに ~ax.get_yaxis_transform()~ を使うので、
+間違えないように注意する。
+
+#+begin_src ipython :ipyfile ./obipy-resources/params_coord_transform.png :session :exports both :results raw drawer :eval never-export
+  ax = plot_fiducial()
+  ax.text(-1.0, -1.0, 'Data coord.\n (-1, -1)')
+  ax.text(0.7, 0.7, 'Axes coord.\n (0.7, 0.7)', transform=ax.transAxes)
+  ax.text(-1.0, 0.7, 'y: Axes coord.\n (-1, 0.7).', transform=ax.get_xaxis_transform())
+  ax.text(0.7, -1.0, 'x: Axes coord.\n (0.7, -1)', transform=ax.get_yaxis_transform())
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[31]:
+: Text(0.7, -1.0, 'x: Axes coord.\n (0.7, -1)')
+[[file:./obipy-resources/params_coord_transform.png]]
+:end:
 
 * テキスト
 
@@ -87,8 +123,68 @@ f-stringとLaTeX記法は併存できる。
 [[file:./obipy-resources/params_text_fstring_latex.png]]
 
 * 矢印
-** arrow
-データ座標を使って矢印を描く。
+** annotate
+もともとはテキストに矢印をつけるための機能だが、テキストを入れずに矢印のみを書くこともできる。
+- [[https://matplotlib.org/stable/users/explain/text/annotations.html][Annotations (詳細)]]
+- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.annotate.html][matplotlib.axes.Axes.annotate]]
+詳細な設定は ~ArrowStyle~ から ~arrwostyle~ を選び、それに対して変更を加えることでできる。
+各パラメータの数字の単位はpt。おそらく描画領域の大きさに対して矢印のサイズが決まる。
+- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.patches.ArrowStyle.html#matplotlib.patches.ArrowStyle][matplotlib.patches.ArrowStyle]]
+- [[https://matplotlib.org/stable/gallery/text_labels_and_annotations/fancyarrow_demo.html][Annotation arrow style reference]]
+
+*注意すべき点* として、
+デフォルトでは ~shrinkA=2.0~ 、 ~shrinkB=2.0~ に設定されており、
+そのままでは指定した位置から少し離れた位置に矢印の先端が来るように設定されている。
+annotateは何かを指し示すための機能なので、おそらく指し示す物から少し離れた位置に
+始点を置きたかったのであろう。
+また、 ~mutation_scale~ を指定することで初期値から拡大縮小できるが、
+この値の初期値はテキストサイズ ~font.size~ と同じ値になっているので
+入れた値の数だけ倍々に拡大縮小されるわけではないので注意する。
+
+#+begin_src ipython :ipyfile ./obipy-resources/params_annotate.png :session :exports both :results raw drawer :eval never-export
+  from matplotlib.patches import ArrowStyle
+  import matplotlib as mpl
+  fontsize = mpl.rcParams['font.size']
+
+  ax = plot_fiducial()
+  arrowstyles = [
+      ArrowStyle('->', head_length=0.4, head_width=0.2),  # default
+      ArrowStyle('<|-|>', head_length=0.4, head_width=0.2),  # default
+      ArrowStyle('<|-|>', head_length=0.4, head_width=0.2),  # default
+      ArrowStyle('<|-|>', head_length=1.2, head_width=0.2),
+      ArrowStyle('<|-|>', head_length=0.4, head_width=0.6),
+      ArrowStyle('<|-|>'),  # default
+  ]
+  ax.axvline(-0.5, ls='--', c='gray')
+  ax.axvline(1.5, ls='--', c='gray')
+  for i, arrowstyle in enumerate(arrowstyles):
+      shrink = 0.0 if i != 2 else 10.0
+      mu = fontsize if i != 5 else 5.0 * fontsize
+      annotate = ax.annotate(
+          "",
+          (-0.5, -1.5 + i * 0.5),
+          xytext=(1.5, -1.0 + i * 0.5),
+          arrowprops=dict(
+              arrowstyle=arrowstyle,
+              facecolor='pink',
+              edgecolor='red',
+              shrinkA=shrink,
+              shrinkB=shrink,
+              mutation_scale=mu,
+          ),
+          c='black',
+      )
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[26]:
+[[file:./obipy-resources/params_annotate.png]]
+:end:
+
+** arrow (discouraged)
+データ座標を使って矢印を描くための機能だが、現在の使用は非推奨になっている。掲載は参考までに。
+- [[https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.arrow.html][matplotlib.axes.Axes.arrow — Matplotlib 3.10.5 documentation]]
 #+begin_src ipython :ipyfile ./obipy-resources/params_arrow.png :session :exports code :results raw :eval never-export
   ax = plot_fiducial()
   _ = ax.arrow(
@@ -135,6 +231,7 @@ f-stringとLaTeX記法は併存できる。
 ~matplotlib.gridspec.GridSpec~ を使うと引数 ~width_ratios~ などを使ってより柔軟なグリッドを作ることができる。
 ~GridSpec~ は ~fig.subplots()~ に引数として与えることもできるが、
 ~fig.add_subplot()~ で個別にパネルを作ることで ~projection~ などを柔軟に対応させられる。
+
 #+begin_src ipython :ipyfile ./obipy-resources/params_grids.png :session :exports code :results raw :eval never-export
   from matplotlib.gridspec import GridSpec
   gs = GridSpec(1, 2, width_ratios=(1.5, 1))
@@ -152,3 +249,47 @@ f-stringとLaTeX記法は併存できる。
 [[file:./obipy-resources/params_grids.png]]
 
 参照: [[https://stackoverflow.com/questions/10388462/matplotlib-different-size-subplots][python - Matplotlib different size subplots - Stack Overflow]]
+
+* 図
+** Nonuniform image
+ピクセルの形が長方形になるような、各列や行によってピクセル幅が異なる画像を作成する際には
+~NonUniformImage~ を使う。
+~ax.imshow~ は画像(Image)を定義する以外に[[https://github.com/matplotlib/matplotlib/blob/v3.10.5/lib/matplotlib/axes/_axes.py#L5750-L5996][内部で様々な設定を同時にしてくれている]]が、
+~NonUniformImage~ を使う場合には自分で画像の設定をする必要がある。
+例えば、以下の例では ~extent~ 自体は ~NonUniformImage~ を呼ぶ際に設定しているが、
+画像の縦横サイズ ~xlim~ と ~ylim~ は自動では設定されないので、
+ ~im.set_extent()~ を明示的に呼ぶことで ~extent~ に合わせて画像サイズを設定している。
+
+#+begin_src ipython :ipyfile ./obipy-resources/params_image_nonuniformimage.png :session :exports code :results raw :eval never-export
+  from matplotlib.image import NonUniformImage
+
+  fig = makefig(figsize=['small', 0.6])
+
+  x = (np.arange(15) - 7.0)
+  x = x**3 / 7.0**3 * 3.0
+  y = (np.arange(9) - 4.0)
+  image = np.exp(-0.5 * (x[None, ...]**2 + y[..., None]**2))
+  extent = (-3.5, 3.5, -4.5, 4.5)
+  kw = dict(
+      extent=extent,
+      origin='lower',
+      cmap='YlGn',
+  )
+
+  ax = fig.add_subplot(1, 2, 1)
+  im = NonUniformImage(ax, interpolation='nearest', **kw)
+  im.set_data(x, y, image)
+  im.set_extent(extent)
+  ax.add_image(im)
+  ax.set_aspect('auto')
+
+  ax = fig.add_subplot(1, 2, 2)
+  ax.imshow(image, aspect='auto', **kw)
+  _ = ax.set_title('Uniform (worng scale)')
+#+end_src
+
+#+RESULTS:
+# Out[49]:
+[[file:./obipy-resources/params_image_nonuniformimage.png]]
+
+- [[https://matplotlib.org/stable/gallery/images_contours_and_fields/image_nonuniform.html][Image nonuniform — Matplotlib 3.10.5 documentation]]
