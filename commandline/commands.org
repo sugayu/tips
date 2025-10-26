@@ -42,3 +42,11 @@
   - .mypy_cache
   - .git/*
 #+end_example
+
+* Mac
+** Spotlight
+Spotlightの停止は
+#+begin_src bash
+  sudo mdutil -a -i off
+#+end_src
+稼動させるには off を on にする。
