@@ -5,5 +5,5 @@
 *.minted
 *.tex
 ltximg/
-/python/.DS_Store
-/python/fitting/.DS_Store
+.DS_Store
+*.tex
