@@ -1,0 +1,743 @@
+#+title: *astropy.tableのこまかいところ*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle
+#+OPTIONS: toc:nil
+
+* astropy.table
+- [[https://docs.astropy.org/en/latest/table/index.html][Data Tables (astropy.table) — Astropy v8.0.0]]
+
+~astropy.table~ は表を柔軟に運用できるモジュール。
+列の中に配列や画像、 ~astorpy~ で使われているクラスを格納できるので便利。
+
+* TableとQTableの違い
+~astorpy.table.Table~ と ~astorpy.table.QTable~ は、単位付きの量を格納するときに
+- QTable :: 列に ~Quantity~ を格納できる
+- Table :: 列 ~Column~ に単位を付与する
+という点で振舞いが異なる。
+- [[https://docs.astropy.org/en/latest/table/mixin_columns.html#quantity-and-qtable][Quantity and QTable | Mixin Columns — Astropy v8.0.0]]
+
+このため、単位付き列を持つ ~Table~ と ~QTable~ は結合できない。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  import astropy.units as u
+  from astropy.table import Table, QTable, vstack
+
+  quantity = [1.0, 2.0, 3.0] * u.s
+  table = Table([quantity], names=['time'])
+  qtable = QTable([quantity], names=['time'])
+  try:
+      vstack([table, qtable])
+  except ValueError as e:
+      errormessage = repr(e)
+  errormessage
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[18]:
+: 'ValueError("unmergeable object classes [\'Column\', \'Quantity\']")'
+:end:
+
+このエラーメッセージは、どの列で問題が生じているのかを教えてくれないし、初見で何言ってるかわからないので不親切である。
+しかも、 ~Table~ か ~QTable~ かはぱっと見区別がつきづらい。
+~astroquery~ などを使ってダウンロードしてきた表データと、ファイルから ~QTable~ で読み込んだ既存の表データを合わせるときにエラーが出ると、
+同じ形式のデータのはずなのにエラーが出る理由が分からず混乱する。
+
+特にこだわりが無ければ、 ~QTable~ を使う(~QTable~ に変換する)と決めておけばいい。
+
+* Tableのコピーとビュー
+~Table~ の内容を一部読み出すときには、他のオブジェクト同様にコピーとビューに注意する。
+スライスはビューを与え、fancy indexやbool indexはコピーを与える。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  from astropy.table import Table
+
+  table = Table([[0, 1, 2]], names=['value'])
+  # slice---view
+  t0 = table[:1]
+  t0['value'][0] = 500
+
+  # fancy index---copy
+  t1 = table[[0, 1]]
+  t1['value'][1] = 1000
+
+  # bool index---copy
+  t2 = table[[True, True, False]]
+  t2['value'][1] = 1000
+
+  table
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[8]:
+#+BEGIN_EXAMPLE
+  <Table length=3>
+  value
+  int64
+  -----
+  500
+  1
+  2
+#+END_EXAMPLE
+:end:
+
+forループはビューを与えるので、取り出した ~Row~ を変換することで元の表を更新することができる。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  for row in table:
+      row['value'] *= 2
+  table
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[9]:
+#+BEGIN_EXAMPLE
+  <Table length=3>
+  value
+  int64
+  -----
+  1000
+  2
+  4
+#+END_EXAMPLE
+:end:
+
+* Tableのマスク
+** 基本
+~Table~ は ~np.ma.array~ や ~MaskedColumn~ や ~MaskedQuantity~ を使ってマスクをサポートしているが、これがめっちゃややこしい。
+できれば使うべきではないと思うが、使いたいときもある。
+- [[https://docs.astropy.org/en/latest/table/masking.html][Masking and Missing Values — Astropy v8.0.0]]
+
+マスク入りの表を作成したいときには ~MaskedColumn~ を使用する。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  from astropy.table import Table, Column, MaskedColumn
+  a = MaskedColumn([0, 1], name='a', mask=[True, False], dtype=int)
+  b = Column([2, 3], name='b', dtype=int)
+  Table([a, b])
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[2]:
+#+BEGIN_EXAMPLE
+  <Table length=2>
+  a     b
+  int64 int64
+  ----- -----
+  --     2
+  1     3
+#+END_EXAMPLE
+:end:
+
+その表や列がマスクを持っているかどうかは ~mask~ 属性で確認できる。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  table = Table([a, b])
+  table.mask, '=======', table['a'].mask
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[3]:
+#+BEGIN_EXAMPLE
+  (<Table length=2>
+  a     b
+  bool  bool
+  ----- -----
+  True False
+  False False,
+  '=======',
+  array([ True, False]))
+#+END_EXAMPLE
+:end:
+
+要素レベルで確認したいときは、 ~MaskedConstant~ なら ~mask~ 属性、一般には ~na.ma.is_masked~ が使える。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  table['a'][0].mask, np.ma.is_masked(table['a'][0]), np.ma.is_masked(table['a'][1])
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[4]:
+: (array(True), True, False)
+:end:
+
+*ただし、~na.ma.is_mask~ はそのオブジェクトがマスクを有することができるかを判定する全く異なる関数なので、間違えないように注意する* 。
+こんなミスが起こりやすい関数を二つ用意するなんて信じられない。
+
+** あとからマスクする
+あとからマスクをしたいときはいくつかの方法がある。
+まず、 ~Table~ や ~MaskedColumn~ は ~mask~ 属性を持っているので、これにブール値を代入すればマスクできる。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  import numpy as np
+
+  c = MaskedColumn([6, 3], name='c', dtype=int)
+  table = Table([a, b, c])
+  table['a'].mask = [False, True]
+  table['c'].mask = True
+  table
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[5]:
+#+BEGIN_EXAMPLE
+  <Table length=2>
+  a     b     c
+  int64 int64 int64
+  ----- ----- -----
+  0     2    --
+  --     3    --
+#+END_EXAMPLE
+:end:
+
+ただし、 ~Column~ は ~mask~ 属性を持っていないのでエラーが出る。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  try:
+      table['b'].mask = [True, False]
+  except AttributeError as e:
+      errormessage = repr(e)
+  errormessage
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[6]:
+: "AttributeError('cannot set mask value to a column in non-masked Table')"
+:end:
+
+次の方法として、各列か各要素に ~np.ma.masked~ を代入すればできる。
+のだが、 *このとき列が ~Column~ だと数字が初期化されるがマスクされるわけではない* 。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  import numpy as np
+
+  table = Table([a, b, c])
+  table['a'] = np.ma.masked
+  table['b'] = np.ma.masked
+  table['c'][0] = np.ma.masked
+  table
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[8]:
+#+BEGIN_EXAMPLE
+  <Table length=2>
+  a     b     c
+  int64 int64 int64
+  ----- ----- -----
+  --     0    --
+  --     0     3
+#+END_EXAMPLE
+:end:
+
+~np.ma.nomask~ を使えばマスクを外してやることもできる。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  table['c'][0] = np.ma.nomask
+  table
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[10]:
+#+BEGIN_EXAMPLE
+  <Table length=2>
+  a     b     c
+  int64 int64 int64
+  ----- ----- -----
+  --     0     0
+  --     0     3
+#+END_EXAMPLE
+:end:
+
+
+また、 ~Column~ の要素はマスクではない(~np.ma.MaskedConstant~ ではない)ので、マスクを加えようとするとエラーになる。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  try:
+      table['b'][0] = np.ma.masked
+  except np.ma.MaskError as e:
+      errormessage = repr(e)
+  errormessage
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[8]:
+: "MaskError('Cannot convert masked element to a Python int.')"
+:end:
+
+追加する行をマスクしたいときは、 ~Table.add_row~ で ~mask~ キーワードを追加する。
+~mask~ キーワードを使えば列が ~Column~ か ~MaskedColumn~ かは関係なくマスクすることができ、結果として ~Column~ は ~MaskedColumn~ に変換される。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  table.add_row([10, 11, 12], mask=[False, True, False])
+  table
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[9]:
+#+BEGIN_EXAMPLE
+  <Table length=3>
+  a     b     c
+  int64 int64 int64
+  ----- ----- -----
+  --     0    --
+  --     0     3
+  10    --    12
+#+END_EXAMPLE
+:end:
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  type(table['b'])
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[10]:
+: astropy.table.column.MaskedColumn
+:end:
+
+上で示したマニュアルには、表全体で ~masked=True~ にして新しく追加される列全てを自動的に ~MaskedColumn~ にする方法も
+載っているので、必要があれば参照する。(なんで ~mask~ じゃなくて ~masked~ なんや...)
+
+** マスクをファイルから読む
+マスクはファイル入出力でも表現できるが、めちゃくちゃややこしい。
+
+マスクがどう扱われるかは保存先のファイルに依存する。
+- [[https://docs.astropy.org/en/latest/io/unified_table.html#table-serialization-methods][Table Data — Astropy v8.0.0]]
+~ecsv~ の場合は、初期設定ではマスクされた値は空の文字列になる。
+#+begin_src ipython :session :exports both :async t :results output :export both :eval never-export
+  import sys
+  import io
+
+  table['c'].mask = False  # Removed masks
+
+  STDOUT = sys.stdout
+  sys.stdout = io.StringIO()
+  table.write(sys.stdout, format='ascii.ecsv')
+  string = sys.stdout.getvalue()
+  sys.stdout = STDOUT
+  print(string)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: a, datatype: int64}
+# - {name: b, datatype: int64}
+# - {name: c, datatype: int64}
+# schema: astropy-2.0
+a b c
+"" 0 6
+"" 0 3
+10 "" 12
+
+#+end_example
+
+ここで、書き込む前にわざと列cのマスクを外したが、 ~ecsv~ ファイルの中には列cが ~MaskedColumn~ であったという情報は残らない。
+よって、 *改めてこれを読み込むと通常の ~Column~ として読み込まれる* 。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  table2 = Table.read(string, format='ascii.ecsv')
+  type(table['c']), type(table2['c'])
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[21]:
+: (astropy.table.column.MaskedColumn, astropy.table.column.Column)
+:end:
+
+~MaskedColumn~ ではなくなるということは、 ~mask~ 属性が無くなるなどオブジェクトの操作方法が変わるということなので、
+読み込んだあとにどこかで明示的に戻してやる必要がある。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  table3 = Table(table2, masked=True)
+  type(table['c']), type(table2['c']), type(table3['c'])
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[22]:
+#+BEGIN_EXAMPLE
+  (astropy.table.column.MaskedColumn,
+  astropy.table.column.Column,
+  astropy.table.column.MaskedColumn)
+#+END_EXAMPLE
+:end:
+
+* Tableと文字列フォーマット
+~Table~ に格納される文字列は固定長である。
+可変長にするときにはフォーマットを ~object~ に指定すると解決できる。
+これは、既存の表に文字列を代入するときに問題になる。
+
+#+begin_src ipython :session :exports both :async t :results output :export both :eval never-export
+  from astropy.table import Table
+
+  table = Table([['M81', 'M77'], ['galaxy', 'AGN']], names=['name', 'property'], dtype=[str, object])
+  table['name'][0] = 'M101---pinwheel'
+  table['property'][0] = 'grand spiral galaxy'
+  table.pprint(show_dtype=True)
+#+end_src
+
+#+RESULTS:
+: name       property     
+: str3        object      
+: ---- -------------------
+:  M10 grand spiral galaxy
+:  M77                 AGN
+: /tmp/ipykernel_1049744/3946362794.py:4: StringTruncateWarning: truncated right side string(s) longer than 3 character(s) during assignment
+:   table['name'][0] = 'M101---pinwheel'
+
+固定長文字列は、新しく行を足したり表同士を結合したりするときには自動的に長さが延長される。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  from astropy.table import vstack
+
+  table.add_row(['NGC1300', 'bar spiral'])
+  table2 = Table([['M101'], ['sprial galaxy']], names=['name', 'property'], dtype=[str, object])
+  vstack([table, table2])
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[22]:
+#+BEGIN_EXAMPLE
+  <Table length=4>
+  name        property
+  str7         object
+  ------- -------------------
+  M10 grand spiral galaxy
+  M77                 AGN
+  NGC1300          bar spiral
+  M101       sprial galaxy
+#+END_EXAMPLE
+:end:
+
+しかし、 ~str~ と ~object~ は足し合わせることができない。
+結合するときには相互に変換してやる必要がある。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  from astropy.table import TableMergeError
+
+  dtype = [str, str]
+  table2 = Table([['M101'], ['sprial galaxy']], names=['name', 'property'], dtype=dtype)
+  try:
+      vstack([table, table2])
+  except TableMergeError as e:
+      errormessage = repr(e)
+
+  table2['property'] = table2['property'].astype(object)
+  vstack([table, table2])  # No error message
+  errormessage
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[27]:
+: 'TableMergeError("The \'property\' columns have incompatible types: [\'object\', \'str416\']")'
+:end:
+
+* Tableと日付けデータ
+~Table~ は ~astropy.time.Time~ と連携するように作られているが、これがなかなかにややこしいうえに癖がある。
+- [[https://docs.astropy.org/en/latest/table/table_and_dataframes.html#time-and-coordinates][Time and Coordinates | Astropy Table and DataFrames — Astropy v8.0.0]]
+
+Python上で通常どおり使うだけなら ~Time~ は ~Table~ とうまく連携しているように見える。
+しかし、入出力やマスクと組み合わさるととたんに予想外の挙動を示す。
+
+** 初期化
+まず、 ~Time~ のややこしい点として、空で初期化することが標準でできない。
+おそらく、 ~Time~ には日付フォーマットを判定するための派生関数がたくさんあり、どのフォーマットで時刻を入力するかを決めてやるためだと推測するが、定かではない。
+そのため、必ずなにか初期値を入力してやる必要がある。
+空のオブジェクトを作りたければ、初期化したあとに要素を消す必要がある。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  import numpy as np
+  from astropy.time import Time
+  from astropy.table import Table, Column
+  import datetime
+
+  time = Time(datetime.datetime.today())  # Time.now() would be more useful
+  time = np.delete(time, 0)
+  Table([time, np.array([]), Column(dtype=str)], names=['time', 'value', 'memo'])
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[7]:
+#+BEGIN_EXAMPLE
+  <Table length=0>
+  time  value  memo
+  Time float64 str1
+  ---- ------- ----
+#+END_EXAMPLE
+:end:
+
+また、一つの値で初期化するとスカラーで扱われてしまう。
+(~np.delete~ はなぜか使えるが、)ベクトル配列で扱いたい場合には、基本的に配列を明示的に与えてやる必要がある。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  Time(Time.now()), Time([Time.now()])
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[17]:
+#+BEGIN_EXAMPLE
+  (<Time object: scale='utc' format='datetime' value=2026-02-10 07:15:45.149020>,
+  <Time object: scale='utc' format='datetime' value=[datetime.datetime(2026, 2, 10, 7, 15, 45, 149510)]>)
+#+END_EXAMPLE
+:end:
+
+スカラーで扱われた場合には ~Table~ を作成するときにエラーが出てしまう。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  try:
+      Table([Time(Time.now())], names=['time'])
+  except TypeError as e:
+      errormessage = repr(e)
+  errormessage
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[30]:
+: 'TypeError("Scalar \'Time\' object has no len()")'
+:end:
+
+** マスク
+~Time~ はマスクをサポートしている。
+- [[https://docs.astropy.org/en/latest/time/index.html#missing-values][missing values | Time and Dates (astropy.time) — Astropy v8.0.0]]
+
+しかし、やはり癖がある。
+「[[*あとからマスクする][あとからマスクする]]」で挙げたいくつかのマスク手法は ~Time~ では使えない。
+まず ~mask~ 属性はsetterが無いので代入できない。
+要素に直接 ~np.ma.masked~ を与えることはでき、 ~np.ma.nomask~ でマスクを外せる。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  time = Time([Time.now()])
+  try:
+      time.mask = [True]
+  except AttributeError as e:
+      errormessage = repr(e)
+
+  time[0] = np.ma.masked  # OK
+
+  errormessage
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[15]:
+: 'AttributeError("property \'mask\' of \'Time\' object has no setter")'
+:end:
+
+~unmasked~ という ~MaskedColumn~ には用意されていない属性で、マスクを外したオブジェクトを得ることができる。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  time.unmasked
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[18]:
+: <Time object: scale='utc' format='datetime' value=[datetime.datetime(2026, 2, 10, 7, 13, 25, 981787)]>
+:end:
+
+~Time~ は自分が初期化される前にマスクされた値を読みには行かないので、マスクの下の値として2000年1月1日が使われる。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  from astropy.utils.masked import Masked
+  dates = Masked(['2001:020', '2001:040', '2001:060'], mask=[False, True, False])
+  tm = Time(dates, out_subfmt="date")
+  tm[2] = np.ma.masked
+  tm.unmasked
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[21]:
+: <Time object: scale='utc' format='yday' value=['2001:020' '2000:001' '2001:060']>
+:end:
+
+
+** 入出力
+~Time~ には初期値が必要であり、全ての値がマスクされているとフォーマットがわからずエラーになる。
+
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  from astropy.table import MaskedColumn
+  try:
+      time = Time(MaskedColumn([datetime.datetime.today()] * 3, mask=True))
+  except ValueError as e:
+      errormessage = repr(e)
+
+  time = Time(MaskedColumn([datetime.datetime.today()] * 3, mask=True), format='datetime')  # OK
+  errormessage
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[36]:
+: "ValueError('cannot guess format from input values with zero-size array or all elements masked')"
+:end:
+
+特にファイル入出力が問題で、 *表が空だと書き込む際にエラーになる* 。
+#+begin_src ipython :session :exports both :async t :results raw drawer :export both :eval never-export
+  import sys
+  import io
+
+  emptytime = np.delete(time, [0, 1, 2])
+  table = Table([emptytime], names=['time'])
+
+  try:
+      table.write(sys.stdout, format='ascii.ecsv')
+  except ValueError as e:
+      errormessage = repr(e)
+  errormessage
+#+end_src
+
+#+RESULTS:
+:results:
+# Out[63]:
+: "ValueError('cannot call `vectorize` on size 0 inputs unless `otypes` is set')"
+:end:
+
+
+また *ファイルから表を読み込む際に全ての値がマスクされてるとエラーになる* 。
+#+begin_src ipython :session :exports both :async t :results output :export both :eval never-export
+  import sys
+  import io
+
+  table = Table([time], names=['time'])
+
+  STDOUT = sys.stdout
+  sys.stdout = io.StringIO()
+  table.write(sys.stdout, format='ascii.ecsv')
+  string = sys.stdout.getvalue()
+  sys.stdout = STDOUT
+
+  try:
+      table.read(string, format='ascii.ecsv')
+  except ValueError as e:
+      errormessage = repr(e)
+  print(string)
+  print(errormessage)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: time, datatype: string}
+# meta: !!omap
+# - __serialized_columns__:
+#     time:
+#       __class__: astropy.time.core.Time
+#       format: datetime
+#       in_subfmt: '*'
+#       out_subfmt: '*'
+#       precision: 3
+#       scale: utc
+#       value: !astropy.table.SerializedColumn
+#         __class__: astropy.utils.masked.core.MaskedNDArray
+#         data: !astropy.table.SerializedColumn {name: time}
+# schema: astropy-2.0
+time
+""
+""
+""
+
+ValueError("Invalid isoformat string: '0'")
+#+end_example
+
+で、一部マスクを外せばうまく行くのかと思いきや、 *結局エラーになる* 。
+#+begin_src ipython :session :exports both :async t :results output :export both :eval never-export
+  table = Table([time], names=['time'])
+  table['time'][0] = np.ma.nomask
+
+  STDOUT = sys.stdout
+  sys.stdout = io.StringIO()
+  table.write(sys.stdout, format='ascii.ecsv')
+  string = sys.stdout.getvalue()
+  sys.stdout = STDOUT
+
+  try:
+      table.read(string, format='ascii.ecsv')
+  except ValueError as e:
+      errormessage = repr(e)
+  print(string)
+  print(errormessage)
+#+end_src
+
+#+RESULTS:
+#+begin_example
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: time, datatype: string}
+# meta: !!omap
+# - __serialized_columns__:
+#     time:
+#       __class__: astropy.time.core.Time
+#       format: datetime
+#       in_subfmt: '*'
+#       out_subfmt: '*'
+#       precision: 3
+#       scale: utc
+#       value: !astropy.table.SerializedColumn
+#         __class__: astropy.utils.masked.core.MaskedNDArray
+#         data: !astropy.table.SerializedColumn {name: time}
+# schema: astropy-2.0
+time
+2000-01-01T12:00:00
+""
+""
+
+ValueError("Invalid isoformat string: '0'")
+#+end_example
+
+マスクがなければうまくいくのでバグだと思われる。
+#+begin_src ipython :session :exports both :async t :results output :export both :eval never-export
+  table = Table([time], names=['time'])
+  table['time'][:] = np.ma.nomask
+
+  STDOUT = sys.stdout
+  sys.stdout = io.StringIO()
+  table.write(sys.stdout, format='ascii.ecsv')
+  string = sys.stdout.getvalue()
+  sys.stdout = STDOUT
+
+  print(string)
+  print(table.read(string, format='ascii.ecsv'))
+#+end_src
+
+#+RESULTS:
+#+begin_example
+# %ECSV 1.0
+# ---
+# datatype:
+# - {name: time, datatype: string}
+# meta: !!omap
+# - __serialized_columns__:
+#     time:
+#       __class__: astropy.time.core.Time
+#       format: datetime
+#       in_subfmt: '*'
+#       out_subfmt: '*'
+#       precision: 3
+#       scale: utc
+#       value: !astropy.table.SerializedColumn
+#         __class__: astropy.utils.masked.core.MaskedNDArray
+#         data: !astropy.table.SerializedColumn {name: time}
+# schema: astropy-2.0
+time
+2000-01-01T12:00:00
+2000-01-01T12:00:00
+2000-01-01T12:00:00
+
+        time       
+-------------------
+2000-01-01 12:00:00
+2000-01-01 12:00:00
+2000-01-01 12:00:00
+#+end_example
+
+とにもかくにも、マスクと日付の相性が悪い。
+おそらく ~escv~ のメタ情報をコントロールしたり、
+書き出す際のフォーマットを変更したり([[https://docs.astropy.org/en/latest/io/unified_table.html#table-serialization-methods][Table Data — Astropy v8.0.0]])すれば解決しそうな気がするが、
+便利関数を使っているはずなのになぜこんなにも苦労しなければいけないのかという思いが増す。
