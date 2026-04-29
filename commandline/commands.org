@@ -43,6 +43,8 @@
   - .git/*
 #+end_example
 
+- [[file:rsync-excludefrom.org][rsyncのexclude-fromオプション]]
+
 * Mac
 ** Spotlight
 Spotlightの停止は

@@ -1,0 +1,236 @@
+#+title: rsyncのexclude-fromオプション
+
+* 試してみる
+#+begin_src bash :exports both :results raw :eval never-export
+  tree
+#+end_src
+
+#+RESULTS:
+#+begin_example
+.
+├── test
+│   ├── a
+│   ├── b
+│   └── subdir
+│       ├── c
+│       ├── d
+│       └── subsubdir
+│           ├── e
+│           └── f
+├── test.list
+├── test2
+
+5 directories, 14 files
+#+end_example
+
+コマンド
+#+begin_src bash :exports both :results raw :eval never-export
+  rsync -avhnC --exclude-from="test.list" test/ test2/
+#+end_src
+
+#+begin_example
++ subdir/
++ subdir/subsubdir
++ subdir/subsubdir/e
+- *
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+subdir/
+subdir/subsubdir/
+subdir/subsubdir/e
+
+sent 155 bytes  received 30 bytes  370.00 bytes/sec
+total size is 2  speedup is 0.01 (DRY RUN)
+
+#+begin_example
++ subdir/subsubdir
++ subdir/subsubdir/e
+- *
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+
+sent 61 bytes  received 19 bytes  160.00 bytes/sec
+total size is 0  speedup is 0.00 (DRY RUN)
+
+
+
+#+begin_example
+  + subdir/subsubdir
+  + subdir/subsubdir/e
+  - subdir/**
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+subdir/
+subdir/subsubdir/
+subdir/subsubdir/e
+
+sent 205 bytes  received 36 bytes  482.00 bytes/sec
+total size is 10  speedup is 0.04 (DRY RUN)
+
+#+begin_example
+  + subdir/subsubdir
+  + subdir/subsubdir/e
+  - subdir/*
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+subdir/
+subdir/subsubdir/
+subdir/subsubdir/e
+subdir/subsubdir/f
+
+sent 220 bytes  received 39 bytes  518.00 bytes/sec
+total size is 11  speedup is 0.04 (DRY RUN)
+
+#+begin_example
+  + subdir
+  + subdir/c
+  - subdir/*
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+subdir/
+subdir/c
+
+#+begin_example
+  + subdir
+  + subdir/c
+  - subdir
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+subdir/
+subdir/c
+subdir/d
+subdir/subsubdir/
+subdir/subsubdir/e
+subdir/subsubdir/f
+
+sent 271 bytes  received 45 bytes  632.00 bytes/sec
+total size is 16  speedup is 0.05 (DRY RUN)
+
+
+
+#+begin_example
+  + subdir/c
+  - subdir
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+
+sent 102 bytes  received 25 bytes  254.00 bytes/sec
+total size is 8  speedup is 0.06 (DRY RUN)
+
+
+
+#+begin_example
+  - subdir
+  + subdir/c
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+
+sent 102 bytes  received 25 bytes  254.00 bytes/sec
+total size is 8  speedup is 0.06 (DRY RUN)
+
+
+
+#+begin_example
+- subsubdir
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+subdir/
+subdir/c
+subdir/d
+
+sent 183 bytes  received 35 bytes  436.00 bytes/sec
+total size is 13  speedup is 0.06 (DRY RUN)
+
+
+
+#+begin_example
+- subdir
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+
+sent 102 bytes  received 25 bytes  254.00 bytes/sec
+total size is 8  speedup is 0.06 (DRY RUN)
+
+
+
+#+begin_example
+  # default
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+subdir/
+subdir/c
+subdir/d
+subdir/subsubdir/
+subdir/subsubdir/e
+subdir/subsubdir/f
+
+sent 271 bytes  received 45 bytes  632.00 bytes/sec
+total size is 16  speedup is 0.05 (DRY RUN)
+
+#+begin_example
+  - subdir/
+  + subdir/
+  + subdir/subsubdir/
+  + subdir/subsubdir/e
+  - subdir/**
+#+end_example
+
+#+RESULTS:
+sending incremental file list
+./
+a
+b
+
+sent 102 bytes  received 25 bytes  254.00 bytes/sec
+total size is 8  speedup is 0.06 (DRY RUN)
