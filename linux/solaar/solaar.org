@@ -1,0 +1,50 @@
+#+title: *Solaar*
+#+AUTHOR: sugayu
+#+OPTIONS: toc:nil ^:nil
+
+* Solaar
+Logitech製品の振舞いをLinuxから制御するためのソフトウェア。
+Logitechが公式でLinux用のマネージャーアプリを用意してくれていないのでコミュニティが有志で作成している。
+Linuxコミュニティすごい。
+
+- [[https://pwr-solaar.github.io/Solaar/][Solaar Documentation]]
+
+* インストール
+#+begin_src bash
+  sudo add-apt-repository ppa:solaar-unifying/ppa
+  sudo apt-get install solaar
+#+end_src
+やけどたぶん1行目は要らなかった。
+インストール後、再起動する。
+
+下記サイトを参考にした。
+- [[https://gihyo.jp/admin/serial/01/ubuntu-recipe/0397][第397回　SolaarでロジクールのUniyingレシーバーを管理する | gihyo.jp]]
+
+* 設定
+
+** マウスジェスチャー
+マウスジェスチャーも再現してくれている。コミュニティの力、すごい。
+Action Ringショートカットのボタン名は Haptic だが、さすがにAction Ringは作れていないと思う。
+
+ジェスチャーを使いたいときには、
+「キー/ボタンをルールへ迂回」[Haptic, マウスジェスチャー]に設定する。
+- [[https://github.com/pwr-Solaar/Solaar/issues/2964][The MX Master 4 is officially out! · Issue #2964 · pwr-Solaar/Solaar · GitHub]]
+
+** ルールの
+ルール設定のドキュメントがここにある。
+- [[https://pwr-solaar.github.io/Solaar/rules/][Rules - Solaar Documentation]]
+
+ルールエディタの設定例
+- ルール
+  - マウスジェスチャー Mouse Left
+  - プロセス firefox
+  - キー押下 Control_L + w
+- ルール
+  - Mouse Right
+  - プロセス firefox
+  - キー押下 Control_L + Shift_L + t
+
+使いたいアプリケーションのプロセスを特定することで、そのアプリ専用の振舞いをさせることができる。
+どうやってプロセス名を特定するかは分からないが、firefoxが小文字でいけたので、
+ターミナル上の ~ps~ で出てくるコマンド名を指すんじゃないでしょうか、知らんけど。
+(たとえば、 ~ps -aux | grep firefox~ でfirefoxに関するプロセスが出てくる。)
