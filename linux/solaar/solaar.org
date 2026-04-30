@@ -30,19 +30,94 @@ Action Ringショートカットのボタン名は Haptic だが、さすがにA
 「キー/ボタンをルールへ迂回」[Haptic, マウスジェスチャー]に設定する。
 - [[https://github.com/pwr-Solaar/Solaar/issues/2964][The MX Master 4 is officially out! · Issue #2964 · pwr-Solaar/Solaar · GitHub]]
 
-** ルールの
+** ルール
 ルール設定のドキュメントがここにある。
 - [[https://pwr-solaar.github.io/Solaar/rules/][Rules - Solaar Documentation]]
 
-ルールエディタの設定例
-- ルール
-  - マウスジェスチャー Mouse Left
-  - プロセス firefox
-  - キー押下 Control_L + w
-- ルール
-  - Mouse Right
-  - プロセス firefox
-  - キー押下 Control_L + Shift_L + t
+マウスボタンのルール設定時は、上のマウスジェスチャーと同様に関連するボタンの機能をルールへ迂回させる必要がある。
+
+ルールエディタの設定例 (file:~/.config/solaar/rules.yaml)
+#+begin_src yaml
+  %YAML 1.3
+  ---
+  - Not:
+      KeyIsDown: Middle Button
+  - Key: [Forward Button, pressed]
+  - KeyPress:
+    - XF86_Forward
+    - click
+  ...
+  ---
+  - Not:
+      KeyIsDown: Middle Button
+  - Key: [Back Button, pressed]
+  - KeyPress:
+    - XF86_Back
+    - click
+  ...
+  ---
+  - Key: [Middle Button, pressed]
+  - MouseClick: [middle, 1]
+  ...
+  ---
+  - KeyIsDown: Middle Button
+  - Key: [Back Button, pressed]
+  - Process: firefox
+  - KeyPress:
+    - [Control_L, Shift_L, Tab]
+    - click
+  ...
+  ---
+  - KeyIsDown: Middle Button
+  - Key: [Forward Button, pressed]
+  - Process: firefox
+  - KeyPress:
+    - [Control_L, Tab]
+    - click
+  ...
+  ---
+  - MouseGesture: Mouse Left
+  - Process: firefox
+  - KeyPress:
+    - [Control_L, w]
+    - click
+  ...
+  ---
+  - MouseGesture: Mouse Right
+  - Process: firefox
+  - KeyPress:
+    - [Control_L, Shift_L, t]
+    - click
+  ...
+  ---
+  - Not:
+      KeyIsDown: Haptic
+  - Test: [hires_wheel_up, 30]
+  - MouseScroll: [0, 2]
+  ...
+  ---
+  - Not:
+      KeyIsDown: Haptic
+  - Test: [hires_wheel_down, 30]
+  - MouseScroll: [0, -2]
+  ...
+  ---
+  - KeyIsDown: Haptic
+  - Test: [hires_wheel_up, 20]
+  - Process: firefox
+  - KeyPress:
+    - [Control_L, minus]
+    - click
+  ...
+  ---
+  - KeyIsDown: Haptic
+  - Test: [hires_wheel_down, 20]
+  - Process: firefox
+  - KeyPress:
+    - [Control_L, equal]
+    - click
+  ...
+#+end_src
 
 使いたいアプリケーションのプロセスを特定することで、そのアプリ専用の振舞いをさせることができる。
 どうやってプロセス名を特定するかは分からないが、firefoxが小文字でいけたので、
