@@ -1,0 +1,115 @@
+#+title: *ログの設定*
+#+AUTHOR: sugayu
+#+OPTIONS: toc:nil ^:nil
+
+* loggingモジュール
+Pythonのログには標準ライブラリに含まれる ~logging~ モジュールが使える。
+
+* loggingモジュールの内部の振舞い
+初期設定では、全てのloggerは同じroot loggerから派生している。
+~logger = getLogger(__name__)~ は内部で ~Logger.manager.getLogger(__name__)~ を呼び出している。
+これにより ~getLogger~ で得られる全てのloggerを一つの ~manager~ で管理している。
+[[file:~/anaconda3/envs/astro12/lib/python3.12/logging/__init__.py::def getLogger(name=None):]]
+
+~logger~ には親子関係が定義されており、loggerの名前にピリオドがあるとピリオドより前の名前が親 ~logger.parent~ として設定される。
+属性 ~logger.propagate~ が初期設定のまま ~True~ であるとき、~logger~ が呼ばれると ~logger.parent~ を逆のぼり続ける。
+この仕組みにより、子は親で定義されたHandlerを引き継いで使用することができる。
+1番上の親はroot loggerとしてモジュール内で定義されており、上で述べたように全てのloggerはroot loggerの派生している。
+多くの場合、各コード内では ~logger = getLogger(__name__)~ で ~logger~ を作成するだけに留め、
+スクリプト内でroot loggerに対して設定を行うことで全てのコードはこの設定に従ってログをはく。
+[[file:~/anaconda3/envs/astro12/lib/python3.12/logging/__init__.py::def callHandlers(self, record):]]
+
+ファイルを越えて同じloggerを名前で呼び出せるので、あるモジュール内のloggerだけ出力先や出力レベルを変えたい場合には、
+~logger = getLogger(name)~ で呼び出してやればどこからでも設定が可能であり、 ~name~ の子全てにその設定は引き継がれる。
+このとき、親の設定を引き継ぎたくなければ ~logger.propagate = False~ とすることを忘れない。
+
+* 例
+~jwst~ パイプラインのログだけ異なるファイルに吐き出すための設定関数。
+
+#+begin_src python
+  def set_jwstlogger(path_root: Path) -> None:
+      '''Set a logger for JWST.'''
+      jwstlogger = getLogger('jwst')
+      jwstlogger.propagate = False
+
+      if jwstlogger.hasHandlers():
+          for handler in jwstlogger.handlers:
+              jwstlogger.removeHandler(handler)
+
+      # Use same formatter as the root one.
+      formatter = logging.root.handlers[0].formatter
+
+      stream_handler = logging.StreamHandler()
+      stream_handler.setLevel(logging.WARNING)
+      stream_handler.setFormatter(formatter)
+      jwstlogger.addHandler(stream_handler)
+
+      date = datetime.today().strftime('%Y%m%d-%Hh%Mm%Ss')
+      path_log = path_root / f'log/pipeline-nirspecifu_{date}.log'
+      if not path_log.parent.exists():
+          raise FileNotFoundError(f'No "log/" in {path_log}.')
+      file_handler = logging.FileHandler(path_log)
+      file_handler.setLevel(logging.INFO)
+      file_handler.setFormatter(formatter)
+      jwstlogger.addHandler(file_handler)
+#+end_src
+
+** root loggerを一時的に変更する contextmanager
+root loggerを一時的に変更するうえ、root loggerに ~FileHandler~ が含まれる場合には削除せずレベルを変えるという
+複雑極まりない一時処理をする場合の関数。
+
+途中で元のhanldlersを一時保存するために ~DEFAULT_ROOT_HANDLERS~ をshallow copyしている。
+ここをコピーせずビューにしてしまうと、 ~logger.removeHandler~ で ~handler~ を消すときに一緒に消えてしまう。
+また、 ~for handler in DEFAULT_ROOT_HANDLERS:~ も大事で、ここを ~for handler in logger_root.handlers:~ にしてしまうと
+ループの途中でリストの要素が消えることになり、意図した挙動にならないバグが生じる。
+
+#+begin_src python
+  @contextlib.contextmanager
+  def set_jwstlogger(path_root: Path):
+      '''Set a logger for JWST.'''
+      date = datetime.today().strftime('%Y%m%d-%Hh%Mm%Ss')
+      path_log = path_root / f'log/pipeline-nirspecifu_{date}.log'
+      if not path_log.parent.exists():
+          raise FileNotFoundError(f'No "log/" in {path_log}.')
+
+      logger_root = logger.root
+      # Use same formatter as the root one.
+      formatter = logger_root.handlers[0].formatter
+      DEFAULT_ROOT_HANDLERS = [h for h in logger_root.handlers]  # copy list
+      DEFAULT_LEVELS = {}
+
+      logger.info(f'Set jwst logger: output path is {path_log}')
+
+      if logger_root.hasHandlers():
+          for handler in DEFAULT_ROOT_HANDLERS:
+              if isinstance(handler, logging.FileHandler):
+                  DEFAULT_LEVELS[handler] = handler.level
+                  handler.setLevel(logging.WARNING)
+              else:
+                  logger_root.removeHandler(handler)
+
+      stream_handler = logging.StreamHandler()
+      stream_handler.setLevel(logging.WARNING)
+      stream_handler.setFormatter(formatter)
+      logger_root.addHandler(stream_handler)
+
+      file_handler = logging.FileHandler(path_log)
+      file_handler.setLevel(logging.INFO)
+      file_handler.setFormatter(formatter)
+      logger_root.addHandler(file_handler)
+
+      try:
+          yield
+
+      finally:
+          if logger_root.hasHandlers():
+              handlers = [h for h in logger_root.handlers]
+              for handler in handlers:
+                  logger_root.removeHandler(handler)
+              del handlers
+
+          for handler in DEFAULT_ROOT_HANDLERS:
+              logger_root.addHandler(handler)
+              if isinstance(handler, logging.FileHandler):
+                  handler.setLevel(DEFAULT_LEVELS[handler])
+#+end_src

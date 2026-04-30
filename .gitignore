@@ -7,3 +7,5 @@
 ltximg/
 .DS_Store
 *.tex
+*.pyc
+obipy-resources/
