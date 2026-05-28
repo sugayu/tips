@@ -1,0 +1,27 @@
+#+title: *LaTeXパッケージ*
+#+AUTHOR: sugayu
+#+OPTIONS: toc:nil
+#+LATEX_HEADER: \usepackage[list-units = single, range-units = single]{siunitx}
+
+* siunitx
+単位を調整するパッケージ。
+
+** よく使うコマンド
+- ~\qty~, ~\unit~, ~\num~
+- ~\qtylist~, ~\qtyrange~: ~\qtylist{5230.154;5222.533}{GHz}~ = \(\qtylist{5230.154;5222.533}{GHz}\)
+
+** よく使うオプション
+*** list-units, range-units
+数値を並べたときに、単位をどのようにつけるか。
+#+begin_export latex
+\usepackage[list-units = single, range-units = single]{siunitx}
+#+end_export
+
+*** range-phrase
+範囲を表す文字を指定できる。
+#+begin_export latex
+\qtyrange[range-phrase = \text{--}]{0.4}{0.8}{mm}
+#+end_export
+
+** マニュアル
+- https://texdoc.org/serve/siunitx/0
