@@ -1,0 +1,464 @@
+#+title: NIRSpec IFUデータ較正
+
+* STScIパイプライン
+
+** デフォルトパラメータ
+#+begin_src python
+  print(Detector1Pipeline.step_defs['jump'].spec)
+#+end_src
+
+#+begin_src python
+  jump=Detector1Pipeline.step_defs['jump']()
+  jump.get_pars()
+#+end_src
+
+** MAST
+MASTは基本的にデフォルトパラメータでデータ処理しているものだと思っていたが、 ~jump detection~ の処理で
+1. デフォルトでオフのはずのsnowball検出アルゴリズムが働いている。
+2. デフォルトパラメータを使ったときと宇宙線の検出率が違う。
+3. MASTの生成物はSnowballがめっちゃきれいに引かれている。
+という上記の3点から、MASTはデータ処理のパラメータをデフォルトから変更しているという結論を得た。
+
+MASTのデータ処理で使われているパラメータはデータに含まれているログから取り出すことができる。
+MASTのデータ(例えばrate.fits)に対して以下のattributeを見て確認できる。
+#+begin_src python
+  from jwst import datamodels
+  datamodel=datamodels.open('jw01208062001_03101_00001_nrs1_rate.fits')
+  print(datamodel._instance.data['cal_logs']['calwebb_detector1'][1])
+#+end_src
+
+2025年11月に較正された Operations Pipeline Build 12.1 (pipeline version 1.20.2) のデータは以下のとおりである。
+#+begin_example
+  2025-11-30T08:29:04.154 - stpipe.step - INFO - Step Detector1Pipeline parameters are:
+    pre_hooks: []
+    post_hooks: []
+    output_file: None
+    output_dir: None
+    output_ext: .fits
+    output_use_model: False
+    output_use_index: True
+    save_results: True
+    skip: False
+    suffix: None
+    search_output_file: True
+    input_dir: fits
+    save_calibrated_ramp: False
+    steps:
+      group_scale:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+      dq_init:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+      emicorr:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: True
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        algorithm: joint
+        nints_to_phase: None
+        nbins: None
+        scale_reference: True
+        onthefly_corr_freq: None
+        use_n_cycles: 3
+        fit_ints_separately: False
+        user_supplied_reffile: None
+        save_intermediate_results: False
+      saturation:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        n_pix_grow_sat: 1
+        use_readpatt: True
+      ipc:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: True
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+      superbias:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+      refpix:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        odd_even_columns: True
+        use_side_ref_pixels: True
+        side_smoothing_length: 11
+        side_gain: 1.0
+        odd_even_rows: True
+        ovr_corr_mitigation_ftr: 3.0
+        preserve_irs2_refpix: False
+        irs2_mean_subtraction: False
+        refpix_algorithm: median
+        sigreject: 4.0
+        gaussmooth: 1.0
+        halfwidth: 30
+      rscd:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+      firstframe:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        bright_use_group1: True
+      lastframe:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+      linearity:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+      dark_current:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        dark_output: None
+        average_dark_current: 0.0082
+      reset:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+      persistence:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        input_trapsfilled: ''
+        flag_pers_cutoff: 40.0
+        save_persistence: False
+        save_trapsfilled: True
+        modify_input: False
+      charge_migration:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: True
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        signal_threshold: 25000.0
+      jump:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        rejection_threshold: 4.0
+        three_group_rejection_threshold: 6.0
+        four_group_rejection_threshold: 5.0
+        maximum_cores: '1'
+        flag_4_neighbors: True
+        max_jump_to_flag_neighbors: 1000
+        min_jump_to_flag_neighbors: 30
+        after_jump_flag_dn1: 0
+        after_jump_flag_time1: 0
+        after_jump_flag_dn2: 0
+        after_jump_flag_time2: 0
+        expand_large_events: True
+        min_sat_area: 1
+        min_jump_area: 5
+        expand_factor: 2
+        use_ellipses: False
+        sat_required_snowball: True
+        min_sat_radius_extend: 2.5
+        sat_expand: 2
+        edge_size: 25
+        mask_snowball_core_next_int: True
+        snowball_time_masked_next_int: 4000
+        find_showers: False
+        max_shower_amplitude: 4.0
+        extend_snr_threshold: 0.0
+        extend_min_area: 0
+        extend_inner_radius: 0
+        extend_outer_radius: 0.0
+        extend_ellipse_expand_ratio: 0.0
+        time_masked_after_shower: 0
+        min_diffs_single_pass: 10
+        max_extended_radius: 200
+        minimum_groups: 3
+        minimum_sigclip_groups: 100
+        only_use_ints: True
+      clean_flicker_noise:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: True
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        autoparam: False
+        fit_method: median
+        fit_by_channel: False
+        background_method: median
+        background_box_size: None
+        mask_science_regions: False
+        apply_flat_field: False
+        n_sigma: 2.0
+        fit_histogram: False
+        single_mask: True
+        user_mask: None
+        save_mask: False
+        save_background: False
+        save_noise: False
+      ramp_fit:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+        algorithm: OLS_C
+        int_name: ''
+        save_opt: False
+        opt_name: ''
+        suppress_one_group: True
+        firstgroup: None
+        lastgroup: None
+        maximum_cores: '1'
+      gain_scale:
+        pre_hooks: []
+        post_hooks: []
+        output_file: None
+        output_dir: None
+        output_ext: .fits
+        output_use_model: False
+        output_use_index: True
+        save_results: False
+        skip: False
+        suffix: None
+        search_output_file: True
+        input_dir: fits
+#+end_example
+
+NIRSpecに関する部分でデフォルトと異なるのは以下の3箇所。
+#+begin_example
+  dark_current:
+    average_dark_current: 0.0082
+  jump:
+    min_jump_to_flag_neighbors: 30
+    expand_large_events: True
+#+end_example
+
+** 参考資料
+- [[https://github.com/spacetelescope/jwst][James Webb Space Telescope Calibration Pipeline· GitHub]]
+- [[https://github.com/spacetelescope/jwst-pipeline-notebooks/blob/main/notebooks/NIRSPEC/IFU/JWPipeNB-NIRSpec-IFU.ipynb][NIRSpec IFU Pipeline Notebook · GitHub]]
+
+* Stage1: Detector1
+
+** refpix
+増幅器で信号を読み出す際に定数値で乗るカウント値を補正する。
+
+どのように補正するかは検出器の読み出しモード(パターン)ごとに異なる。
+読み出しモードは以下のように7通りある。
+- [[https://jwst-docs.stsci.edu/jwst-near-infrared-spectrograph/nirspec-instrumentation/nirspec-detectors/nirspec-detector-readout-modes-and-patterns#gsc.tab=0][NIRSpec Detector Readout Modes and Patterns - JWST User Documentation]]
+たいてい使われるのは ~NRSIRS2~, ~NRSIRS2RAPID~, ~NRSRAPID~, ~NRS~ ではないかと思う。
+
+~NRS~ や ~NRSRAPID~ のときの補正手法を決める ~refpix_algorithm~ はデフォルトでは ~median~ になっている。
+しかし、[[https://github.com/spacetelescope/jwst-pipeline-notebooks/blob/main/notebooks/NIRSPEC/IFU/JWPipeNB-NIRSpec-IFU.ipynb][NIRSpec IFU Pipeline Notebook]]によればデフォルト値は ~sirs~ が良いらしい。
+どちらにせよ、 ~IRS2~ 系統のときは ~irs2_subtract_reference.correct_model~ という別の手法が
+使われるのでここで指定した処理は行われないことに注意する。
+
+#+begin_example
+  The refpix_algorithm parameter in the refpix step is applicable only to NIR data.
+  For NIRSpec full-frame data using traditional readout modes (NRS, NRSRAPID), the default algorithm—set in the parameter reference file as of Build 12.0—is 'sirs' (Simple Improved Reference Subtraction), which uses reference pixels from the left and right sides.
+  For subarray data or non-traditional readouts, the algorithm automatically defaults to 'median'.
+#+end_example
+
+#+begin_src python
+  det1dict['refpix']['refpix_algorithm'] = 'sirs'  # default
+#+end_src
+
+** jump detection
+宇宙線を検出してrampfitから取り除く、データを綺麗にするうえで重要な処理。
+snowballもここで取り除くことができる。
+
+[[https://github.com/spacetelescope/jwst-pipeline-notebooks/blob/main/notebooks/NIRSPEC/IFU/JWPipeNB-NIRSpec-IFU.ipynb][NIRSpec IFU Pipeline Notebook]]を見てみると、 ~jump~ ステップで以下の二つのパラメータが指定されていた。
+#+begin_example
+  Many exposures are affected by artifacts known as snowballs caused by large cosmic ray events.
+  These artifacts are particularly significant in deep exposures with long integration times, with an estimated rate of one snowball per detector (FULL FRAME) per 20 seconds. 
+  To expand the number of pixels flagged as jumps around large cosmic ray events, set expand_large_events to True.
+  An expand_factor of 3 works well for NIRSpec observations to cover most snowballs.
+#+end_example
+#+begin_src python
+  # Turn on detection of cosmic ray snowballs (on by default).
+  det1dict['jump']['expand_large_events'] = True # default value
+  det1dict['jump']['expand_factor'] = 3  # default value
+#+end_src
+これらのパラメータはdefaultと書かれているが、 ~jwst~ パイプライン上では別に初期値ではない。
+~Detector1~ はJWSTの全装置の検出器較正に使われているので、
+デフォルト値以外にもNIRSpecに最適化したパラメータセットというのが存在するのかもしれない。
+このなかでも ~expand_large_events~ は特に大事なパラメータで、~True~ でNIRSpecのsnowball除去の機能を有効化する。
+デフォルトでは無効になっているので特区に理由が無ければ必ず有効化する。
+
+MASTのデータでデフォルトと違う値を使っているのは、NIRSpecに関係するパラメータでは以下の二つだけであった。
+#+begin_src python
+  min_jump_to_flag_neighbors: 30
+  expand_large_events: True
+#+end_src
+snowballがかなり綺麗に取り除かれているので、他の値も変更されてると思ったんやけどな...
+
+Operations Pipeline Build 10.2 (2024/3/29)で、アルゴリズムが改良されてsnowballが綺麗に取り除けるようになった。
+10.0と比べても一目瞭然である。
+- [[https://jwst-docs.stsci.edu/known-issues/shower-and-snowball-artifacts#gsc.tab=0][Shower and Snowball Artifacts - JWST User Documentation]]
+
+- [[https://jwst-pipeline.readthedocs.io/en/stable/jwst/jump/index.html][Jump Detection — jwst 2.0.0 documentation]]
+
+* Stage2: Spec2
+
+** asign wcs
+
+* Stage3: Spec3
+
+** cube build
