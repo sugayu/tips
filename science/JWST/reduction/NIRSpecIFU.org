@@ -397,6 +397,17 @@ NIRSpecに関する部分でデフォルトと異なるのは以下の3箇所。
 
 * Stage1: Detector1
 
+** Group Scale Correction
+読み出しの際にgroupを平均化する\(N_\text{frames}\)が2の乗数でないときに、それを補正する処理。
+これがなければ、フラックス値が5/8倍小さくなってしまう。
+
+検出器の読み出しモードで該当するのはNRSIRS2のみ。
+よって、読み出しモードをNRSIRS2にした場合はこれを必ずしなければならない。
+必要が無いときは処理を飛ばしてくれるので、初期設定どおりに有効化しておけばいい。
+
+- [[https://jwst-docs.stsci.edu/jwst-near-infrared-spectrograph/nirspec-instrumentation/nirspec-detectors/nirspec-detector-readout-modes-and-patterns#gsc.tab=0][NIRSpec Detector Readout Modes and Patterns - JWST User Documentation]]
+- [[https://jwst-pipeline.readthedocs.io/en/latest/jwst/group_scale/index.html][Group Scale Correction — jwst 2.1.0.dev72+g094969c59 documentation]]
+
 ** refpix
 増幅器で信号を読み出す際に定数値で乗るカウント値を補正する。
 
