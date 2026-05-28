@@ -1,0 +1,156 @@
+#+title: Fletの使い方
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle
+#+OPTIONS: toc:nil
+
+* Flet
+Pythonのフロントエンドアプリケーション。
+バージョン0.80.0 (1.0.beta) からUIが宣言的(declarative)になったとのことで、メモする。
+
+関連リンク
+- [[https://flet.dev/blog/introducing-declarative-ui-in-flet/][Introducing Declarative UI in Flet | Flet]]
+- [[https://zenn.dev/harumikun/articles/357c576417fbdd][Pythonだけで"ほぼReact"な宣言的UIアプリが作れるようになったぞ！【Flet1.0beta】]]
+
+* UI作成の基本
+** ft.component
+例文として挙げられている最も基本的な構文はこれ。
+#+begin_src python
+  import flet as ft
+
+  @ft.component
+  def App():
+      count, set_count = ft.use_state(0)
+
+      return ft.Row(
+          controls=[
+              ft.Text(value=f"{count}"),
+              ft.Button("Add", on_click=lambda: set_count(count + 1)),
+          ],
+      )
+
+  ft.run(lambda page: page.render(App))
+#+end_src
+
+~ft.component~ でデコレートした関数 ~App~ (おそらく慣習として頭大文字)をUIの構成要素とする。
+この関数が実行されると、関数 ~ft.Row()~ という ~ft.Control~ が返され、それを ~flet~ が読み取ってUIとして表示する。
+こうした ~ft.control~ を返す ~ft.component~ を組み合わせてUIを作る。
+
+** 宣言的UI
+宣言的という言葉は、命令的と対比して使われる。
+宣言的とは、どのようにページを更新するかを命令しなくても、
+内容を変更するだけで勝手にページを更新してくれる性質のことである。
+
+上で例に挙げたカウンターアプリでいうと、
+命令的なプログラムは「カウントの変更→表示するUI要素の変更→ページの更新」を全て記述する必要がある。
+宣言的なプログラムは「カウントの変更」をすると、プログラムが変更を検知して必要な箇所を変更してくれる。
+
+これを可能にしているのが ~hook~ と呼ばれる ~ft.use_state~ である。
+値とそれを変更する関数をペアで返し、関数を使用して値を変更すると、
+その ~ft.component~ を更新してくれる。
+
+** ft.observable
+Observableパターンを実現するデコレータ。
+~dataclass~ とともに使い、 ~dataclass~ 内の属性に変化があればUIを更新する。
+これを用いると各構成要素で共通の形式をもった変数群(dataclass)を持てるほか、
+属性を更新するためのメソッドを自由な形で定義できる。
+クラスとして切り出すのでパラメータの意味が分かりやすくなるのも良い。
+
+#+begin_src python
+  import asyncio
+  from dataclasses import dataclass
+
+  import flet as ft
+
+  @dataclass
+  @ft.observable
+  class AppState:
+      counter: float
+
+      async def start_counter(self):
+          self.counter = 0
+          for _ in range(0, 10):
+              self.counter += 0.1
+              await asyncio.sleep(0.5)
+
+  @ft.component
+  def App():
+      state, _ = ft.use_state(AppState(counter=0))
+
+      return [
+          ft.ProgressBar(state.counter),
+          ft.Button("Run!", on_click=state.start_counter),
+      ]
+
+  ft.run(lambda page: page.render(App))
+#+end_src
+
+~ft.use_state~ で呼び出し、状態の変化はメソッド ~state.start_counter~ で行う。
+
+* Hook
+~hook~ は変数の受け渡しとUI更新のタインミングを調整するための関数。
+hookと呼ばれる所以は、おそらくhookが管理する変数が変更と同時にUIが更新されるからであろう。
+
+** use_state
+~ft.component~ 内のローカル変数を管理するための ~hook~ 。
+~var, set_func = ft.use_state(init)~ という構文で、 ~set_func~ を用いて ~var~ を更新すると
+~use_state~ を呼んだ ~ft.component~ が更新される。
+
+** use_context
+~ft.component~ 間で状態を共有したいときに使用する。
+特にUI要素間で設定値を共有したいときに便利。
+こちらもcontext内の属性値が変更されると、関連する全てのUIが更新される。
+
+* Viewの遷移
+ページの遷移を起こすときには ~ft.View~ を使う。
+~ft.component~ で ~list[ft.View]~ を返す関数(~app~ とする)を定義し、
+メイン関数で ~page.render_views(app)~ を呼び出す。
+~app~ 内で条件に応じて返り値 ~list[ft.View]~ を調整することでページの遷移を起こせる。
+
+~flet~ では上に重なるページを作ることでページ遷移を表現する。
+そのため、ルートページに戻るための関数も用意しておくと、重なったページを繰り戻すような演出を起こせる。
+
+* routing
+ページのルート(パス)の切り替えは ~ft.context.page.push_route~ で行う。
+これを行うことで、ページの遷移とともにURLを切り替えることができる。
+
+#+begin_src python
+  ft.Button(
+      'Visit',
+      on_click=lambda _: asyncio.create_task(ft.context.page.push_route('/fig')),
+  )
+#+end_src
+
+~ft.context.page.push_route~ が呼ばれると、 ~ft.context.page.on_route_change~ が走るので
+ルートが変わったときに実行すべき関数を事前に与えておく。
+
+#+begin_src python
+  @ft.observable
+  @dataclass
+  class Route:
+      route: str
+
+      def route_change(self, e: ft.RouteChangeEvent):
+          logger.info("Route changed from: %s to: %s", self.route, e.route)
+          self.route = e.route
+
+      async def view_popped(self, e: ft.ViewPopEvent):
+          logger.info("View popped")
+          views = ft.unwrap_component(ft.context.page.views)
+          if len(views) > 1:
+              await ft.context.page.push_route('/')
+
+  @ft.component
+  def app() -> list[ft.View]:
+      route, _ = ft.use_state(Route(route=ft.context.page.route))
+      ft.context.page.on_route_change = route.route_change
+      ft.context.page.on_view_pop = route.view_popped
+#+end_src
+
+ルートを管理する ~ft.observable~ を作っておき、 ~ft.context.page.on_route_change~ に適切なメソッドを与えてやれば、
+ルートが変更されるたびに自動的に ~Route.route~ が変更されるので、連動してUI要素も自動的に更新される。
+
+ただし ~RouteManager~ なるものが近い将来の変更で追加され、ルーティングがより容易になるかもしれない。
+- [[https://github.com/flet-dev/flet/issues/5961][feature: Router Manager · Issue #5961 · flet-dev/flet · GitHub]]
+
+参考文献
+- [[https://github.com/flet-dev/flet/blob/main/sdk/python/examples/apps/declarative/routing_two_pages.py][flet/sdk/python/examples/apps/declarative/routing_two_pages.py at main · flet-dev/flet · GitHub]]
