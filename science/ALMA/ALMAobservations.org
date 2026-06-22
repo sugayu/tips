@@ -1,0 +1,36 @@
+#+title: *ALMA観測の諸々*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle
+#+OPTIONS: toc:nil
+
+* 大気モデル
+ALMA望遠鏡サイトの大気透過率モデルを手元で数値として見たり、プロットしたいときがある。
+大気透過率モデルは ~casatools.atmosphere~ で得ることができるが、
+これは低レベルな関数群を与えるクラスなので ~Analysis Utilities~ の ~plotAtmosphere~ を使った方が良さそう。
+- [[https://help.almascience.org/kb/articles/how-can-i-plot-the-atmospheric-transmission-opacity-or-sky-temperature-for-alma][How can I plot the atmospheric transmission, opacity or sky temperature for ALMA? - Knowledgebase / Project Planning - ALMA Science]]
+
+~Analysis Utilities~ のダウンロードはtarファイルから自分で ~CASA~ にパスを通す。
+#+begin_src bash
+  wget ftp://ftp.cv.nrao.edu/pub/casaguides/analysis_scripts.tar
+  tar xvf analysis_scripts.tar
+#+end_src
+~CASA 6~ なら file:$HOME/.casa/startup.py に以下を書きこむ。
+#+begin_src python
+  # In startup.py (not in config.py)
+  import sys
+
+  sys.path.append("/PATH/TO/analysis_scripts")
+  import analysisUtils as au
+  import analysisUtils as aU
+#+end_src
+- [[https://casaguides.nrao.edu/index.php/Analysis_Utilities][Analysis Utilities - CASA Guides]]
+
+~CASA~ 上で以下のコマンドを打つとプロットが得られ、同時に透過率を書き込んだファイルが生成される。
+#+begin_src python
+  au.plotAtmosphere(numchan=10000,telescope='ALMA', pwv=.472, plotfile='alma.660.png',outfile='alma.dat')
+#+end_src
+
+観測周波数とターゲットの座標に応じて適切なpwvの値が欲しいが、これはさすがに Observing Tool を使う必要がありそう。
+Observing Tool はブラウザ上以外から使うAPIを見つけられていない。
+ある程度正確にやりたかったら、ターゲットの座標を決めたのち、適当な周波数幅でpwvの変化をポチポチ調べていくしかないか。
+- [[https://help.almascience.org/kb/articles/what-pwv-should-i-use-in-my-casa-simulations-to-prepare-an-alma-proposal][What pwv should I use in my CASA simulations to prepare an ALMA proposal? - Knowledgebase / Project Planning - ALMA Science]]
