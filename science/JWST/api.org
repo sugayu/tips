@@ -1,0 +1,8 @@
+#+title: *JWST関係のAPI*
+#+AUTHOR: sugayu
+#+LATEX_CLASS: jsarticle
+#+OPTIONS: toc:nil
+
+* 論文検索
+- [[https://archive.stsci.edu/publishing/bibliography#/][Space Telescope Bibliographic Search]]
+- [[https://archive.stsci.edu/papertrack/docs/index.html][Welcome to the Papertrack API documentation! — Papertrack 0.1 documentation]]
